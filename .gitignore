@@ -1,2 +1,10 @@
 
 \.idea/
+
+*.iml
+
+discordtoken\.txt
+
+porkbot-1\.0-SNAPSHOT\.jar
+
+target/

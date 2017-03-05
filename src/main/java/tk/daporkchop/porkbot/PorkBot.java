@@ -3,6 +3,8 @@ package tk.daporkchop.porkbot;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.impl.GameImpl;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 import javax.security.auth.login.LoginException;
@@ -40,7 +42,6 @@ public class PorkBot {
             e.printStackTrace();
             System.exit(0);
         }
-
     }
 
     public static void main(String[] args)  {
@@ -92,6 +93,14 @@ public class PorkBot {
     }
 
     public void start() {
+        jda.getPresence().setGame(new GameImpl("Say ..help", "https://google.com", Game.GameType.TWITCH));
 
+        while (true)    {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e)    {
+
+            }
+        }
     }
 }
