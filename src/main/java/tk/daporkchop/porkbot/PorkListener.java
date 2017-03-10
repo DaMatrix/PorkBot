@@ -1,13 +1,17 @@
 package tk.daporkchop.porkbot;
 
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import tk.daporkchop.porkbot.command.CommandRegistry;
 
 /**
  * Created by daporkchop on 05.03.17.
  */
 public class PorkListener extends ListenerAdapter {
+
+    public static final MessageEmbed.Field PlayersHeader = new MessageEmbed.Field(null, "Test header!", false);
+    public static final MessageEmbed.Field PlayersSubHeader = new MessageEmbed.Field(null, "", false);
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -16,11 +20,11 @@ public class PorkListener extends ListenerAdapter {
             //bots don't matter to us!
             return;
         }
-
+        System.out.println("jklö");
         String message = event.getMessage().getRawContent();
 
         if (message.startsWith(".."))    {
-            event.getChannel().sendMessage("Command recieved! Nothing happens tho because @DaPorkchop_#2459 hasn't finished me yet").queue();
+            CommandRegistry.runCommand(event);
         }
     }
 }
