@@ -20,7 +20,7 @@ public class CommandMcUUID extends Command {
 		String[] args = evt.getMessage().getRawContent().split(" ");
 		
 		if (args.length < 2 || args[1].isEmpty())	{
-			evt.getChannel().sendMessage("Name isn't long enough or isn't given!\nUsage: `..mcuuid <username>`\nExample: `..mcuuid Notch`").queue();
+			sendErrorMessage(evt.getTextChannel(), "Name isn't long enough or isn't given!");
 		}
 		
 		String s = null;
@@ -31,8 +31,21 @@ public class CommandMcUUID extends Command {
 			evt.getChannel().sendMessage("Error getting player's UUID: `java.io.IOException`").queue();
 			return;
 		}
-		
-		JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
-		evt.getChannel().sendMessage(args[1] + "'s UUID: `" + json.get("id").getAsString() + "`").queue();
+		try {
+			JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
+			evt.getChannel().sendMessage(args[1] + "'s UUID: `" + json.get("id").getAsString() + "`").queue();
+		} catch (IllegalStateException e)	{
+			evt.getChannel().sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?").queue();
+		}
+	}
+
+	@Override
+	public String getUsage() {
+		return "..mcuuid <username>";
+	}
+
+	@Override
+	public String getUsageExample()	{
+		return "..mcuuid Notch";
 	}
 }

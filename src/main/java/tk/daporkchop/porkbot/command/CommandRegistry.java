@@ -10,6 +10,8 @@ public abstract class CommandRegistry {
 	 * A HashMap containing all the commands and their prefix
 	 */
 	private static final HashMap<String, Command> COMMANDS = new HashMap<>();
+
+	public static final Command IGNORE = new CommandIgnore();
 	
 	/**
 	 * Registers a command to the command registry.
@@ -26,6 +28,6 @@ public abstract class CommandRegistry {
 	 * @param evt
 	 */
 	public static void runCommand(MessageReceivedEvent evt)	{
-		COMMANDS.get(evt.getMessage().getRawContent().split(" ")[0].substring(2)).excecute(evt);
+		COMMANDS.getOrDefault(evt.getMessage().getRawContent().split(" ")[0].substring(2), IGNORE).excecute(evt);
 	}
 }
