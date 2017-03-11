@@ -1,5 +1,6 @@
 package tk.daporkchop.porkbot;
 
+import com.google.common.cache.CacheBuilder;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -7,7 +8,8 @@ import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.impl.GameImpl;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import tk.daporkchop.porkbot.command.CommandRegistry;
-import tk.daporkchop.porkbot.command.base.CommandMcUUID;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcPing;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcUUID;
 import tk.daporkchop.porkbot.command.base.CommandSay;
 
 import javax.security.auth.login.LoginException;
@@ -16,6 +18,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -27,6 +31,14 @@ public class PorkBot {
     public static Logger logger;
 
     public JDA jda;
+
+    /**
+     * The bot's main cache!
+     */
+    public ConcurrentMap<Object, Object> botCache = CacheBuilder.newBuilder()
+            .maximumSize(5000)
+            .expireAfterWrite(30, TimeUnit.MINUTES)
+            .build().asMap();
 
     public PorkBot()    {
         logger.info("Starting PorkBot...");
@@ -100,6 +112,7 @@ public class PorkBot {
         
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandSay());
+        CommandRegistry.registerCommand(new CommandMcPing());
         
         while (true)    {
             try {

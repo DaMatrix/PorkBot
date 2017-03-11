@@ -1,4 +1,4 @@
-package tk.daporkchop.porkbot.command.base;
+package tk.daporkchop.porkbot.command.base.minecraft;
 
 import java.io.IOException;
 
