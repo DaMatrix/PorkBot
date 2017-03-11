@@ -8,6 +8,7 @@ import net.dv8tion.jda.core.entities.impl.GameImpl;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import tk.daporkchop.porkbot.command.CommandRegistry;
 import tk.daporkchop.porkbot.command.base.CommandMcUUID;
+import tk.daporkchop.porkbot.command.base.CommandSay;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -98,6 +99,7 @@ public class PorkBot {
         jda.getPresence().setGame(new GameImpl("Say ..help", "https://google.com", Game.GameType.TWITCH));
         
         CommandRegistry.registerCommand(new CommandMcUUID());
+        CommandRegistry.registerCommand(new CommandSay());
         
         while (true)    {
             try {
