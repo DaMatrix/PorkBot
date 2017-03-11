@@ -1,6 +1,5 @@
 package tk.daporkchop.porkbot.command;
 
-import com.sun.istack.internal.Nullable;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -31,7 +30,7 @@ public abstract class Command {
 	 */
 	public abstract String getUsageExample();
 
-	public void sendErrorMessage(TextChannel channel, @Nullable String message)	{
+	public void sendErrorMessage(TextChannel channel, String message)	{
 		channel.sendMessage((message == null ? "" : message + "\n") + "Usage: " + getUsage() + "\nExample: " + getUsageExample()).queue();
 	}
 }
