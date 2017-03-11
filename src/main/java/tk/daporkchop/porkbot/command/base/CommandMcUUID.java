@@ -21,6 +21,7 @@ public class CommandMcUUID extends Command {
 		
 		if (args.length < 2 || args[1].isEmpty())	{
 			sendErrorMessage(evt.getTextChannel(), "Name isn't long enough or isn't given!");
+			return;
 		}
 		
 		String s = null;

@@ -14,12 +14,22 @@ public class CommandSay extends Command {
 		String[] args = evt.getMessage().getRawContent().split(" ");
 		
 		if (args.length < 2 || args[1].isEmpty())	{
-			evt.getChannel().sendMessage("Give some arguments!\nUsage: `..say <stuff you want to say>`\nExample: `..say Toasters are the future!`").queue();
+			sendErrorMessage(evt.getTextChannel(), "Add a message!");
 			return;
 		}
 		
 		String s = evt.getMessage().getRawContent().substring(6);
 	    
 		evt.getChannel().sendMessage(s).queue();
+	}
+
+	@Override
+	public String getUsage() {
+		return "..say <stuff you want to say>";
+	}
+
+	@Override
+	public String getUsageExample()	{
+		return "..say Hello World!";
 	}
 }
