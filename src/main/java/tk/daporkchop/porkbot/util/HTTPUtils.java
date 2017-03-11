@@ -1,4 +1,4 @@
-package tk.daporkchop.porkbot;
+package tk.daporkchop.porkbot.util;
 
 import java.io.IOException;
 import java.io.InputStream;

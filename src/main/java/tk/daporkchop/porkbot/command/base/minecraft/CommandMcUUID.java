@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import tk.daporkchop.porkbot.HTTPUtils;
+import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.command.Command;
 
 public class CommandMcUUID extends Command {

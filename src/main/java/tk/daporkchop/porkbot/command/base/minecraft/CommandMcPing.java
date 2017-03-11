@@ -4,8 +4,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import tk.daporkchop.porkbot.HTTPUtils;
+import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.command.Command;
+import tk.daporkchop.porkbot.util.TextFormat;
 
 import java.awt.*;
 import java.io.IOException;
@@ -60,11 +61,20 @@ public class CommandMcPing extends Command {
                 builder.setColor(Color.GREEN);
                 builder.setThumbnail("https://eu.mc-api.net/v3/server/favicon/" + ipPort[0]);
 
-                builder.addField(args[1], "Status: ***ONLINE***", false);
+                builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
+
+                builder.addField("Ping:", "" + json.get("ping").getAsInt(), false);
+                builder.addField("Version:", json.get("version").getAsString(), false);
+
+                JsonObject onlinePlayers = json.getAsJsonObject("players");
+
+                builder.addField("Players:", onlinePlayers.get("online").getAsInt() + "**/**" + onlinePlayers.get("max").getAsInt(), false);
+
+                builder.addField("MOTD:", TextFormat.clean(json.get("motd").getAsString()), false);
             } else {
                 //server's offline
                 builder.setColor(Color.RED);
-                builder.addField(args[1], "Status: ***OFFLINE***", false);
+                builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
             }
 
             evt.getChannel().sendMessage(builder.build()).queue();
