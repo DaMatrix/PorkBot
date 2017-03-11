@@ -11,6 +11,7 @@ import tk.daporkchop.porkbot.command.CommandRegistry;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcPing;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcUUID;
 import tk.daporkchop.porkbot.command.base.CommandSay;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcpePing;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -113,6 +114,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandSay());
         CommandRegistry.registerCommand(new CommandMcPing());
+        CommandRegistry.registerCommand(new CommandMcpePing());
         
         while (true)    {
             try {
