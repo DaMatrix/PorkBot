@@ -38,8 +38,8 @@ while [ "$LOOPS" -eq 0 ] || [ "$DO_LOOP" == "true" ]; do
 	sleep 3
         if ./pull.sh | grep -q 'Already up-to-date.'; then
 		clear
-./compile.sh
-#        	echo "Nothing  changed, starting..."
+#		./compile.sh
+        	echo "Nothing  changed, starting..."
 	else
 		./compile.sh
 	fi

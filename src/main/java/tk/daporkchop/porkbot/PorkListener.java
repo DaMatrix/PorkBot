@@ -15,12 +15,10 @@ public class PorkListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        System.out.println("asdf");
         if (event.getAuthor().isBot()) {
             //bots don't matter to us!
             return;
         }
-        System.out.println("jklö");
         String message = event.getMessage().getRawContent();
 
         if (message.startsWith(".."))    {
