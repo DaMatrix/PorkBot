@@ -36,7 +36,7 @@ while [ "$LOOPS" -eq 0 ] || [ "$DO_LOOP" == "true" ]; do
 	fi
 	echo Press Ctrl+c to stop
 	sleep 3
-        if ./pull.sh | grep -q 'Already up-to-date.'; then
+        if git pull | grep -q 'Already up-to-date.'; then
 		clear
 #		./compile.sh
         	echo "Nothing  changed, starting..."
