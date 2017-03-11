@@ -9,9 +9,9 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import tk.daporkchop.porkbot.HTTPUtils;
 import tk.daporkchop.porkbot.command.Command;
 
-public class CommandMcUUID extends Command {
+public class CommandSay extends Command {
 
-	public CommandMcUUID() {
+	public CommandSay() {
 		super("say");
 	}
 
