@@ -31,7 +31,7 @@ public class CommandMcSkin extends Command {
 
         builder.addField(args[1] + "'s skin", "", false);
 
-        evt.getChannel().sendMessage(builder.build());
+        evt.getChannel().sendMessage(builder.build()).queue();
 
         builder = new EmbedBuilder();
 
@@ -40,7 +40,7 @@ public class CommandMcSkin extends Command {
 
         builder.addField(args[1] + "'s skin", "", false);
 
-        evt.getChannel().sendMessage(builder.build());
+        evt.getChannel().sendMessage(builder.build()).queue();
     }
 
     @Override
