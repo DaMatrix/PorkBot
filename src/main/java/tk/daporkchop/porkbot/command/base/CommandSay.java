@@ -17,10 +17,8 @@ public class CommandSay extends Command {
 			sendErrorMessage(evt.getTextChannel(), "Add a message!");
 			return;
 		}
-		
-		String s = evt.getMessage().getRawContent().substring(6);
-	    
-		evt.getChannel().sendMessage(s).queue();
+
+		evt.getChannel().sendMessage(evt.getAuthor().getName() + ": " + evt.getMessage().getRawContent().substring(6)).queue();
 	}
 
 	@Override
