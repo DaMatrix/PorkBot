@@ -12,6 +12,7 @@ import tk.daporkchop.porkbot.command.base.minecraft.CommandMcAvatar;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcHead;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcPing;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcSkin;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcStatus;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcUUID;
 import tk.daporkchop.porkbot.command.base.CommandSay;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcpePing;
@@ -121,6 +122,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcSkin());
         CommandRegistry.registerCommand(new CommandMcAvatar());
         CommandRegistry.registerCommand(new CommandMcHead());
+        CommandRegistry.registerCommand(new CommandMcStatus());
         
         while (true)    {
             try {

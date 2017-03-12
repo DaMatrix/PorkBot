@@ -31,6 +31,6 @@ public abstract class Command {
 	public abstract String getUsageExample();
 
 	public void sendErrorMessage(TextChannel channel, String message)	{
-		channel.sendMessage((message == null ? "" : message + "\n") + "Usage: " + getUsage() + "\nExample: " + getUsageExample()).queue();
+		channel.sendMessage((message == null ? "" : message + "\n") + "Usage: `" + getUsage() + "`\nExample: `" + getUsageExample() + "`").queue();
 	}
 }
