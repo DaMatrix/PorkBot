@@ -32,15 +32,6 @@ public class CommandMcSkin extends Command {
         builder.addField(args[1] + "'s skin", "", false);
 
         evt.getChannel().sendMessage(builder.build()).queue();
-
-        builder = new EmbedBuilder();
-
-        builder.setColor(Color.DARK_GRAY);
-        builder.setThumbnail("https://crafatar.com/renders/body/" + args[1] + "?overlay");
-
-        builder.addField(args[1] + "'s skin", "", false);
-
-        evt.getChannel().sendMessage(builder.build()).queue();
     }
 
     @Override
