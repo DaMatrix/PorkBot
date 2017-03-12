@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.entities.impl.GameImpl;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import tk.daporkchop.porkbot.command.CommandRegistry;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcPing;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcSkin;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcUUID;
 import tk.daporkchop.porkbot.command.base.CommandSay;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcpePing;
@@ -115,6 +116,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandSay());
         CommandRegistry.registerCommand(new CommandMcPing());
         CommandRegistry.registerCommand(new CommandMcpePing());
+        CommandRegistry.registerCommand(new CommandMcSkin());
         
         while (true)    {
             try {
