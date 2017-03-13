@@ -16,6 +16,8 @@ import tk.daporkchop.porkbot.command.base.minecraft.CommandMcStatus;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcUUID;
 import tk.daporkchop.porkbot.command.base.CommandSay;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcpePing;
+import tk.daporkchop.porkbot.command.CommandHelp;
+import tk.daporkchop.porkbot.command.CommandInvite;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -113,8 +115,10 @@ public class PorkBot {
     }
 
     public void start() {
-        jda.getPresence().setGame(new GameImpl("Say ..help", "https://google.com", Game.GameType.TWITCH));
+        jda.getPresence().setGame(new GameImpl("Say ..help", "https://www.twitch.tv/DaPorkchop_", Game.GameType.TWITCH));
         
+        CommandRegistry.registerCommand(new CommandHelp());
+        CommandRegistry.registerCommand(new CommandInvite());
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandSay());
         CommandRegistry.registerCommand(new CommandMcPing());
