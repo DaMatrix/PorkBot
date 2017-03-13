@@ -13,7 +13,7 @@ public class CommandInvite extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent evt) {
-        evt.getChannel().sendMessage("***Invite link:***\https://discordapp.com/oauth2/authorize?client_id=287894637165936640&scope=bot&permissions=8").queue();
+        evt.getChannel().sendMessage("***Invite link:***\nhttps://discordapp.com/oauth2/authorize?client_id=287894637165936640&scope=bot&permissions=8").queue();
     }
 
     @Override
