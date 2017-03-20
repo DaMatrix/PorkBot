@@ -16,7 +16,7 @@ public class CommandPing extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent event) {
-        event.getChannel().sendMessage("Pong: " + event.getMessage().getCreationTime().compareTo(OffsetDateTime.now()) + "ms");
+        event.getChannel().sendMessage("Pong: " + (event.getMessage().getCreationTime().toInstant().getEpochSecond() - System.currentTimeMillis()) + "ms");
     }
 
     @Override
