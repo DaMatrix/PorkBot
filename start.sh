@@ -15,34 +15,30 @@ DO_LOOP="true"
 
 clear
 
-NUKKIT_FILE=""
-
-if [ "$NUKKIT_FILE" == "" ]; then
-	if [ -f ./porkbot*.jar ]; then
-		NUKKIT_FILE="./porkbot-1.0-SNAPSHOT.jar"
-	else
-		echo "[ERROR] PorkBot JAR not found!"
-		exit 1
-	fi
+if git pull | grep -q 'Already up-to-date.'; then
+    clear
+    echo "Nothing  changed, starting..."
+else
+    ./compile.sh
+	clear
+	echo "Compiled, starting..." 
 fi
 
-LOOPS=0
+sleep 2
 
-while [ "$LOOPS" -eq 0 ] || [ "$DO_LOOP" == "true" ]; do
-	if [ "$DO_LOOP" == "true" ]; then
-		java -Xmx3500M -jar "$NUKKIT_FILE" $@
-	else
-		exec java -Xmx3500M -jar "$NUKKIT_FILE" $@
-	fi
-	echo Press Ctrl+c to stop
+clear 
+
+while [ "$DO_LOOP" == "true" ]; do
+	mvn exec:java -Dexec.mainClass="tk.daporkchop.porkbot.PorkBot" -Dexec.classpathScope=runtime
+	echo "Press Ctrl+c to stop" 
 	sleep 3
-        if git pull | grep -q 'Already up-to-date.'; then
+    if git pull | grep -q 'Already up-to-date.'; then
 		clear
-#		./compile.sh
-        	echo "Nothing  changed, starting..."
+        echo "Nothing  changed, starting..."
 	else
 		./compile.sh
+		sleep 2
+		clear
+		echo "Compiled, starting..." 
 	fi
-	((LOOPS++))
 done
-

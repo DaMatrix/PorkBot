@@ -106,7 +106,7 @@ public class PorkBot {
 
                 s.close();
             } catch (FileNotFoundException e) {
-                logger.severe("impossible error kek");
+                logger.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -116,7 +116,7 @@ public class PorkBot {
     }
 
     public void start() {
-        jda.getPresence().setGame(new GameImpl("Say ..help", "https://www.twitch.tv/DaPorkchop_", Game.GameType.TWITCH));
+        jda.getPresence().setGame(new GameImpl("Say ..help", "https://www.twitch.tv/daporkchop_", Game.GameType.TWITCH));
         
         CommandRegistry.registerCommand(new CommandHelp());
         CommandRegistry.registerCommand(new CommandInvite());
