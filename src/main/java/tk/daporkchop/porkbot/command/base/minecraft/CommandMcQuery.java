@@ -59,15 +59,6 @@ public class CommandMcQuery extends Command {
         try {
             query = (new JsonParser()).parse(s).getAsJsonObject();
 
-            if (!query.get("status").getAsBoolean())    {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.RED);
-                builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
-
-                evt.getChannel().sendMessage(builder.build()).queue();
-                return;
-            }
-
             if (ipPort.length == 1) {
                 s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/info"));
             } else if (ipPort.length == 2)  {
@@ -86,6 +77,19 @@ public class CommandMcQuery extends Command {
         } catch (Exception e)   {
             e.printStackTrace();
             evt.getChannel().sendMessage("Error parsing server status!").queue();
+            return;
+        }
+
+        if (!query.get("status").getAsBoolean())    {
+            if (ping.get("status").getAsBoolean())  {
+                evt.getChannel().sendMessage("The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties`!").queue();
+            } else {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(Color.RED);
+                builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
+
+                evt.getChannel().sendMessage(builder.build()).queue();
+            }
             return;
         }
 
