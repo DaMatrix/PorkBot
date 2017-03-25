@@ -58,7 +58,7 @@ public class CommandMcQuery extends Command {
         try {
             query = (new JsonParser()).parse(s).getAsJsonObject();
 
-            if (!query.get("stauts").getAsBoolean())    {
+            if (!query.get("status").getAsBoolean())    {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
                 builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
