@@ -2,6 +2,7 @@ package tk.daporkchop.porkbot.command.base.minecraft;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -107,10 +108,10 @@ public class CommandMcQuery extends Command {
             builder.addField("Players:", onlinePlayers.get("online").getAsInt() + "**/**" + onlinePlayers.get("max").getAsInt(), false);
 
             String sample = null;
-            JsonArray arr = query.getAsJsonArray("list");
-            if (arr != null)    {
+            Object arrObj = query.get("list");
+            if (!(arrObj instanceof JsonNull))    {
                 sample = "*";
-                Iterator<JsonElement> iter = arr.iterator();
+                Iterator<JsonElement> iter = ((JsonArray) arrObj).iterator();
                 while (iter.hasNext())  {
                     sample += iter.next().getAsString().replace("_", "\\_") + ", ";
                 }
@@ -121,10 +122,10 @@ public class CommandMcQuery extends Command {
             }
 
             sample = null;
-            arr = query.getAsJsonArray("plugins");
-            if (arr != null)    {
+            arrObj = query.getAsJsonArray("plugins");
+            if (!(arrObj instanceof JsonNull))    {
                 sample = "*";
-                Iterator<JsonElement> iterator = arr.iterator();
+                Iterator<JsonElement> iterator = ((JsonArray) arrObj).iterator();
                 while (iterator.hasNext())  {
                     sample += iterator.next().getAsString().replace("_", "\\_") + ", ";
                 }
