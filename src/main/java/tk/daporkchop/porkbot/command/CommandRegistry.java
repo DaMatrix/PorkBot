@@ -28,6 +28,10 @@ public abstract class CommandRegistry {
 	 * @param evt
 	 */
 	public static void runCommand(MessageReceivedEvent evt)	{
-		COMMANDS.getOrDefault(evt.getMessage().getRawContent().split(" ")[0].substring(2), IGNORE).excecute(evt);
+		try {
+			COMMANDS.getOrDefault(evt.getMessage().getRawContent().split(" ")[0].substring(2), IGNORE).excecute(evt);
+		} catch (Exception e)	{
+			evt.getChannel().sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`");
+		}
 	}
 }

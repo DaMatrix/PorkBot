@@ -10,8 +10,12 @@ import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import tk.daporkchop.porkbot.command.CommandRegistry;
 import tk.daporkchop.porkbot.command.base.CommandPing;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcAvatar;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcCount;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcHead;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcIcon;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcMOTD;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcPing;
+import tk.daporkchop.porkbot.command.base.minecraft.CommandMcQuery;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcSkin;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcStatus;
 import tk.daporkchop.porkbot.command.base.minecraft.CommandMcUUID;
@@ -106,7 +110,7 @@ public class PorkBot {
 
                 s.close();
             } catch (FileNotFoundException e) {
-                logger.severe("impossible error kek");
+                logger.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -116,7 +120,7 @@ public class PorkBot {
     }
 
     public void start() {
-        jda.getPresence().setGame(new GameImpl("Say ..help", "https://www.twitch.tv/daporkchop_", Game.GameType.TWITCH));
+        jda.getPresence().setGame(new GameImpl("Say ..help", "https://www.twitch.tv/daporkchop_", Game.GameType.TWITCH));
         
         CommandRegistry.registerCommand(new CommandHelp());
         CommandRegistry.registerCommand(new CommandInvite());
@@ -129,6 +133,10 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcHead());
         CommandRegistry.registerCommand(new CommandMcStatus());
         CommandRegistry.registerCommand(new CommandPing());
+        CommandRegistry.registerCommand(new CommandMcMOTD());
+        CommandRegistry.registerCommand(new CommandMcCount());
+        CommandRegistry.registerCommand(new CommandMcIcon());
+        CommandRegistry.registerCommand(new CommandMcQuery());
         
         while (true)    {
             try {

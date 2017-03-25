@@ -4,20 +4,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.command.Command;
+import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.util.TextFormat;
 
 import java.awt.*;
 import java.io.IOException;
 
-/**
- * Created by daporkchop on 11.03.17.
- */
-public class CommandMcPing extends Command {
-
-    public CommandMcPing() {
-        super("mcping");
+public class CommandMcMOTD extends Command {
+    public CommandMcMOTD() {
+        super("mcmotd");
     }
 
     @Override
@@ -33,10 +29,10 @@ public class CommandMcPing extends Command {
         String[] ipPort = args[1].split(":");
         try {
             if (ipPort.length == 1) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/info"));
+                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/motd"));
             } else if (ipPort.length == 2)  {
                 try {
-                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/info"));
+                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/motd"));
                 } catch (NumberFormatException e)   {
                     evt.getChannel().sendMessage("Error getting server info: `java.lang.NumberFormatException`").queue();
                     return;
@@ -59,22 +55,12 @@ public class CommandMcPing extends Command {
             if (json.get("status").getAsBoolean())  {
                 //server's online
                 builder.setColor(Color.GREEN);
-                builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
 
-                builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
-
-                builder.addField("Ping:", json.get("ping").getAsInt() + "ms", false);
-                builder.addField("Version:", json.get("version").getAsString(), false);
-
-                JsonObject onlinePlayers = json.getAsJsonObject("players");
-
-                builder.addField("Players:", onlinePlayers.get("online").getAsInt() + "**/**" + onlinePlayers.get("max").getAsInt(), false);
-
-                builder.addField("MOTD:", TextFormat.clean(json.get("motd").getAsString()), false);
+                builder.addField("**" + args[1] + "** MOTD:", json.getAsJsonObject("motds").get("clean").getAsString(), false);
             } else {
                 //server's offline
                 builder.setColor(Color.RED);
-                builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
+                builder.addField("**" + args[1] + "**", "***OFFLINE***", false);
             }
 
             evt.getChannel().sendMessage(builder.build()).queue();
@@ -86,11 +72,11 @@ public class CommandMcPing extends Command {
 
     @Override
     public String getUsage() {
-        return "..mcping <ip>";
+        return "..mcmotd <ip>";
     }
 
     @Override
     public String getUsageExample()	{
-        return "..mcping 2b2t.org";
+        return "..mcmotd 2b2t.org";
     }
 }
