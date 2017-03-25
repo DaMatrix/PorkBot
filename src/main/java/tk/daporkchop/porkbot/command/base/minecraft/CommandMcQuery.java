@@ -68,10 +68,10 @@ public class CommandMcQuery extends Command {
             }
 
             if (ipPort.length == 1) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/extensive"));
+                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/info"));
             } else if (ipPort.length == 2)  {
                 try {
-                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/extensive"));
+                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/info"));
                 } catch (NumberFormatException e)   {
                     evt.getChannel().sendMessage("Error getting server info: `java.lang.NumberFormatException`").queue();
                     return;
