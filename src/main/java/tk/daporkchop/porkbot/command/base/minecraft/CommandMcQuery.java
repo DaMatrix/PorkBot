@@ -137,6 +137,7 @@ public class CommandMcQuery extends Command {
 
             builder.addField("MOTD:", TextFormat.clean(ping.get("motd").getAsString()), false);
 
+            evt.getChannel().sendMessage(builder.build()).queue();
         } catch (Exception e)   {
             e.printStackTrace();
             evt.getChannel().sendMessage("**Error**:\n" + e.toString());
