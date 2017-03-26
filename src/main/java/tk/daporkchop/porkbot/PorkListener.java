@@ -1,5 +1,6 @@
 package tk.daporkchop.porkbot;
 
+import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -23,6 +24,14 @@ public class PorkListener extends ListenerAdapter {
 
         if (message.startsWith(".."))    {
             CommandRegistry.runCommand(event);
+        } else if (event.getChannelType().ordinal() == ChannelType.PRIVATE.ordinal()) {
+            if (event.getAuthor().getId().equals("226975061880471552"))   {
+                switch (message)    {
+                    case ",,instareboot":
+                        System.exit(0);
+                        break;
+                }
+            }
         }
     }
 }

@@ -158,7 +158,17 @@ public class PorkBot {
     public static void sendMessage(String s, TextChannel channel)   {
         try {
             channel.sendTyping().queue();
-            channel.sendMessage(s).queue();
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e)    {
+                        //impossible
+                    }
+                    channel.sendMessage(s).queue();
+                }
+            }.start();
         } catch (PermissionException e) {
             //we can't do anything about it
         }
@@ -172,7 +182,17 @@ public class PorkBot {
     public static void sendMessage(EmbedBuilder builder, TextChannel channel)   {
         try {
             channel.sendTyping().queue();
-            channel.sendMessage(builder.build()).queue();
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e)    {
+                        //impossible
+                    }
+                    channel.sendMessage(builder.build()).queue();
+                }
+            }.start();
         } catch (PermissionException e) {
             //we can't do anything about it
         }
