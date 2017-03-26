@@ -58,7 +58,7 @@ public class CommandMcCount extends Command {
                 //server's online
                 builder.setColor(Color.GREEN);
 
-                builder.addField("**" + args[1] + "** Player count:", json.getAsJsonObject("players").get("online").getAsInt() + "/" + json.getAsJsonObject("players").get("max").getAsInt(), false);
+                builder.addField("**" + args[1] + "** player count:", json.getAsJsonObject("players").get("online").getAsInt() + "/" + json.getAsJsonObject("players").get("max").getAsInt(), false);
             } else {
                 //server's offline
                 builder.setColor(Color.RED);
