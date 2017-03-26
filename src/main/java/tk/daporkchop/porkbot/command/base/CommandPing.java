@@ -1,6 +1,7 @@
 package tk.daporkchop.porkbot.command.base;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 
 import java.time.OffsetDateTime;
@@ -16,7 +17,7 @@ public class CommandPing extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent event) {
-        event.getChannel().sendMessage("Pong: " + (event.getMessage().getCreationTime().toInstant().getEpochSecond() - System.currentTimeMillis()) + "ms");
+        PorkBot.sendMessage("Pong: " + (event.getMessage().getCreationTime().toInstant().getEpochSecond() - System.currentTimeMillis()) + "ms", event.getTextChannel());
     }
 
     @Override

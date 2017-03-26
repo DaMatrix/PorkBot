@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.util.TextFormat;
@@ -41,15 +42,15 @@ public class CommandMcQuery extends Command {
                 try {
                     s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/extensive"));
                 } catch (NumberFormatException e)   {
-                    evt.getChannel().sendMessage("Error getting server info: `java.lang.NumberFormatException`").queue();
+                    PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                     return;
                 }
             } else {
-                evt.getChannel().sendMessage("Unable to parse server ip!").queue();
+                PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
                 return;
             }
         } catch (IOException e) {
-            evt.getChannel().sendMessage("Error getting server info: `java.io.IOException`").queue();
+            PorkBot.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
             return;
         }
 
@@ -65,30 +66,30 @@ public class CommandMcQuery extends Command {
                 try {
                     s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/info"));
                 } catch (NumberFormatException e)   {
-                    evt.getChannel().sendMessage("Error getting server info: `java.lang.NumberFormatException`").queue();
+                    PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                     return;
                 }
             } else {
-                evt.getChannel().sendMessage("Unable to parse server ip!").queue();
+                PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
                 return;
             }
 
             ping = (new JsonParser()).parse(s).getAsJsonObject();
         } catch (Exception e)   {
             e.printStackTrace();
-            evt.getChannel().sendMessage("Error parsing server status!").queue();
+            PorkBot.sendMessage("Unable to parse server status!", evt.getTextChannel());
             return;
         }
 
         if (!query.get("status").getAsBoolean())    {
             if (ping.get("status").getAsBoolean())  {
-                evt.getChannel().sendMessage("The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties`!").queue();
+                PorkBot.sendMessage("The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties`!", evt.getTextChannel());
             } else {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
                 builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
 
-                evt.getChannel().sendMessage(builder.build()).queue();
+                PorkBot.sendMessage(builder, evt.getTextChannel());
             }
             return;
         }
@@ -141,10 +142,10 @@ public class CommandMcQuery extends Command {
 
             builder.addField("MOTD:", TextFormat.clean(ping.get("motd").getAsString()), false);
 
-            evt.getChannel().sendMessage(builder.build()).queue();
+            PorkBot.sendMessage(builder, evt.getTextChannel());
         } catch (Exception e)   {
             e.printStackTrace();
-            evt.getChannel().sendMessage("**Error**:\n" + e.toString());
+            PorkBot.sendMessage("**Error**:\n" + e.toString(), evt.getTextChannel());
             return;
         }
     }

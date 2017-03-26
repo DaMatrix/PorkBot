@@ -2,10 +2,13 @@ package tk.daporkchop.porkbot;
 
 import com.google.common.cache.CacheBuilder;
 import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.impl.GameImpl;
+import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import tk.daporkchop.porkbot.command.CommandRegistry;
 import tk.daporkchop.porkbot.command.base.CommandPing;
@@ -144,6 +147,34 @@ public class PorkBot {
             } catch (InterruptedException e)    {
 
             }
+        }
+    }
+
+    /**
+     * Sends a message to a channel
+     * @param s
+     * @param channel
+     */
+    public static void sendMessage(String s, TextChannel channel)   {
+        try {
+            channel.sendTyping().queue();
+            channel.sendMessage(s).queue();
+        } catch (PermissionException e) {
+            //we can't do anything about it
+        }
+    }
+
+    /**
+     * Sends a message to a channel
+     * @param builder
+     * @param channel
+     */
+    public static void sendMessage(EmbedBuilder builder, TextChannel channel)   {
+        try {
+            channel.sendTyping().queue();
+            channel.sendMessage(builder.build()).queue();
+        } catch (PermissionException e) {
+            //we can't do anything about it
         }
     }
 }

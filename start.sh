@@ -20,8 +20,8 @@ if git pull | grep -q 'Already up-to-date.'; then
     echo "Nothing  changed, starting..."
 else
     ./compile.sh
-	clear
-	echo "Compiled, starting..." 
+    clear
+    echo "Compiled, starting..." 
 fi
 
 sleep 2
@@ -34,7 +34,7 @@ while [ "$DO_LOOP" == "true" ]; do
 	sleep 3
     if git pull | grep -q 'Already up-to-date.'; then
 		clear
-        echo "Nothing  changed, starting..."
+                echo "Nothing  changed, starting..."
 	else
 		./compile.sh
 		sleep 2

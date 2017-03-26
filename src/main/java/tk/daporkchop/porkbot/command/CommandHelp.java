@@ -1,6 +1,7 @@
 package tk.daporkchop.porkbot.command;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 
 /**
  * Created by daporkchop on 11.03.17.
@@ -13,7 +14,7 @@ public class CommandHelp extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent evt) {
-        evt.getChannel().sendMessage("***Commands:***\nhttp://www.daporkchop.tk/porkbot").queue();
+        PorkBot.sendMessage("***Commands:***\nhttp://www.daporkchop.tk/porkbot", evt.getTextChannel());
     }
 
     @Override

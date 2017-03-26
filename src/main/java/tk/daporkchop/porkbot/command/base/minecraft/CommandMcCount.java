@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.util.HTTPUtils;
 
@@ -36,16 +37,16 @@ public class CommandMcCount extends Command {
                 try {
                     s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/players"));
                 } catch (NumberFormatException e)   {
-                    evt.getChannel().sendMessage("Error getting server info: `java.lang.NumberFormatException`").queue();
+                    PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                     return;
                 }
             } else {
-                evt.getChannel().sendMessage("Unable to parse server ip!").queue();
+                PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
                 return;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            evt.getChannel().sendMessage("Error getting server info: `java.io.IOException`").queue();
+            PorkBot.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
             return;
         }
 
@@ -65,9 +66,9 @@ public class CommandMcCount extends Command {
                 builder.addField("**" + args[1] + "**", "***OFFLINE***", false);
             }
 
-            evt.getChannel().sendMessage(builder.build()).queue();
+            PorkBot.sendMessage(builder, evt.getTextChannel());
         } catch (IllegalStateException e)   {
-            evt.getChannel().sendMessage("Unable to parse server status!").queue();
+            PorkBot.sendMessage("Unable to parse server status!", evt.getTextChannel());
             return;
         }
     }

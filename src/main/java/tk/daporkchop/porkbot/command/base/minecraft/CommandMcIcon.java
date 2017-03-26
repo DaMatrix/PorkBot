@@ -2,6 +2,7 @@ package tk.daporkchop.porkbot.command.base.minecraft;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 
 import java.awt.*;
@@ -32,7 +33,7 @@ public class CommandMcIcon extends Command {
 
         builder.setImage("https://mcapi.ca/query/" + args[1] + "/icon");
 
-        evt.getChannel().sendMessage(builder.build()).queue();
+        PorkBot.sendMessage(builder, evt.getTextChannel());
     }
 
     @Override

@@ -3,6 +3,7 @@ package tk.daporkchop.porkbot.command;
 import java.util.HashMap;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 
 public abstract class CommandRegistry {
 	
@@ -31,7 +32,7 @@ public abstract class CommandRegistry {
 		try {
 			COMMANDS.getOrDefault(evt.getMessage().getRawContent().split(" ")[0].substring(2), IGNORE).excecute(evt);
 		} catch (Exception e)	{
-			evt.getChannel().sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`");
+			PorkBot.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
 		}
 	}
 }

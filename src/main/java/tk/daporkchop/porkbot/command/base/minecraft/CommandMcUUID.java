@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.command.Command;
 
@@ -29,14 +30,14 @@ public class CommandMcUUID extends Command {
 			s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://api.mojang.com/users/profiles/minecraft/" + args[1]));
 		} catch (IOException e) {
 			e.printStackTrace();
-			evt.getChannel().sendMessage("Error getting player's UUID: `java.io.IOException`").queue();
+			PorkBot.sendMessage("Error getting player's UUID: `java.io.IOException`", evt.getTextChannel());
 			return;
 		}
 		try {
 			JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
-			evt.getChannel().sendMessage(args[1] + "'s UUID: `" + json.get("id").getAsString() + "`").queue();
+			PorkBot.sendMessage(args[1] + "'s UUID: `" + json.get("id").getAsString() + "`", evt.getTextChannel());
 		} catch (IllegalStateException e)	{
-			evt.getChannel().sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?").queue();
+			PorkBot.sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?", evt.getTextChannel());
 		}
 	}
 

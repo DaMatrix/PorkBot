@@ -1,6 +1,7 @@
 package tk.daporkchop.porkbot.command.base;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 
 public class CommandSay extends Command {
@@ -18,7 +19,7 @@ public class CommandSay extends Command {
 			return;
 		}
 
-		evt.getChannel().sendMessage(evt.getAuthor().getName() + ": " + evt.getMessage().getRawContent().substring(6)).queue();
+		PorkBot.sendMessage(evt.getAuthor().getName() + ": " + evt.getMessage().getRawContent().substring(6), evt.getTextChannel());
 	}
 
 	@Override
