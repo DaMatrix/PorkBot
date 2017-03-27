@@ -85,7 +85,7 @@ public class CommandMcQuery extends Command {
             if (ping.get("status").getAsBoolean())  {
                 EmbdBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.ORANGE);
-                builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties`!", false);
+                builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
                 
                 PorkBot.sendMessage(builder, evt.getTextChannel());
             } else {
