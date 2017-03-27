@@ -137,7 +137,7 @@ public class CommandMcQuery extends Command {
                 sample = sample.substring(0, sample.length() - 2) + "*";
             }
             if (sample != null) {
-                builder.addField("Plguins:", sample, false);
+                builder.addField("Plugins:", sample, false);
             }
 
             builder.addField("MOTD:", TextFormat.clean(ping.get("motd").getAsString()), false);

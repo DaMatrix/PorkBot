@@ -1,7 +1,6 @@
 package tk.daporkchop.porkbot.command.base.minecraft;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import tk.daporkchop.porkbot.PorkBot;
@@ -11,14 +10,15 @@ import tk.daporkchop.porkbot.util.TextFormat;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * Created by daporkchop on 11.03.17.
  */
-public class CommandMcpePing extends Command {
+public class CommandPeQuery extends Command {
 
-    public CommandMcpePing() {
-        super("peping");
+    public CommandPeQuery() {
+        super("pequery");
     }
 
     @Override
@@ -71,6 +71,34 @@ public class CommandMcpePing extends Command {
                 builder.addField("Players:", onlinePlayers.get("online").getAsInt() + "**/**" + onlinePlayers.get("max").getAsInt(), false);
 
                 builder.addField("MOTD:", json.getAsJsonObject("motds").get("clean").getAsString(), false);
+
+                String sample = null;
+                Object arrObj = json.get("list");
+                if (!(arrObj instanceof JsonNull))    {
+                    sample = "*";
+                    Iterator<JsonElement> iter = ((JsonArray) arrObj).iterator();
+                    while (iter.hasNext())  {
+                        sample += iter.next().getAsString().replace("_", "\\_") + ", ";
+                    }
+                    sample = sample.substring(0, sample.length() - 2) + "*";
+                }
+                if (sample != null)   {
+                    builder.addField("Player sample:", sample, false);
+                }
+
+                sample = null;
+                arrObj = json.getAsJsonArray("plugins");
+                if (!(arrObj instanceof JsonNull))    {
+                    sample = "*";
+                    Iterator<JsonElement> iterator = ((JsonArray) arrObj).iterator();
+                    while (iterator.hasNext())  {
+                        sample += iterator.next().getAsString().replace("_", "\\_") + ", ";
+                    }
+                    sample = sample.substring(0, sample.length() - 2) + "*";
+                }
+                if (sample != null) {
+                    builder.addField("Plugins:", sample, false);
+                }
             } else {
                 //server's offline
                 builder.setColor(Color.RED);
@@ -86,11 +114,11 @@ public class CommandMcpePing extends Command {
 
     @Override
     public String getUsage() {
-        return "..peping <ip>";
+        return "..pequery <ip>";
     }
 
     @Override
     public String getUsageExample()	{
-        return "..peping play.2p2e.tk";
+        return "..pequery play.2p2e.tk";
     }
 }
