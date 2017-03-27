@@ -131,6 +131,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcIcon());
         CommandRegistry.registerCommand(new CommandMcQuery());
         CommandRegistry.registerCommand(new CommandPePing());
+        CommandRegistry.registerCommand(new CommandOfflineUUID());
         
         while (true)    {
             try {
