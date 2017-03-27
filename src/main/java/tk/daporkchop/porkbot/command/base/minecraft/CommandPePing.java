@@ -32,10 +32,10 @@ public class CommandPePing extends Command {
         String[] ipPort = args[1].split(":");
         try {
             if (ipPort.length == 1) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/mcpe"));
+                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("http://repo.daporkchop.tk/ExamplePinger.php?ip=" + ipPort[0] + "&port=19132"));
             } else if (ipPort.length == 2)  {
                 try {
-                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/mcpe"));
+                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("http://repo.daporkchop.tk/ExamplePinger.php?ip=" + ipPort[0] + "&port=" + Integer.parseInt(ipPort[1])));
                 } catch (NumberFormatException e)   {
                     PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                     return;
