@@ -61,7 +61,7 @@ public class CommandPePing extends Command {
                     builder.setColor(Color.ORANGE);
                     builder.addField("***OLD SERVER!***", "PorkBot cannot ping this server, as it runs an older version of MCPE.", false);
                 } else {
-                    builder.setColor(Color.RED);
+                    builder.setColor(Color.GREEN);
 
                     builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
