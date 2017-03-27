@@ -17,7 +17,7 @@ public class CommandPing extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent event) {
-        PorkBot.sendMessage("Pong: " + (event.getMessage().getCreationTime().toInstant().getEpochSecond() - System.currentTimeMillis()) + "ms", event.getTextChannel());
+        PorkBot.sendMessage("Pong: " + event.getMessage().getCreationTime().compareTo(OffsetDateTime.now()) + "ms", event.getTextChannel());
     }
 
     @Override
