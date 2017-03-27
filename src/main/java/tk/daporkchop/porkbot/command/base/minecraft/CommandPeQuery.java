@@ -75,12 +75,20 @@ public class CommandPeQuery extends Command {
                 String sample = null;
                 Object arrObj = json.get("list");
                 if (!(arrObj instanceof JsonNull))    {
-                    sample = "*";
-                    Iterator<JsonElement> iter = ((JsonArray) arrObj).iterator();
-                    while (iter.hasNext())  {
-                        sample += iter.next().getAsString().replace("_", "\\_") + ", ";
+                    if (arrObj instanceof JsonArray) {
+                        sample = "*";
+                        Iterator<JsonElement> iter = ((JsonArray) arrObj).iterator();
+                        while (iter.hasNext()) {
+                            sample += iter.next().getAsString().replace("_", "\\_") + ", ";
+                        }
+                        sample = sample.substring(0, sample.length() - 2) + "*";
+                    } else if (arrObj instanceof JsonPrimitive) {
+                        if (!((JsonPrimitive) arrObj).getAsString().contains(";"))   {
+                            sample = "No players!";
+                        }
+                    } else {
+                        throw new IllegalStateException();
                     }
-                    sample = sample.substring(0, sample.length() - 2) + "*";
                 }
                 if (sample != null)   {
                     builder.addField("Player sample:", sample, false);
@@ -89,12 +97,20 @@ public class CommandPeQuery extends Command {
                 sample = null;
                 arrObj = json.getAsJsonArray("plugins");
                 if (!(arrObj instanceof JsonNull))    {
-                    sample = "*";
-                    Iterator<JsonElement> iterator = ((JsonArray) arrObj).iterator();
-                    while (iterator.hasNext())  {
-                        sample += iterator.next().getAsString().replace("_", "\\_") + ", ";
+                    if (arrObj instanceof JsonArray) {
+                        sample = "*";
+                        Iterator<JsonElement> iterator = ((JsonArray) arrObj).iterator();
+                        while (iterator.hasNext()) {
+                            sample += iterator.next().getAsString().replace("_", "\\_") + ", ";
+                        }
+                        sample = sample.substring(0, sample.length() - 2) + "*";
+                    } else if (arrObj instanceof JsonPrimitive) {
+                        if (!((JsonPrimitive) arrObj).getAsString().contains(";"))   {
+                            sample = "No plugins!";
+                        }
+                    } else {
+                        throw new IllegalStateException();
                     }
-                    sample = sample.substring(0, sample.length() - 2) + "*";
                 }
                 if (sample != null) {
                     builder.addField("Plugins:", sample, false);
