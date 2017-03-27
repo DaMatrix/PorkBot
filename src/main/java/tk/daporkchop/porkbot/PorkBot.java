@@ -149,12 +149,11 @@ public class PorkBot {
      */
     public static void sendMessage(String s, TextChannel channel)   {
         try {
-            channel.sendTyping().queue();
             new Thread() {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(250);
+                        Thread.sleep(750);
                     } catch (InterruptedException e)    {
                         //impossible
                     }
@@ -173,12 +172,11 @@ public class PorkBot {
      */
     public static void sendMessage(EmbedBuilder builder, TextChannel channel)   {
         try {
-            channel.sendTyping().queue();
             new Thread() {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(250);
+                        Thread.sleep(750);
                     } catch (InterruptedException e)    {
                         //impossible
                     }
