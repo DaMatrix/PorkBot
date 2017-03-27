@@ -30,7 +30,11 @@ public abstract class CommandRegistry {
 	 */
 	public static void runCommand(MessageReceivedEvent evt)	{
 		try {
-			COMMANDS.getOrDefault(evt.getMessage().getRawContent().split(" ")[0].substring(2), IGNORE).excecute(evt);
+			Command cmd = COMMANDS.getOrDefault(evt.getMessage().getRawContent().split(" ")[0].substring(2), IGNORE);
+			if (cmd != IGNORE)	{
+				evt.getTextChannel().sendTyping().queue();
+				cmd.excecute(evt);
+			}
 		} catch (Exception e)	{
 			e.printStackTrace();
 			PorkBot.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
