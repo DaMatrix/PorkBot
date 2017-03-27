@@ -95,7 +95,7 @@ public class CommandPeQuery extends Command {
                 }
 
                 sample = null;
-                arrObj = json.getAsJsonArray("plugins");
+                arrObj = json.get("plugins");
                 if (!(arrObj instanceof JsonNull))    {
                     if (arrObj instanceof JsonArray) {
                         sample = "*";
