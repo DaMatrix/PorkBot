@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.command.Command;
+import tk.daporkchop.porkbot.util.UUIDFetcher;
 
 public class CommandMcUUID extends Command {
 
@@ -35,9 +36,12 @@ public class CommandMcUUID extends Command {
 		}
 		try {
 			JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
-			PorkBot.sendMessage(args[1] + "'s UUID:\n```\n" + json.get("id").getAsString() + "\n```", evt.getTextChannel());
+			//                                                    this makes the UUId look nice
+			PorkBot.sendMessage(args[1] + "'s UUID:\n```\n" + UUIDFetcher.getUUIDOf(json.get("id").getAsString()).toString() + "\n```", evt.getTextChannel());
 		} catch (IllegalStateException e)	{
 			PorkBot.sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?", evt.getTextChannel());
+		} catch (Exception e)	{
+			PorkBot.sendMessage("Error processing UUID, is Mojang down?", evt.getTextChannel());
 		}
 	}
 

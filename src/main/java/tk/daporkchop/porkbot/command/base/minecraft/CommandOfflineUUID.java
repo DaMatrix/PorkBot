@@ -2,6 +2,7 @@ package tk.daporkchop.porkbot.command.base.minecraft;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.apache.commons.io.Charsets;
 import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 
@@ -25,7 +26,7 @@ public class CommandOfflineUUID extends Command {
             return;
         }
 
-        String msg = args[1] + "'s offline UUID:\n```\n" + UUID.fromString("OfflinePlayer:" + args[1]).toString() + "\n```";
+        String msg = args[1] + "'s offline UUID:\n```\n" + UUID.nameUUIDFromBytes(("OfflinePlayer:" + args[1]).getBytes(Charsets.UTF_8)).toString() + "\n```";
 
         PorkBot.sendMessage(msg, evt.getTextChannel());
     }
