@@ -13,7 +13,7 @@ public class CommandHelp extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt) {
+    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
         PorkBot.sendMessage("***Commands:***\nhttp://www.daporkchop.tk/porkbot", evt.getTextChannel());
     }
 

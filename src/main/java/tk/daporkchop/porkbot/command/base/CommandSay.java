@@ -11,15 +11,13 @@ public class CommandSay extends Command {
 	}
 
 	@Override
-	public void excecute(MessageReceivedEvent evt) {
-		String[] args = evt.getMessage().getRawContent().split(" ");
-		
+	public void excecute(MessageReceivedEvent evt, String[] args, String message) {
 		if (args.length < 2 || args[1].isEmpty())	{
 			sendErrorMessage(evt.getTextChannel(), "Add a message!");
 			return;
 		}
 
-		PorkBot.sendMessage(evt.getAuthor().getName() + ": " + evt.getMessage().getRawContent().substring(6), evt.getTextChannel());
+		PorkBot.sendMessage(evt.getAuthor().getName() + ": " + message.substring(6), evt.getTextChannel());
 	}
 
 	@Override

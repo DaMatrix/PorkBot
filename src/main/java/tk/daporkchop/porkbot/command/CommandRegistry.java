@@ -12,8 +12,6 @@ public abstract class CommandRegistry {
 	 */
 	private static final HashMap<String, Command> COMMANDS = new HashMap<>();
 
-	public static final Command IGNORE = new CommandIgnore();
-	
 	/**
 	 * Registers a command to the command registry.
 	 * @param cmd
@@ -28,12 +26,19 @@ public abstract class CommandRegistry {
 	 * Runs a comamnd
 	 * @param evt
 	 */
-	public static void runCommand(MessageReceivedEvent evt)	{
+	public static void runCommand(MessageReceivedEvent evt, String rawContent)	{
 		try {
-			Command cmd = COMMANDS.getOrDefault(evt.getMessage().getRawContent().split(" ")[0].substring(2), IGNORE);
-			if (cmd != IGNORE)	{
+			String[] split = rawContent.split(" ");
+			Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
+			if (cmd != null)	{
 				evt.getTextChannel().sendTyping().queue();
-				cmd.excecute(evt);
+
+				new Thread() {
+					@Override
+					public void run()	{
+						cmd.excecute(evt, split, rawContent);
+					}
+				}.start();
 			}
 		} catch (Exception e)	{
 			e.printStackTrace();

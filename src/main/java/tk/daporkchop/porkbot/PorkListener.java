@@ -23,7 +23,7 @@ public class PorkListener extends ListenerAdapter {
         String message = event.getMessage().getRawContent();
 
         if (message.startsWith(".."))    {
-            CommandRegistry.runCommand(event);
+            CommandRegistry.runCommand(event, message);
         } else if (event.getChannelType().ordinal() == ChannelType.PRIVATE.ordinal()) {
             if (event.getAuthor().getId().equals("226975061880471552"))   {
                 switch (message)    {

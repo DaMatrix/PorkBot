@@ -24,7 +24,7 @@ public class CommandMcStatus extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt) {
+    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
         String s;
         try {
             s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/mcstatus"));
@@ -39,7 +39,7 @@ public class CommandMcStatus extends Command {
 
             EmbedBuilder builder = new EmbedBuilder();
 
-            builder.setTitle("**Mojang status:**");
+            builder.setTitle("**Mojang status:**", "https://mojang.com");
 
             boolean isAllOnline = true;
             int onlineCount = 0;

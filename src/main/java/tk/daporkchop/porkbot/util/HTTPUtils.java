@@ -14,6 +14,7 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
+@SuppressWarnings("deprecation")
 public class HTTPUtils {
 
     public static HttpURLConnection createUrlConnection(final URL url) throws IOException {

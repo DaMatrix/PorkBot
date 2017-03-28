@@ -18,10 +18,10 @@ public class CommandBotInfo extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent event) {
+    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
-        builder.setTitle("**PorkBot info**");
+        builder.setTitle("**PorkBot info**", "http://www.daporkchop.tk/porkbot");
 
         builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
 
@@ -29,7 +29,7 @@ public class CommandBotInfo extends Command {
 
         builder.addField("", "This command is kinda unfinished, sorry D:", false);
 
-        PorkBot.sendMessage(builder, event.getTextChannel());
+        PorkBot.sendMessage(builder, evt.getTextChannel());
     }
 
     @Override
