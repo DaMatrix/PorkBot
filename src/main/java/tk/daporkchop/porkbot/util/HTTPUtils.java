@@ -78,6 +78,59 @@ public class HTTPUtils {
     }
 
     /**
+     * Performs a POST request to the specified URL and returns the result.
+     * <p />
+     * The POST data will be encoded in UTF-8 as the specified contentType. The response will be parsed as UTF-8.
+     * If the server returns an error but still provides a body, the body will be returned as normal.
+     * If the server returns an error without any body, a relevant {@link java.io.IOException} will be thrown.
+     *
+     * @param url URL to submit the POST request to
+     * @param post POST data in the correct format to be submitted
+     * @param contentType Content type of the POST data
+     * @return Raw text response from the server
+     * @throws IOException The request was not successful
+     */
+    public static String performPostRequestWithAuth(final URL url, final String post, final String contentType, final String auth) throws IOException {
+        Validate.notNull(url);
+        Validate.notNull(post);
+        Validate.notNull(contentType);
+        final HttpURLConnection connection = createUrlConnection(url);
+        final byte[] postAsBytes = post.getBytes(Charsets.UTF_8);
+
+        connection.setRequestProperty ("Authorization", auth);
+        connection.setRequestProperty("Content-Type", contentType + "; charset=utf-8");
+        connection.setRequestProperty("Content-Length", "" + postAsBytes.length);
+        connection.setDoOutput(true);
+
+        OutputStream outputStream = null;
+        try {
+            outputStream = connection.getOutputStream();
+            IOUtils.write(postAsBytes, outputStream);
+        } finally {
+            IOUtils.closeQuietly(outputStream);
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = connection.getInputStream();
+            final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
+            return result;
+        } catch (final IOException e) {
+            IOUtils.closeQuietly(inputStream);
+            inputStream = connection.getErrorStream();
+
+            if (inputStream != null) {
+                final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
+                return result;
+            } else {
+                throw e;
+            }
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    /**
      * Performs a GET request to the specified URL and returns the result.
      * <p />
      * The response will be parsed as UTF-8.

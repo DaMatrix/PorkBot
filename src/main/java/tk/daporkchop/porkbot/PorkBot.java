@@ -10,19 +10,21 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.impl.GameImpl;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.command.CommandRegistry;
+import tk.daporkchop.porkbot.command.base.CommandBotInfo;
 import tk.daporkchop.porkbot.command.base.CommandPing;
 import tk.daporkchop.porkbot.command.base.minecraft.*;
 import tk.daporkchop.porkbot.command.base.CommandSay;
 import tk.daporkchop.porkbot.command.CommandHelp;
 import tk.daporkchop.porkbot.command.CommandInvite;
+import tk.daporkchop.porkbot.util.HTTPUtils;
 
 import javax.security.auth.login.LoginException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -132,6 +134,23 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcQuery());
         CommandRegistry.registerCommand(new CommandPePing());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
+        CommandRegistry.registerCommand(new CommandBotInfo());
+
+        final String authToken = getAuthtoken();
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    HTTPUtils.performPostRequestWithAuth(HTTPUtils.constantURL("https://bots.discord.pw/api/bots/287894637165936640/stats"),
+                            "{ \"server_count\": " + PorkBot.INSTANCE.jda.getGuilds().size() + " }",
+                            "application/json",
+                            authToken);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 1000, 120000);
         
         while (true)    {
             try {
@@ -186,5 +205,47 @@ public class PorkBot {
         } catch (PermissionException e) {
             //we can't do anything about it
         }
+    }
+
+    public static String getAuthtoken() {
+        File f = new File(System.getProperty("user.dir") + "/authtoken.txt");
+        String token = "";
+
+        if (!f.exists()) {
+            try {
+                PrintWriter writer = new PrintWriter(f.getAbsolutePath(), "UTF-8");
+                Scanner s = new Scanner(System.in);
+
+                logger.info("Please enter your auth token for bots.discord.pw");
+                token = s.nextLine();
+                writer.println(token);
+                logger.info("Successful. connecting...");
+
+                s.close();
+                writer.close();
+            } catch (FileNotFoundException e) {
+                logger.severe("impossible error kek");
+                e.printStackTrace();
+                System.exit(0);
+            } catch (UnsupportedEncodingException e) {
+                logger.severe("File encoding not supported!");
+                e.printStackTrace();
+                System.exit(0);
+            }
+        } else {
+            try {
+                Scanner s = new Scanner(f);
+
+                token = s.nextLine();
+
+                s.close();
+            } catch (FileNotFoundException e) {
+                logger.severe("impossible error kek");
+                e.printStackTrace();
+                System.exit(0);
+            }
+        }
+
+        return token.trim();
     }
 }
