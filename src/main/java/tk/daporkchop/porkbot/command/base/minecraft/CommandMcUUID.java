@@ -37,7 +37,7 @@ public class CommandMcUUID extends Command {
 		try {
 			JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
 			//                                                    this makes the UUId look nice
-			PorkBot.sendMessage(args[1] + "'s UUID:\n```\n" + UUIDFetcher.getUUIDOf(json.get("id").getAsString()).toString() + "\n```", evt.getTextChannel());
+			PorkBot.sendMessage(args[1] + "'s UUID:\n```\n" + UUIDFetcher.getUUID(json.get("id").getAsString()).toString() + "\n```", evt.getTextChannel());
 		} catch (IllegalStateException e)	{
 			PorkBot.sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?", evt.getTextChannel());
 		} catch (Exception e)	{
