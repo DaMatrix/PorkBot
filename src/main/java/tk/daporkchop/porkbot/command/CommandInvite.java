@@ -14,7 +14,7 @@ public class CommandInvite extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent evt, String[] args, String message) {
-        PorkBot.sendMessage("***Invite link:***\nhttps://discordapp.com/oauth2/authorize?client_id=287894637165936640&scope=bot&permissions=8", evt.getTextChannel());
+        PorkBot.sendMessage("***Invite link is on bot site:***\nhttp://www.daporkchop.tk/porkbot", evt.getTextChannel());
     }
 
     @Override
