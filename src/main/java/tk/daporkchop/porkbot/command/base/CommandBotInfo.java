@@ -25,7 +25,7 @@ public class CommandBotInfo extends Command {
 
         builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
 
-        builder.addField("Name:", PorkBot.INSTANCE.jda.getSelfUser().getDiscriminator(), false);
+        builder.addField("Name:", "PorkBot#" + PorkBot.INSTANCE.jda.getSelfUser().getDiscriminator(), false);
 
         builder.addField("Servers:", String.valueOf(PorkBot.INSTANCE.jda.getGuilds().size()), false);
 

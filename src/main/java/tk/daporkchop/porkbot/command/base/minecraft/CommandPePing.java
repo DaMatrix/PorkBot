@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.util.HTTPUtils;
+import tk.daporkchop.porkbot.util.TextFormat;
 
 import java.awt.*;
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class CommandPePing extends Command {
 
                     builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
-                    builder.addField("MOTD:", json.get("motd").getAsString(), false);
+                    builder.addField("MOTD:", TextFormat.clean(json.get("motd").getAsString()), false);
 
                     builder.addField("Players:", json.get("players").getAsString(), false);
 

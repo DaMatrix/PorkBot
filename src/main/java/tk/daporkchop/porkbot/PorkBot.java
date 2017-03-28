@@ -191,6 +191,7 @@ public class PorkBot {
      */
     public static void sendMessage(EmbedBuilder builder, TextChannel channel)   {
         try {
+            builder.setAuthor("PorkBot", "http://www.daporkchop.tk/porkbot", "https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif");
             new Thread() {
                 @Override
                 public void run() {

@@ -50,28 +50,59 @@ public class CommandPeQuery extends Command {
             return;
         }
 
-        try {
-            JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
+        JsonObject query = null;
+        JsonObject ping = null;
 
+        try {
+            query = (new JsonParser()).parse(s).getAsJsonObject();
+
+            try {
+                if (ipPort.length == 1) {
+                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("http://repo.daporkchop.tk/ExamplePinger.php?ip=" + ipPort[0] + "&port=19132"));
+                } else if (ipPort.length == 2)  {
+                    try {
+                        s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("http://repo.daporkchop.tk/ExamplePinger.php?ip=" + ipPort[0] + "&port=" + Integer.parseInt(ipPort[1])));
+                    } catch (NumberFormatException e)   {
+                        PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
+                        return;
+                    }
+                } else {
+                    PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                PorkBot.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
+                return;
+            }
+
+            ping = (new JsonParser()).parse(s).getAsJsonObject();
+        } catch (IllegalStateException e)   {
+            PorkBot.sendMessage("Unable to parse server status!", evt.getTextChannel());
+        }
+
+        try {
             EmbedBuilder builder = new EmbedBuilder();
 
-            if (json.get("status").getAsBoolean())  {
+            if (query.get("status").getAsBoolean())  {
                 //server's online
                 builder.setColor(Color.GREEN);
 
                 builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
-                builder.addField("Version:", json.get("version").getAsString(), false);
-                builder.addField("Software:", json.get("software").getAsString(), false);
+                builder.addField("Version:", query.get("version").getAsString(), false);
+                builder.addField("Software:", query.get("software").getAsString(), false);
 
-                JsonObject onlinePlayers = json.getAsJsonObject("players");
+                builder.addField("Protocol Version:", ping.get("protocol").getAsInt() + "", false);
+
+                JsonObject onlinePlayers = query.getAsJsonObject("players");
 
                 builder.addField("Players:", onlinePlayers.get("online").getAsInt() + "**/**" + onlinePlayers.get("max").getAsInt(), false);
 
-                builder.addField("MOTD:", json.getAsJsonObject("motds").get("clean").getAsString(), false);
+                builder.addField("MOTD:", TextFormat.clean(ping.get("motd").getAsString()), false);
 
                 String sample = null;
-                Object arrObj = json.get("list");
+                Object arrObj = query.get("list");
                 if (!(arrObj instanceof JsonNull))    {
                     if (arrObj instanceof JsonArray) {
                         sample = "*";
@@ -93,7 +124,7 @@ public class CommandPeQuery extends Command {
                 }
 
                 sample = null;
-                arrObj = json.get("plugins");
+                arrObj = query.get("plugins");
                 if (!(arrObj instanceof JsonNull))    {
                     if (arrObj instanceof JsonArray) {
                         sample = "*";
@@ -114,9 +145,14 @@ public class CommandPeQuery extends Command {
                     builder.addField("Plugins:", sample, false);
                 }
             } else {
-                //server's offline
-                builder.setColor(Color.RED);
-                builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
+                if (ping.get("status").getAsBoolean())  {
+                    builder.setColor(Color.ORANGE);
+                    builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
+                } else {
+                    //server's offline
+                    builder.setColor(Color.RED);
+                    builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
+                }
             }
 
             PorkBot.sendMessage(builder, evt.getTextChannel());
