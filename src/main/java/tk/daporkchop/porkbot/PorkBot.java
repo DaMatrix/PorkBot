@@ -214,6 +214,7 @@ public class PorkBot {
      * @param evt the channel from this event is used to send the message
      */
     public static void sendException(Exception e, MessageReceivedEvent evt) {
+        e.printStackTrace();
         PorkBot.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
     }
 
