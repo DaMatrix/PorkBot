@@ -32,11 +32,7 @@ public abstract class MCPing {
                     return new PePing(true, false, json.get("motd").getAsString(), json.get("players").getAsString(), json.get("ping").getAsString(), json.get("version").getAsString(), json.get("protocol").getAsInt(), false, null);
                 }
             } else {
-                if (json.get("old").getAsBoolean()) {
-                    return new PePing(true, true, null, null, null, null, 0, false, null);
-                } else {
-                    return new PePing(false, false, null, null, null, null, 0, false, null);
-                }
+                return new PePing(false, false, null, null, null, null, 0, false, null);
             }
         } catch (Exception e)   {
             return new PePing(false, false, null, null, null, null, 0, true, e);

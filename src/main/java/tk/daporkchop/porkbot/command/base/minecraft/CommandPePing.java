@@ -34,7 +34,7 @@ public class CommandPePing extends Command {
             try {
                 ping = MCPing.pingPe(ipPort[0], Integer.parseInt(ipPort[1]));
             } catch (NumberFormatException e) {
-                PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
+                PorkBot.sendMessage("Unable to interpret port number!", evt.getTextChannel());
                 return;
             }
         } else {
