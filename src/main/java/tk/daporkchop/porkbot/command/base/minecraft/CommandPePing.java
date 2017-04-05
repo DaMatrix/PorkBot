@@ -8,13 +8,11 @@ import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.util.TextFormat;
+import tk.daporkchop.porkbot.util.mcpinger.MCPing;
 
 import java.awt.*;
 import java.io.IOException;
 
-/**
- * Created by rabi.jose.2015 on 27.03.2017.
- */
 public class CommandPePing extends Command {
     public CommandPePing()  {
         super("peping");
@@ -27,36 +25,29 @@ public class CommandPePing extends Command {
             return;
         }
 
-        String s = null;
+        MCPing.PePing ping = null;
         String[] ipPort = args[1].split(":");
-        try {
-            if (ipPort.length == 1) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("http://repo.daporkchop.tk/ExamplePinger.php?ip=" + ipPort[0] + "&port=19132"));
-            } else if (ipPort.length == 2)  {
-                try {
-                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("http://repo.daporkchop.tk/ExamplePinger.php?ip=" + ipPort[0] + "&port=" + Integer.parseInt(ipPort[1])));
-                } catch (NumberFormatException e)   {
-                    PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
-                    return;
-                }
-            } else {
-                PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
+
+        if (ipPort.length == 1) {
+            ping = MCPing.pingPe(ipPort[0], 19132);
+        } else if (ipPort.length == 2) {
+            try {
+                ping = MCPing.pingPe(ipPort[0], Integer.parseInt(ipPort[1]));
+            } catch (NumberFormatException e) {
+                PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            PorkBot.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
+        } else {
+            PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
             return;
         }
 
         try {
-            JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
-
             EmbedBuilder builder = new EmbedBuilder();
 
-            if (json.get("status").getAsBoolean())  {
+            if (ping.status)  {
                 //server's online
-                if (json.get("old").getAsBoolean()) {
+                if (ping.old) {
                     builder.setColor(Color.ORANGE);
                     builder.addField("***OLD SERVER!***", "PorkBot cannot ping this server, as it runs an older version of MCPE.", false);
                 } else {
@@ -64,20 +55,24 @@ public class CommandPePing extends Command {
 
                     builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
-                    builder.addField("MOTD:", TextFormat.clean(json.get("motd").getAsString()), false);
+                    builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
 
-                    builder.addField("Players:", json.get("players").getAsString(), false);
+                    builder.addField("Players:", ping.players, false);
 
-                    builder.addField("Protocol Version:", json.get("protocol").getAsInt() + "", false);
+                    builder.addField("Protocol Version:", ping.protocol + "", false);
 
-                    builder.addField("Version:", json.get("version").getAsString(), false);
+                    builder.addField("Version:", ping.version, false);
 
-                    builder.addField("Ping:", json.get("ping").getAsString(), false);
+                    builder.addField("Ping:", ping.ping, false);
                 }
             } else {
-                //server's offline
-                builder.setColor(Color.RED);
-                builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
+                if (ping.errored)   {
+                    PorkBot.sendException(ping.error, evt);
+                } else {
+                    //server's offline
+                    builder.setColor(Color.RED);
+                    builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
+                }
             }
 
             PorkBot.sendMessage(builder, evt.getTextChannel());

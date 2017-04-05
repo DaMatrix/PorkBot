@@ -6,11 +6,7 @@ import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 
 import java.awt.*;
-import java.time.OffsetDateTime;
 
-/**
- * Created by rabi.jose.2015 on 28.03.2017.
- */
 public class CommandBotInfo extends Command {
 
     public CommandBotInfo() {

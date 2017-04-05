@@ -8,9 +8,9 @@ import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.impl.GameImpl;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.command.CommandRegistry;
 import tk.daporkchop.porkbot.command.base.CommandBotInfo;
 import tk.daporkchop.porkbot.command.base.CommandPing;
@@ -206,6 +206,15 @@ public class PorkBot {
         } catch (PermissionException e) {
             //we can't do anything about it
         }
+    }
+
+    /**
+     * Sends an excepion using the given MessageReceivedEvent's channel
+     * @param e the exception to print
+     * @param evt the channel from this event is used to send the message
+     */
+    public static void sendException(Exception e, MessageReceivedEvent evt) {
+        PorkBot.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
     }
 
     public static String getAuthtoken() {
