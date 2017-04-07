@@ -11,6 +11,7 @@ import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.util.TextFormat;
+import tk.daporkchop.porkbot.util.mcpinger.MCPing;
 
 import java.awt.*;
 import java.io.IOException;
@@ -26,65 +27,37 @@ public class CommandMcQuery extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent evt, String[] args, String message) {
-        if (args.length < 2 || args[1].isEmpty())	{
+        if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;
         }
 
-        String s = null;
+        MCPing.Query query = null;
+        MCPing.McPing ping = null;
         String[] ipPort = args[1].split(":");
-        try {
-            if (ipPort.length == 1) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/extensive"));
-            } else if (ipPort.length == 2)  {
-                try {
-                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/extensive"));
-                } catch (NumberFormatException e)   {
-                    PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
-                    return;
-                }
-            } else {
-                PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
+
+        if (ipPort.length == 1) {
+            query = MCPing.query(ipPort[0], 25565, false);
+            ping = MCPing.pingPc(ipPort[0], 25565);
+        } else if (ipPort.length == 2) {
+            try {
+                query = MCPing.query(ipPort[0], Integer.parseInt(ipPort[1]), false);
+                ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]));
+            } catch (NumberFormatException e) {
+                PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;
             }
-        } catch (IOException e) {
-            PorkBot.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
+        } else {
+            PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
             return;
         }
 
-        JsonObject query = null;
-        JsonObject ping = null;
-
-        try {
-            query = (new JsonParser()).parse(s).getAsJsonObject();
-
-            if (ipPort.length == 1) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/info"));
-            } else if (ipPort.length == 2)  {
-                try {
-                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/info"));
-                } catch (NumberFormatException e)   {
-                    PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
-                    return;
-                }
-            } else {
-                PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
-                return;
-            }
-
-            ping = (new JsonParser()).parse(s).getAsJsonObject();
-        } catch (Exception e)   {
-            e.printStackTrace();
-            PorkBot.sendMessage("Unable to parse server status!", evt.getTextChannel());
-            return;
-        }
-
-        if (!query.get("status").getAsBoolean())    {
-            if (ping.get("status").getAsBoolean())  {
+        if (!query.status) {
+            if (ping.status) {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.ORANGE);
                 builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
-                
+
                 PorkBot.sendMessage(builder, evt.getTextChannel());
             } else {
                 EmbedBuilder builder = new EmbedBuilder();
@@ -94,61 +67,37 @@ public class CommandMcQuery extends Command {
                 PorkBot.sendMessage(builder, evt.getTextChannel());
             }
             return;
-        }
+        } else {
+            try {
+                EmbedBuilder builder = new EmbedBuilder();
 
-        try {
-            EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(Color.GREEN);
+                builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
 
-            builder.setColor(Color.GREEN);
-            builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
+                builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
-            builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
+                builder.addField("Ping:", ping.ping + "ms", false);
 
-            builder.addField("Ping:", ping.get("ping").getAsInt() + "ms", false);
+                builder.addField("Version:", query.version, false);
 
-            builder.addField("Version:", query.get("version").getAsString(), false);
+                builder.addField("Players:", ping.players, false);
 
-            builder.addField("Software:", query.get("software").getAsString(), false);
-
-            JsonObject onlinePlayers = ping.getAsJsonObject("players");
-
-            builder.addField("Players:", onlinePlayers.get("online").getAsInt() + "**/**" + onlinePlayers.get("max").getAsInt(), false);
-
-            String sample = null;
-            Object arrObj = query.get("list");
-            if (!(arrObj instanceof JsonNull))    {
-                sample = "*";
-                Iterator<JsonElement> iter = ((JsonArray) arrObj).iterator();
-                while (iter.hasNext())  {
-                    sample += iter.next().getAsString().replace("_", "\\_") + ", ";
+                if (!query.playerSample.isEmpty())   {
+                    builder.addField("Player sample:", query.playerSample, false);
                 }
-                sample = sample.substring(0, sample.length() - 2) + "*";
-            }
-            if (sample != null)   {
-                builder.addField("Player sample:", sample, false);
-            }
 
-            sample = null;
-            arrObj = query.getAsJsonArray("plugins");
-            if (!(arrObj instanceof JsonNull))    {
-                sample = "*";
-                Iterator<JsonElement> iterator = ((JsonArray) arrObj).iterator();
-                while (iterator.hasNext())  {
-                    sample += iterator.next().getAsString().replace("_", "\\_") + ", ";
+                if (!query.plugins.isEmpty())   {
+                    builder.addField("Plugins:", query.plugins, false);
                 }
-                sample = sample.substring(0, sample.length() - 2) + "*";
-            }
-            if (sample != null) {
-                builder.addField("Plugins:", sample, false);
-            }
 
-            builder.addField("MOTD:", TextFormat.clean(ping.get("motd").getAsString()), false);
+                builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
 
-            PorkBot.sendMessage(builder, evt.getTextChannel());
-        } catch (Exception e)   {
-            e.printStackTrace();
-            PorkBot.sendMessage("**Error**:\n" + e.toString(), evt.getTextChannel());
-            return;
+                PorkBot.sendMessage(builder, evt.getTextChannel());
+            } catch (Exception e) {
+                e.printStackTrace();
+                PorkBot.sendException(e, evt);
+                return;
+            }
         }
     }
 
@@ -158,7 +107,7 @@ public class CommandMcQuery extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..mcquery home.daporkchop.tk";
     }
 }

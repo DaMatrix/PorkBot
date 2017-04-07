@@ -1,17 +1,13 @@
 package tk.daporkchop.porkbot.command.base.minecraft;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
-import tk.daporkchop.porkbot.util.HTTPUtils;
 import tk.daporkchop.porkbot.util.TextFormat;
 import tk.daporkchop.porkbot.util.mcpinger.MCPing;
 
 import java.awt.*;
-import java.io.IOException;
 
 public class CommandPePing extends Command {
     public CommandPePing()  {
