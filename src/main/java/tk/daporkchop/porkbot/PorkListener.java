@@ -26,22 +26,34 @@ public class PorkListener extends ListenerAdapter {
         }
         String message = event.getMessage().getRawContent();
 
-        if (message.startsWith(".."))    {
+        if (message.startsWith("..")) {
             CommandRegistry.runCommand(event, message);
         } else if (event.getChannelType().ordinal() == ChannelType.PRIVATE.ordinal()) {
-            if (event.getAuthor().getId().equals("226975061880471552"))   {
-                switch (message)    {
+            if (event.getAuthor().getId().equals("226975061880471552")) {
+                switch (message) {
                     case ",,instareboot":
-                        PorkBot.INSTANCE.jda.shutdown();
-                        System.exit(0);
+                        event.getChannel().sendMessage("Rebooting...").queue();
+                        System.out.println("Rebooting...");
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(500);
+                                    PorkBot.INSTANCE.jda.shutdown();
+                                    System.exit(0);
+                                } catch (InterruptedException e) {
+
+                                }
+                            }
+                        }.start();
                         return;
                 }
 
-                if (message.startsWith(",,announce "))  {
+                if (message.startsWith(",,announce ")) {
                     String toAnnouce = message.substring(11);
 
                     List<Guild> servers = PorkBot.INSTANCE.jda.getGuilds();
-                    for (Guild server : servers)   {
+                    for (Guild server : servers) {
                         try {
                             server.getPublicChannel().sendMessage(toAnnouce).queue();
                         } catch (PermissionException e) {

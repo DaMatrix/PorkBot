@@ -151,8 +151,10 @@ public class PorkBot {
                 }
             }
         }, 1000, 120000);
-        
-        while (true)    {
+
+        jda.getUserById("226975061880471552").getPrivateChannel().sendMessage("Started!").queue();
+
+        while (true)    { //don't remember why i put this here, but there's got to be a reason :P
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e)    {

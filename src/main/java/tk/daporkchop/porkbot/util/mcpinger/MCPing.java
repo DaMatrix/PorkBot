@@ -52,11 +52,15 @@ public abstract class MCPing {
 
             JsonObject json = new JsonParser().parse(s).getAsJsonObject();
 
+            if (!pe)    {
+                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ip + ":" + port + "/motd"));
+            }
+
             if (json.get("status").getAsBoolean())  {
                 if (json.get("noquery").getAsBoolean()) {
                     return new Query(true, true, null, null, null, null, 0, null, null, false, null);
                 } else {
-                    return new Query(true, false, json.get("motd").getAsString(), json.get("players").getAsString(), json.get("ping").getAsString(), json.get("version").getAsString(), json.get("protocol").getAsInt(), json.get("playersample").getAsString(), json.get("plugins").getAsString(), false, null);
+                    return new Query(true, false, (pe ? json.get("motd").getAsString() : new JsonParser().parse(s).getAsJsonObject().get("motd").getAsString()), json.get("players").getAsString(), json.get("ping").getAsString(), json.get("version").getAsString(), json.get("protocol").getAsInt(), json.get("playersample").getAsString(), json.get("plugins").getAsString(), false, null);
                 }
             } else {
                 return new Query(false, false, null, null, null, null, 0, null, null, false, null);
@@ -78,8 +82,12 @@ public abstract class MCPing {
 
             JsonObject json = new JsonParser().parse(s).getAsJsonObject();
 
+            s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ip + ":" + port + "/motd"));
+
+            JsonObject otherJson = new JsonParser().parse(s).getAsJsonObject();
+
             if (json.get("status").getAsBoolean())  {
-                return new McPing(true, json.get("motd").getAsString(), json.get("players").getAsString(), json.get("protocol").getAsInt(), json.get("version").getAsString(), json.get("ping").getAsString(), false, null);
+                return new McPing(true, otherJson.get("motd").getAsString(), json.get("players").getAsString(), json.get("protocol").getAsInt(), json.get("version").getAsString(), json.get("ping").getAsString(), false, null);
             } else {
                 return new McPing(false, null, null, 0, null, null, false, null);
             }
