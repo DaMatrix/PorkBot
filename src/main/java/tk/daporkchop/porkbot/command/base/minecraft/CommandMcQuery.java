@@ -52,50 +52,46 @@ public class CommandMcQuery extends Command {
             return;
         }
 
-        if (!query.status) {
-            if (ping.status) {
+        if (query.status)   {
+            EmbedBuilder builder = new EmbedBuilder();
+
+            builder.setColor(Color.GREEN);
+            builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
+
+            builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
+
+            builder.addField("Ping:", ping.ping, false);
+
+            builder.addField("Version:", ping.version, false);
+
+            builder.addField("Players:", ping.players, false);
+
+            if (!query.playerSample.isEmpty())   {
+                builder.addField("Player sample:", query.playerSample, false);
+            }
+
+            if (!query.plugins.isEmpty())   {
+                builder.addField("Plugins:", query.plugins, false);
+            }
+
+            builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
+
+            PorkBot.sendMessage(builder, evt.getTextChannel());
+            return;
+        } else {
+            if (query.noQuery)  {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.ORANGE);
                 builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
 
                 PorkBot.sendMessage(builder, evt.getTextChannel());
+                return;
             } else {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
                 builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
 
                 PorkBot.sendMessage(builder, evt.getTextChannel());
-            }
-            return;
-        } else {
-            try {
-                EmbedBuilder builder = new EmbedBuilder();
-
-                builder.setColor(Color.GREEN);
-                builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
-
-                builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
-
-                builder.addField("Ping:", ping.ping, false);
-
-                builder.addField("Version:", ping.version, false);
-
-                builder.addField("Players:", ping.players, false);
-
-                if (!query.playerSample.isEmpty())   {
-                    builder.addField("Player sample:", query.playerSample, false);
-                }
-
-                if (!query.plugins.isEmpty())   {
-                    builder.addField("Plugins:", query.plugins, false);
-                }
-
-                builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
-
-                PorkBot.sendMessage(builder, evt.getTextChannel());
-            } catch (Exception e) {
-                e.printStackTrace();
-                PorkBot.sendException(e, evt);
                 return;
             }
         }
