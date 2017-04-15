@@ -53,31 +53,40 @@ public class CommandMcQuery extends Command {
         }
 
         if (query.status)   {
-            EmbedBuilder builder = new EmbedBuilder();
+            if (query.noQuery)  {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(Color.ORANGE);
+                builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
 
-            builder.setColor(Color.GREEN);
-            builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
+                PorkBot.sendMessage(builder, evt.getTextChannel());
+                return;
+            } else {
+                EmbedBuilder builder = new EmbedBuilder();
 
-            builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
+                builder.setColor(Color.GREEN);
+                builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
 
-            builder.addField("Ping:", ping.ping, false);
+                builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
-            builder.addField("Version:", ping.version, false);
+                builder.addField("Ping:", ping.ping, false);
 
-            builder.addField("Players:", ping.players, false);
+                builder.addField("Version:", ping.version, false);
 
-            if (!query.playerSample.isEmpty())   {
-                builder.addField("Player sample:", query.playerSample, false);
+                builder.addField("Players:", ping.players, false);
+
+                if (!query.playerSample.isEmpty()) {
+                    builder.addField("Player sample:", query.playerSample, false);
+                }
+
+                if (!query.plugins.isEmpty()) {
+                    builder.addField("Plugins:", query.plugins, false);
+                }
+
+                builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
+
+                PorkBot.sendMessage(builder, evt.getTextChannel());
+                return;
             }
-
-            if (!query.plugins.isEmpty())   {
-                builder.addField("Plugins:", query.plugins, false);
-            }
-
-            builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
-
-            PorkBot.sendMessage(builder, evt.getTextChannel());
-            return;
         } else {
             if (query.noQuery)  {
                 EmbedBuilder builder = new EmbedBuilder();
