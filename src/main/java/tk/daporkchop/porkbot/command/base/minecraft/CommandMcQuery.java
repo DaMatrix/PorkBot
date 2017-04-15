@@ -78,7 +78,7 @@ public class CommandMcQuery extends Command {
 
                 builder.addField("Ping:", ping.ping, false);
 
-                builder.addField("Version:", query.version, false);
+                builder.addField("Version:", ping.version, false);
 
                 builder.addField("Players:", ping.players, false);
 
