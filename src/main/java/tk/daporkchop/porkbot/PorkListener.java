@@ -1,10 +1,14 @@
 package tk.daporkchop.porkbot;
 
 import net.dv8tion.jda.core.entities.ChannelType;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import tk.daporkchop.porkbot.command.CommandRegistry;
+
+import java.util.List;
 
 /**
  * Created by daporkchop on 05.03.17.
@@ -30,7 +34,20 @@ public class PorkListener extends ListenerAdapter {
                     case ",,instareboot":
                         PorkBot.INSTANCE.jda.shutdown();
                         System.exit(0);
-                        break;
+                        return;
+                }
+
+                if (message.startsWith(",,announce "))  {
+                    String toAnnouce = message.substring(11);
+
+                    List<Guild> servers = PorkBot.INSTANCE.jda.getGuilds();
+                    for (Guild server : servers)   {
+                        try {
+                            server.getPublicChannel().sendMessage(toAnnouce).queue();
+                        } catch (PermissionException e) {
+                            //who cares, we can't do anything about it
+                        }
+                    }
                 }
             }
         }

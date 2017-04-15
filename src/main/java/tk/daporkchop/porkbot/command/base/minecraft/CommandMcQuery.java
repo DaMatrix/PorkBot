@@ -76,7 +76,7 @@ public class CommandMcQuery extends Command {
 
                 builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
-                builder.addField("Ping:", ping.ping + "ms", false);
+                builder.addField("Ping:", ping.ping, false);
 
                 builder.addField("Version:", query.version, false);
 

@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import tk.daporkchop.porkbot.PorkBot;
 import tk.daporkchop.porkbot.command.Command;
 import tk.daporkchop.porkbot.util.HTTPUtils;
+import tk.daporkchop.porkbot.util.mcpinger.MCPing;
 
 import java.awt.*;
 import java.io.IOException;
@@ -21,54 +22,41 @@ public class CommandMcCount extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent evt, String[] args, String message) {
-        if (args.length < 2 || args[1].isEmpty())	{
+        if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;
         }
 
-        String s = null;
+        MCPing.McPing ping = null;
         String[] ipPort = args[1].split(":");
-        try {
-            if (ipPort.length == 1) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + "/players"));
-            } else if (ipPort.length == 2)  {
-                try {
-                    s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ipPort[0] + ":" + Integer.parseInt(ipPort[1]) + "/players"));
-                } catch (NumberFormatException e)   {
-                    PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
-                    return;
-                }
-            } else {
-                PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
+        if (ipPort.length == 1) {
+            ping = MCPing.pingPc(ipPort[0], 25565);
+        } else if (ipPort.length == 2) {
+            try {
+                ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]));
+            } catch (NumberFormatException e) {
+                PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            PorkBot.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
+        } else {
+            PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
             return;
         }
 
-        try {
-            JsonObject json = (new JsonParser()).parse(s).getAsJsonObject();
+        EmbedBuilder builder = new EmbedBuilder();
 
-            EmbedBuilder builder = new EmbedBuilder();
+        if (ping.status) {
+            //server's online
+            builder.setColor(Color.GREEN);
 
-            if (json.get("status").getAsBoolean())  {
-                //server's online
-                builder.setColor(Color.GREEN);
-
-                builder.addField("**" + args[1] + "** player count:", json.getAsJsonObject("players").get("online").getAsInt() + "/" + json.getAsJsonObject("players").get("max").getAsInt(), false);
-            } else {
-                //server's offline
-                builder.setColor(Color.RED);
-                builder.addField("**" + args[1] + "**", "***OFFLINE***", false);
-            }
-
-            PorkBot.sendMessage(builder, evt.getTextChannel());
-        } catch (IllegalStateException e)   {
-            PorkBot.sendMessage("Unable to parse server status!", evt.getTextChannel());
-            return;
+            builder.addField("**" + args[1] + "** player count:", ping.players, false);
+        } else {
+            //server's offline
+            builder.setColor(Color.RED);
+            builder.addField("**" + args[1] + "**", "***OFFLINE***", false);
         }
+
+        PorkBot.sendMessage(builder, evt.getTextChannel());
     }
 
     @Override
@@ -77,7 +65,7 @@ public class CommandMcCount extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..mccount 2b2t.org";
     }
 }
