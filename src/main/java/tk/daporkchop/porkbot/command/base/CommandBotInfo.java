@@ -17,7 +17,7 @@ public class CommandBotInfo extends Command {
     public void excecute(MessageReceivedEvent evt, String[] args, String message) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
-        builder.setTitle("**PorkBot info**", "http://www.daporkchop.tk/porkbot");
+        builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");
 
         builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
 

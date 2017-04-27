@@ -113,6 +113,6 @@ public class CommandMcQuery extends Command {
 
     @Override
     public String getUsageExample() {
-        return "..mcquery home.daporkchop.tk";
+        return "..mcquery home.daporkchop.net";
     }
 }

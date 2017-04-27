@@ -18,7 +18,7 @@ public class CommandPing extends Command {
     public void excecute(MessageReceivedEvent evt, String[] args, String message) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
-        builder.setTitle("PorkBot ping...", "http://www.daporkchop.tk/porkbot");
+        builder.setTitle("PorkBot ping...", "http://www.daporkchop.net/porkbot");
 
         builder.addField("**Pong:**", PorkBot.INSTANCE.jda.getPing() + "ms", false);
         PorkBot.sendMessage(builder, evt.getTextChannel());
