@@ -47,26 +47,26 @@ public class PorkBot {
             .expireAfterWrite(30, TimeUnit.MINUTES)
             .build().asMap();
 
-    public PorkBot()    {
+    public PorkBot() {
         logger.info("Starting PorkBot...");
         try {
             jda = new JDABuilder(AccountType.BOT)
                     .setToken(getToken())
-                    .addListener(new PorkListener())
+                    .addEventListener(new PorkListener())
                     .buildBlocking();
-        } catch (LoginException e)  {
+        } catch (LoginException e) {
             e.printStackTrace();
             System.exit(0);
-        } catch (InterruptedException e)    {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             System.exit(0);
-        } catch (RateLimitedException e)    {
+        } catch (RateLimitedException e) {
             e.printStackTrace();
             System.exit(0);
         }
     }
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
         logger = Logger.getLogger("PorkBot");
         INSTANCE = new PorkBot();
         INSTANCE.start();
@@ -116,17 +116,18 @@ public class PorkBot {
 
     /**
      * Sends a message to a channel
+     *
      * @param s
      * @param channel
      */
-    public static void sendMessage(String s, TextChannel channel)   {
+    public static void sendMessage(String s, TextChannel channel) {
         try {
             new Thread() {
                 @Override
                 public void run() {
                     try {
                         Thread.sleep(750);
-                    } catch (InterruptedException e)    {
+                    } catch (InterruptedException e) {
                         //impossible
                     }
                     channel.sendMessage(s).queue();
@@ -139,10 +140,11 @@ public class PorkBot {
 
     /**
      * Sends a message to a channel
+     *
      * @param builder
      * @param channel
      */
-    public static void sendMessage(EmbedBuilder builder, TextChannel channel)   {
+    public static void sendMessage(EmbedBuilder builder, TextChannel channel) {
         try {
             builder.setAuthor("PorkBot", "http://www.daporkchop.net/porkbot", "https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif");
             new Thread() {
@@ -150,7 +152,7 @@ public class PorkBot {
                 public void run() {
                     try {
                         Thread.sleep(750);
-                    } catch (InterruptedException e)    {
+                    } catch (InterruptedException e) {
                         //impossible
                     }
                     channel.sendMessage(builder.build()).queue();
@@ -163,7 +165,8 @@ public class PorkBot {
 
     /**
      * Sends an excepion using the given MessageReceivedEvent's channel
-     * @param e the exception to print
+     *
+     * @param e   the exception to print
      * @param evt the channel from this event is used to send the message
      */
     public static void sendException(Exception e, MessageReceivedEvent evt) {
@@ -251,12 +254,15 @@ public class PorkBot {
             }
         }, 1000, 120000);
 
-        jda.getUserById("226975061880471552").getPrivateChannel().sendMessage("Started!").queue();
+        jda.getUserById("226975061880471552").openPrivateChannel().queue((channel) -> {
+                    channel.sendMessage("Started!").queue();
+                }
+        );
 
-        while (true)    { //don't remember why i put this here, but there's got to be a reason :P
+        while (true) { //don't remember why i put this here, but there's got to be a reason :P
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e)    {
+            } catch (InterruptedException e) {
 
             }
         }
