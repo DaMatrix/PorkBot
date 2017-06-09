@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class PorkListener extends ListenerAdapter {
 
-    public static final MessageEmbed.Field PlayersHeader = new MessageEmbed.Field(null, "Test header!", false);
-    public static final MessageEmbed.Field PlayersSubHeader = new MessageEmbed.Field(null, "", false);
+//    public static final MessageEmbed.Field PlayersHeader = new MessageEmbed.Field(null, "Test header!", false);
+//   public static final MessageEmbed.Field PlayersSubHeader = new MessageEmbed.Field(null, "", false);
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
