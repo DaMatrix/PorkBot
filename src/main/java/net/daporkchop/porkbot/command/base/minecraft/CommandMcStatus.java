@@ -46,10 +46,10 @@ public class CommandMcStatus extends Command {
             for (Map.Entry<String, JsonElement> entry : json.entrySet())    {
                 if (entry.getValue().getAsJsonObject().get("status").getAsString().equals("Online"))    {
                     onlineCount++;
-                    builder.addField(entry.getKey(), "*Online*", false);
+                    builder.addField(entry.getKey(), "*Online*", true);
                 } else {
                     isAllOnline = false;
-                    builder.addField(entry.getKey(), "*Offline*", false);
+                    builder.addField(entry.getKey(), "*Offline*", true);
                 }
             }
 
