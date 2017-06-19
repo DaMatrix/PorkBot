@@ -37,7 +37,7 @@ public abstract class MCPing {
                     return new PePing(true, true, null, null, null, null, 0, false, null);
                 }
                 MCPEIdentifier mcpeIdentifier = new MCPEIdentifier(identifier);
-                return new PePing(true, false, identifier.build().split(";")[0], mcpeIdentifier.getOnlinePlayerCount() + "/" + mcpeIdentifier.getMaxPlayerCount(), measurePing ? getPingToIP(ip) : "0 ms", mcpeIdentifier.getVersionTag(), mcpeIdentifier.getServerProtocol(), false, null);
+                return new PePing(true, false, identifier.build().split(";")[1], mcpeIdentifier.getOnlinePlayerCount() + "/" + mcpeIdentifier.getMaxPlayerCount(), measurePing ? getPingToIP(ip) : "0 ms", mcpeIdentifier.getVersionTag(), mcpeIdentifier.getServerProtocol(), false, null);
             } else {
                 return new PePing(false, false, null, null, null, null, 0, false, null);
             }
