@@ -10,10 +10,7 @@ import net.daporkchop.porkbot.command.base.CommandSay;
 import net.daporkchop.porkbot.command.base.CommandTest;
 import net.daporkchop.porkbot.command.base.minecraft.*;
 import net.daporkchop.porkbot.util.HTTPUtils;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.impl.GameImpl;
@@ -126,17 +123,7 @@ public class PorkBot {
      */
     public static void sendMessage(String s, TextChannel channel) {
         try {
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(750);
-                    } catch (InterruptedException e) {
-                        //impossible
-                    }
-                    channel.sendMessage(s).queue();
-                }
-            }.start();
+            channel.sendMessage(s).queue();
         } catch (PermissionException e) {
             //we can't do anything about it
         }
@@ -151,17 +138,23 @@ public class PorkBot {
     public static void sendMessage(EmbedBuilder builder, TextChannel channel) {
         try {
             builder.setAuthor("PorkBot", "http://www.daporkchop.net/porkbot", "https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif");
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(750);
-                    } catch (InterruptedException e) {
-                        //impossible
-                    }
-                    channel.sendMessage(builder.build()).queue();
-                }
-            }.start();
+            channel.sendMessage(builder.build()).queue();
+        } catch (PermissionException e) {
+            //we can't do anything about it
+        }
+    }
+
+    /**
+     * Sends an image with the embed
+     *
+     * @param builder
+     * @param image
+     * @param name
+     * @param channel
+     */
+    public static void sendImage(EmbedBuilder builder, byte[] image, String name, TextChannel channel) {
+        try {
+            channel.sendFile(image, name, new MessageBuilder().setEmbed(builder.build()).build()).queue();
         } catch (PermissionException e) {
             //we can't do anything about it
         }

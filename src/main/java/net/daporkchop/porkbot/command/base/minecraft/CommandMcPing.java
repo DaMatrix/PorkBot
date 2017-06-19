@@ -5,15 +5,12 @@ import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import sun.misc.BASE64Decoder;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.UUID;
 
 public class CommandMcPing extends Command {
 
@@ -57,9 +54,8 @@ public class CommandMcPing extends Command {
                 BASE64Decoder decoder = new BASE64Decoder();
                 imageByte = decoder.decodeBuffer(imageString);
                 ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
-                String fileName = UUID.randomUUID().toString() + ipPort[0] + ".png";
 
-                builder.setThumbnail("attachment://" + fileName);
+                builder.setThumbnail("attachment://image.png");
 
                 builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
                 builder.addField("Ping:", ping.ping, false);
@@ -69,9 +65,7 @@ public class CommandMcPing extends Command {
 
                 builder.setAuthor("PorkBot", "http://www.daporkchop.net/porkbot", "https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif");
 
-                Message msg = new MessageBuilder().setEmbed(builder.build()).build();
-
-                evt.getTextChannel().sendFile(imageByte, fileName, msg).queue();
+                PorkBot.sendImage(builder, imageByte, "image.png", evt.getTextChannel());
                 return;
             } else {
                 //server's offline

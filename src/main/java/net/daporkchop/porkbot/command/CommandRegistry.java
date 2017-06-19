@@ -13,6 +13,11 @@ public abstract class CommandRegistry {
     private static final HashMap<String, Command> COMMANDS = new HashMap<>();
 
     /**
+     * Counts all commands run this session
+     */
+    public static long COMMAND_COUNT = 0L;
+
+    /**
      * Registers a command to the command registry.
      *
      * @param cmd
@@ -39,6 +44,7 @@ public abstract class CommandRegistry {
                     @Override
                     public void run() {
                         cmd.excecute(evt, split, rawContent);
+                        COMMAND_COUNT++;
                     }
                 }.start();
             }

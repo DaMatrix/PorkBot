@@ -4,15 +4,12 @@ import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import sun.misc.BASE64Decoder;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Created by daporkchop on 25.03.17.
@@ -60,12 +57,10 @@ public class CommandMcIcon extends Command {
                 BASE64Decoder decoder = new BASE64Decoder();
                 imageByte = decoder.decodeBuffer(imageString);
                 ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
-                String fileName = UUID.randomUUID().toString() + ipPort[0] + ".png";
 
-                builder.setThumbnail("attachment://" + fileName);
+                builder.setThumbnail("attachment://image.png");
 
-                Message msg = new MessageBuilder().setEmbed(builder.build()).build();
-                evt.getTextChannel().sendFile(imageByte, fileName, msg).queue();
+                PorkBot.sendImage(builder, imageByte, "image.png", evt.getTextChannel());
                 return;
             } else {
                 //server's offline

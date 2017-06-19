@@ -8,7 +8,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 
-//TODO: add to docs
 public class CommandMcVersion extends Command {
     public CommandMcVersion() {
         super("mcversion");

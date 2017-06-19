@@ -2,6 +2,7 @@ package net.daporkchop.porkbot.command.base;
 
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.command.CommandRegistry;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -21,13 +22,15 @@ public class CommandBotInfo extends Command {
 
         builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
 
-        builder.addField("Name:", "PorkBot#" + PorkBot.INSTANCE.jda.getSelfUser().getDiscriminator(), false);
+        builder.addField("Name:", "PorkBot#" + PorkBot.INSTANCE.jda.getSelfUser().getDiscriminator(), true);
 
-        builder.addField("Servers:", String.valueOf(PorkBot.INSTANCE.jda.getGuilds().size()), false);
+        builder.addField("Servers:", String.valueOf(PorkBot.INSTANCE.jda.getGuilds().size()), true);
 
-        builder.addField("Known users:", String.valueOf(PorkBot.INSTANCE.jda.getUsers().size()), false);
+        builder.addField("Known users:", String.valueOf(PorkBot.INSTANCE.jda.getUsers().size()), true);
 
-        builder.addField("ID:", PorkBot.INSTANCE.jda.getSelfUser().getId(), false);
+        builder.addField("ID:", PorkBot.INSTANCE.jda.getSelfUser().getId(), true);
+
+        builder.addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true);
 
         PorkBot.sendMessage(builder, evt.getTextChannel());
     }
