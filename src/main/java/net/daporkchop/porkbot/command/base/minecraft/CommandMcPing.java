@@ -9,9 +9,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 
-/**
- * Created by daporkchop on 11.03.17.
- */
 public class CommandMcPing extends Command {
 
     public CommandMcPing() {

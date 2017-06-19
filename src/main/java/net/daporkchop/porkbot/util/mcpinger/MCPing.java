@@ -1,8 +1,13 @@
 package net.daporkchop.porkbot.util.mcpinger;
 
+import ch.jamiete.mcping.MinecraftPing;
+import ch.jamiete.mcping.MinecraftPingReply;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.daporkchop.porkbot.util.HTTPUtils;
+
+import java.net.InetAddress;
+import java.util.GregorianCalendar;
 
 /**
  * A library for interacting with DaPorkchop_'s mcping api
@@ -78,22 +83,44 @@ public abstract class MCPing {
      */
     public static McPing pingPc(String ip, int port)    {
         try {
-            String s = HTTPUtils.performGetRequest(HTTPUtils.constantURL(BASE_URL + "mcpinger.php?ip=" + ip + "&port=" + port));
+            MinecraftPingReply reply = MinecraftPing.getPing(ip, port);
 
-            JsonObject json = new JsonParser().parse(s).getAsJsonObject();
-
-            s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ip + ":" + port + "/motd"));
-
-            JsonObject otherJson = new JsonParser().parse(s).getAsJsonObject();
-
-            if (json.get("status").getAsBoolean())  {
-                return new McPing(true, otherJson.get("motd").getAsString(), json.get("players").getAsString(), json.get("protocol").getAsInt(), json.get("version").getAsString(), json.get("ping").getAsString(), false, null);
+            if (reply != null) {
+                return new McPing(true, reply.getDescription().getText(), reply.getPlayers().getOnline() + "/" + reply.getPlayers().getMax(), reply.getVersion().getProtocol(), reply.getVersion().getName(), getPingToIP(ip), false, null);
             } else {
                 return new McPing(false, null, null, 0, null, null, false, null);
             }
         } catch (Exception e)  {
             return new McPing(false, null, null, 0, null, null, true, e);
         }
+    }
+
+    /**
+     * pings an ip address
+     *
+     * @param ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee idk lol
+     * @return the ping
+     */
+    public static String getPingToIP(String ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee) {
+        try {
+            InetAddress inet = InetAddress.getByName(ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee);
+
+            System.out.println("Sending Ping Request to " + ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee);
+
+            long finish = 0;
+            long start = new GregorianCalendar().getTimeInMillis();
+
+            if (inet.isReachable(5000)) {
+                finish = new GregorianCalendar().getTimeInMillis();
+                return finish - start + " ms";
+            } else {
+                return "-1 ms";
+            }
+        } catch (Exception e) {
+            System.out.println("Exception:" + e.getMessage());
+        }
+
+        return "-1 ms";
     }
 
     /**
