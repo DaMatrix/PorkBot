@@ -7,6 +7,7 @@ import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.base.CommandBotInfo;
 import net.daporkchop.porkbot.command.base.CommandPing;
 import net.daporkchop.porkbot.command.base.CommandSay;
+import net.daporkchop.porkbot.command.base.CommandTest;
 import net.daporkchop.porkbot.command.base.minecraft.*;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.dv8tion.jda.core.AccountType;
@@ -240,6 +241,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandPePing());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
         CommandRegistry.registerCommand(new CommandBotInfo());
+        CommandRegistry.registerCommand(new CommandTest());
 
         final String authToken = getAuthtoken();
 
