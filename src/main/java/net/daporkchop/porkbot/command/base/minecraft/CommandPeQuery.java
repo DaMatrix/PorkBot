@@ -30,13 +30,13 @@ public class CommandPeQuery extends Command {
         String[] ipPort = args[1].split(":");
 
         if (ipPort.length == 1) {
-            ping = MCPing.pingPe(ipPort[0], 19132);
+            ping = MCPing.pingPe(ipPort[0], 19132, false);
             query = MCPing.query(ipPort[0], 19132, true);
         } else if (ipPort.length == 2) {
             try {
                 int port = Integer.parseInt(ipPort[1]);
 
-                ping = MCPing.pingPe(ipPort[0], port);
+                ping = MCPing.pingPe(ipPort[0], port, false);
                 query = MCPing.query(ipPort[0], port, true);
             } catch (NumberFormatException e) {
                 PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());

@@ -20,6 +20,10 @@
 			<name>jcenter-bintray</name>
 			<url>http://jcenter.bintray.com</url>
 		</repository>
+        <repository>
+            <id>maven-repo</id>
+            <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
@@ -52,7 +56,12 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.5</version>
-		</dependency>
+        </dependency>
+        <dependency>
+            <groupId>net.marfgamer</groupId>
+            <artifactId>jraknet</artifactId>
+            <version>2.6.5</version>
+        </dependency>
 	</dependencies>
 
 	<build>

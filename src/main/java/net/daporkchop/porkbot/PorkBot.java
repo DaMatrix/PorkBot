@@ -9,7 +9,6 @@ import net.daporkchop.porkbot.command.base.CommandPing;
 import net.daporkchop.porkbot.command.base.CommandSay;
 import net.daporkchop.porkbot.command.base.CommandTest;
 import net.daporkchop.porkbot.command.base.minecraft.*;
-import net.daporkchop.porkbot.util.HTTPUtils;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -22,8 +21,6 @@ import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.net.URL;
 import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -278,7 +275,7 @@ public class PorkBot {
 
         final String authToken = getAuthtoken();
 
-        new Timer().schedule(new TimerTask() {
+        /*new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -289,12 +286,12 @@ public class PorkBot {
                 } catch (Exception e) {
                 }
             }
-        }, 1000, 120000);
+        }, 1000, 120000);*/
 
-        jda.getUserById("226975061880471552").openPrivateChannel().queue((channel) -> {
+        /*jda.getUserById("226975061880471552").openPrivateChannel().queue((channel) -> {
                     channel.sendMessage("Started!").queue();
                 }
-        );
+        );*/
 
         while (true) { //don't remember why i put this here, but there's got to be a reason :P
             try {

@@ -5,6 +5,9 @@ import ch.jamiete.mcping.MinecraftPingReply;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.daporkchop.porkbot.util.HTTPUtils;
+import net.marfgamer.jraknet.identifier.Identifier;
+import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.util.RakNetUtils;
 
 import java.net.InetAddress;
 import java.util.GregorianCalendar;
@@ -25,18 +28,16 @@ public abstract class MCPing {
      * @param port the server's port
      * @return a filled PePing
      */
-    public static PePing pingPe(String ip, int port) {
+    public static PePing pingPe(String ip, int port, boolean measurePing) {
         try {
-            String s = HTTPUtils.performGetRequest(HTTPUtils.constantURL(BASE_URL + "pepinger.php?ip=" + ip + "&port=" + port));
+            Identifier identifier = RakNetUtils.getServerIdentifier(ip, port);
 
-            JsonObject json = new JsonParser().parse(s).getAsJsonObject();
-
-            if (json.get("status").getAsBoolean()) {
-                if (json.get("old").getAsBoolean()) {
+            if (identifier != null) {
+                if (!MCPEIdentifier.isMCPEIdentifier(identifier)) {
                     return new PePing(true, true, null, null, null, null, 0, false, null);
-                } else {
-                    return new PePing(true, false, json.get("motd").getAsString(), json.get("players").getAsString(), json.get("ping").getAsString(), json.get("version").getAsString(), json.get("protocol").getAsInt(), false, null);
                 }
+                MCPEIdentifier mcpeIdentifier = new MCPEIdentifier(identifier);
+                return new PePing(true, false, mcpeIdentifier.getServerName(), mcpeIdentifier.getOnlinePlayerCount() + "/" + mcpeIdentifier.getMaxPlayerCount(), measurePing ? getPingToIP(ip) : "0 ms", mcpeIdentifier.getVersionTag(), mcpeIdentifier.getServerProtocol(), false, null);
             } else {
                 return new PePing(false, false, null, null, null, null, 0, false, null);
             }
@@ -143,16 +144,16 @@ public abstract class MCPing {
      * A Minecraft: Pocket Edition ping.
      */
     public static class PePing extends Ping {
-        public boolean old;
+        public boolean notMCPE;
         public String motd;
         public String players;
         public String ping;
         public String version;
         public int protocol;
 
-        public PePing(boolean isOnline, boolean old, String motd, String players, String ping, String version, int protocol, boolean errored, Exception error) {
+        public PePing(boolean isOnline, boolean notMCPE, String motd, String players, String ping, String version, int protocol, boolean errored, Exception error) {
             super(isOnline, errored, error);
-            this.old = old;
+            this.notMCPE = notMCPE;
             this.players = players;
             this.ping = ping;
             this.version = version;

@@ -25,10 +25,10 @@ public class CommandPeMOTD extends Command {
         String[] ipPort = args[1].split(":");
 
         if (ipPort.length == 1) {
-            ping = MCPing.pingPe(ipPort[0], 19132);
+            ping = MCPing.pingPe(ipPort[0], 19132, false);
         } else if (ipPort.length == 2) {
             try {
-                ping = MCPing.pingPe(ipPort[0], Integer.parseInt(ipPort[1]));
+                ping = MCPing.pingPe(ipPort[0], Integer.parseInt(ipPort[1]), false);
             } catch (NumberFormatException e) {
                 PorkBot.sendMessage("Unable to interpret port number!", evt.getTextChannel());
                 return;
@@ -43,7 +43,7 @@ public class CommandPeMOTD extends Command {
 
             if (ping.status) {
                 //server's online
-                if (ping.old) {
+                if (ping.notMCPE) {
                     builder.setColor(Color.ORANGE);
                     builder.addField("***OLD SERVER!***", "PorkBot cannot ping this server, as it runs an older version of MCPE.", false);
                 } else {
