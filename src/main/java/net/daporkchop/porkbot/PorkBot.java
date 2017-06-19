@@ -19,10 +19,8 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 import javax.security.auth.login.LoginException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.net.URL;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -169,6 +167,42 @@ public class PorkBot {
     public static void sendException(Exception e, MessageReceivedEvent evt) {
         e.printStackTrace();
         PorkBot.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
+    }
+
+    /**
+     * Downloads an image
+     *
+     * @param address
+     * @return
+     */
+    public static byte[] downloadImage(String address) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        InputStream is = null;
+        URL url = null;
+        try {
+            url = new URL(address);
+            is = url.openStream();
+            byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
+            int n;
+
+            while ((n = is.read(byteChunk)) > 0) {
+                baos.write(byteChunk, 0, n);
+            }
+        } catch (IOException e) {
+            System.err.printf("Failed while reading bytes from %s: %s", url.toExternalForm(), e.getMessage());
+            e.printStackTrace();
+            // Perform any other exception handling that's appropriate.
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+
+            }
+        }
+
+        return baos.toByteArray();
     }
 
     public static String getAuthtoken() {
