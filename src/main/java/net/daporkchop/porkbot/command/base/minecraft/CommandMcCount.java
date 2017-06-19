@@ -26,10 +26,10 @@ public class CommandMcCount extends Command {
         MCPing.McPing ping = null;
         String[] ipPort = args[1].split(":");
         if (ipPort.length == 1) {
-            ping = MCPing.pingPc(ipPort[0], 25565);
+            ping = MCPing.pingPc(ipPort[0], 25565, false);
         } else if (ipPort.length == 2) {
             try {
-                ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]));
+                ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]), false);
             } catch (NumberFormatException e) {
                 PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;

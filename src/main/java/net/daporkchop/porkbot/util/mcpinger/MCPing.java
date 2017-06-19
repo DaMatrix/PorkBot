@@ -84,17 +84,17 @@ public abstract class MCPing {
      * @param port the server's port
      * @return a filled McPing
      */
-    public static McPing pingPc(String ip, int port) {
+    public static McPing pingPc(String ip, int port, boolean measureping) {
         try {
             MinecraftPingReply reply = MinecraftPing.getPing(ip, port);
 
             if (reply != null) {
-                return new McPing(true, reply.getDescription().getText(), reply.getPlayers().getOnline() + "/" + reply.getPlayers().getMax(), reply.getVersion().getProtocol(), reply.getVersion().getName(), getPingToIP(ip), false, null);
+                return new McPing(true, reply.getDescription().getText(), reply.getPlayers().getOnline() + "/" + reply.getPlayers().getMax(), reply.getVersion().getProtocol(), reply.getVersion().getName(), measureping ? getPingToIP(ip) : "0 ms", reply.getFavicon(), false, null);
             } else {
-                return new McPing(false, null, null, 0, null, null, false, null);
+                return new McPing(false, null, null, 0, null, null, null, false, null);
             }
         } catch (Exception e) {
-            return new McPing(false, null, null, 0, null, null, true, e);
+            return new McPing(false, null, null, 0, null, null, null, true, e);
         }
     }
 
@@ -111,7 +111,7 @@ public abstract class MCPing {
             long finish = 0;
             long start = new GregorianCalendar().getTimeInMillis();
 
-            if (inet.isReachable(5000)) {
+            if (inet.isReachable(2500)) {
                 finish = new GregorianCalendar().getTimeInMillis();
                 return finish - start + " ms";
             } else {
@@ -197,8 +197,9 @@ public abstract class MCPing {
         public int protocol;
         public String version;
         public String ping;
+        public String favicon;
 
-        public McPing(boolean isOnline, String motd, String players, int protocol, String version, String ping, boolean errored, Exception error) {
+        public McPing(boolean isOnline, String motd, String players, int protocol, String version, String ping, String favicon, boolean errored, Exception error) {
             super(isOnline, errored, error);
             this.motd = motd;
             this.old = old;
@@ -206,6 +207,7 @@ public abstract class MCPing {
             this.protocol = protocol;
             this.version = version;
             this.ping = ping;
+            this.favicon = favicon;
         }
     }
 }

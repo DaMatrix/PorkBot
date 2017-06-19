@@ -1,4 +1,4 @@
-package net.daporkchop.porkbot.command.base.minecraft;
+package net.daporkchop.porkbot.command.base;
 
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
@@ -9,9 +9,9 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 
-public class CommandMcMOTD extends Command {
-    public CommandMcMOTD() {
-        super("mcmotd");
+public class CommandTest extends Command {
+    public CommandTest() {
+        super("test");
     }
 
     @Override
@@ -24,10 +24,10 @@ public class CommandMcMOTD extends Command {
         MCPing.McPing ping = null;
         String[] ipPort = args[1].split(":");
         if (ipPort.length == 1) {
-            ping = MCPing.pingPc(ipPort[0], 25565, false);
+            ping = MCPing.pingPc(ipPort[0], 25565, true);
         } else if (ipPort.length == 2) {
             try {
-                ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]), false);
+                ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]), true);
             } catch (NumberFormatException e) {
                 PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;
@@ -42,12 +42,21 @@ public class CommandMcMOTD extends Command {
         if (ping.status) {
             //server's online
             builder.setColor(Color.GREEN);
+            builder.setThumbnail(ping.favicon);
+            System.out.println(ping.favicon);
 
-            builder.addField("**" + args[1] + "** MOTD:", TextFormat.clean(ping.motd), false);
+            builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
+
+            builder.addField("Ping:", ping.ping, false);
+            builder.addField("Version:", ping.version, false);
+
+            builder.addField("Players:", ping.players, false);
+
+            builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
         } else {
             //server's offline
             builder.setColor(Color.RED);
-            builder.addField("**" + args[1] + "**", "***OFFLINE***", false);
+            builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
         }
 
         PorkBot.sendMessage(builder, evt.getTextChannel());
@@ -55,11 +64,11 @@ public class CommandMcMOTD extends Command {
 
     @Override
     public String getUsage() {
-        return "..mcmotd <ip>";
+        return "..say <stuff you want to say>";
     }
 
     @Override
     public String getUsageExample() {
-        return "..mcmotd 2b2t.org";
+        return "..say Hello World!";
     }
 }
