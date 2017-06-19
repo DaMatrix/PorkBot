@@ -29,7 +29,7 @@ public class CommandPing extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..ping";
     }
 }

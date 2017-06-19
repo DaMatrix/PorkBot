@@ -20,17 +20,18 @@ public abstract class MCPing {
 
     /**
      * Pings a PE server and returns a ping
-     * @param ip the server's ip
+     *
+     * @param ip   the server's ip
      * @param port the server's port
      * @return a filled PePing
      */
-    public static PePing pingPe(String ip, int port)    {
+    public static PePing pingPe(String ip, int port) {
         try {
             String s = HTTPUtils.performGetRequest(HTTPUtils.constantURL(BASE_URL + "pepinger.php?ip=" + ip + "&port=" + port));
 
             JsonObject json = new JsonParser().parse(s).getAsJsonObject();
 
-            if (json.get("status").getAsBoolean())  {
+            if (json.get("status").getAsBoolean()) {
                 if (json.get("old").getAsBoolean()) {
                     return new PePing(true, true, null, null, null, null, 0, false, null);
                 } else {
@@ -39,16 +40,17 @@ public abstract class MCPing {
             } else {
                 return new PePing(false, false, null, null, null, null, 0, false, null);
             }
-        } catch (Exception e)   {
+        } catch (Exception e) {
             return new PePing(false, false, null, null, null, null, 0, true, e);
         }
     }
 
     /**
      * Queries a Minecraft server and pings it, returning info
-     * @param ip the server's ip
+     *
+     * @param ip   the server's ip
      * @param port the server's port
-     * @param pe whether or not the server is a Pocket Edition server
+     * @param pe   whether or not the server is a Pocket Edition server
      * @return a filled Query
      */
     public static Query query(String ip, int port, boolean pe) {
@@ -57,11 +59,11 @@ public abstract class MCPing {
 
             JsonObject json = new JsonParser().parse(s).getAsJsonObject();
 
-            if (!pe)    {
+            if (!pe) {
                 s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ip + ":" + port + "/motd"));
             }
 
-            if (json.get("status").getAsBoolean())  {
+            if (json.get("status").getAsBoolean()) {
                 if (json.get("noquery").getAsBoolean()) {
                     return new Query(true, true, null, null, null, null, 0, null, null, false, null);
                 } else {
@@ -70,18 +72,19 @@ public abstract class MCPing {
             } else {
                 return new Query(false, false, null, null, null, null, 0, null, null, false, null);
             }
-        } catch (Exception e)   {
+        } catch (Exception e) {
             return new Query(false, false, null, null, null, null, 0, null, null, true, e);
         }
     }
 
     /**
      * Ping a Minecraft PC server, returning info
-     * @param ip the server's ip
+     *
+     * @param ip   the server's ip
      * @param port the server's port
      * @return a filled McPing
      */
-    public static McPing pingPc(String ip, int port)    {
+    public static McPing pingPc(String ip, int port) {
         try {
             MinecraftPingReply reply = MinecraftPing.getPing(ip, port);
 
@@ -90,7 +93,7 @@ public abstract class MCPing {
             } else {
                 return new McPing(false, null, null, 0, null, null, false, null);
             }
-        } catch (Exception e)  {
+        } catch (Exception e) {
             return new McPing(false, null, null, 0, null, null, true, e);
         }
     }
@@ -131,7 +134,7 @@ public abstract class MCPing {
         public boolean errored;
         public Exception error;
 
-        public Ping(boolean isOnline, boolean errored, Exception error)   {
+        public Ping(boolean isOnline, boolean errored, Exception error) {
             this.status = isOnline;
             this.errored = errored;
             this.error = error;
@@ -149,7 +152,7 @@ public abstract class MCPing {
         public String version;
         public int protocol;
 
-        public PePing(boolean isOnline, boolean old, String motd, String players, String ping, String version, int protocol, boolean errored, Exception error)   {
+        public PePing(boolean isOnline, boolean old, String motd, String players, String ping, String version, int protocol, boolean errored, Exception error) {
             super(isOnline, errored, error);
             this.old = old;
             this.players = players;
@@ -173,7 +176,7 @@ public abstract class MCPing {
         public String playerSample;
         public String plugins;
 
-        public Query(boolean isOnline, boolean noQuery, String motd, String players, String ping, String version, int protocol, String playerSample, String plugins, boolean errored, Exception error)   {
+        public Query(boolean isOnline, boolean noQuery, String motd, String players, String ping, String version, int protocol, String playerSample, String plugins, boolean errored, Exception error) {
             super(isOnline, errored, error);
             this.noQuery = noQuery;
             this.players = players;

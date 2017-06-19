@@ -43,8 +43,8 @@ public class CommandMcStatus extends Command {
             boolean isAllOnline = true;
             int onlineCount = 0;
 
-            for (Map.Entry<String, JsonElement> entry : json.entrySet())    {
-                if (entry.getValue().getAsJsonObject().get("status").getAsString().equals("Online"))    {
+            for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+                if (entry.getValue().getAsJsonObject().get("status").getAsString().equals("Online")) {
                     onlineCount++;
                     builder.addField(entry.getKey(), "*Online*", true);
                 } else {
@@ -53,11 +53,11 @@ public class CommandMcStatus extends Command {
                 }
             }
 
-            if (isAllOnline)    {
+            if (isAllOnline) {
                 //everything is online
                 builder.setColor(Color.GREEN);
             } else {
-                if (onlineCount > 0)    {
+                if (onlineCount > 0) {
                     //some stuff is online
                     builder.setColor(Color.ORANGE);
                 } else {
@@ -67,7 +67,7 @@ public class CommandMcStatus extends Command {
             }
 
             PorkBot.sendMessage(builder, evt.getTextChannel());
-        } catch (IllegalStateException e)   {
+        } catch (IllegalStateException e) {
             PorkBot.sendMessage("Unable to parse minecraft status!", evt.getTextChannel());
             return;
         }
@@ -79,7 +79,7 @@ public class CommandMcStatus extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..mcstatus";
     }
 }

@@ -44,8 +44,8 @@ public class CommandMcQuery extends Command {
             return;
         }
 
-        if (query.status)   {
-            if (query.noQuery)  {
+        if (query.status) {
+            if (query.noQuery) {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.ORANGE);
                 builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
@@ -80,7 +80,7 @@ public class CommandMcQuery extends Command {
                 return;
             }
         } else {
-            if (query.noQuery)  {
+            if (query.noQuery) {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.ORANGE);
                 builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);

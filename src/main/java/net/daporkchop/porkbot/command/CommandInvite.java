@@ -23,7 +23,7 @@ public class CommandInvite extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..invite";
     }
 }

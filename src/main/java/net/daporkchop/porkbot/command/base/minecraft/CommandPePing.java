@@ -10,13 +10,13 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.awt.*;
 
 public class CommandPePing extends Command {
-    public CommandPePing()  {
+    public CommandPePing() {
         super("peping");
     }
 
     @Override
     public void excecute(MessageReceivedEvent evt, String[] args, String message) {
-        if (args.length < 2 || args[1].isEmpty())	{
+        if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;
         }
@@ -41,7 +41,7 @@ public class CommandPePing extends Command {
         try {
             EmbedBuilder builder = new EmbedBuilder();
 
-            if (ping.status)  {
+            if (ping.status) {
                 //server's online
                 if (ping.old) {
                     builder.setColor(Color.ORANGE);
@@ -62,7 +62,7 @@ public class CommandPePing extends Command {
                     builder.addField("Ping:", ping.ping, false);
                 }
             } else {
-                if (ping.errored)   {
+                if (ping.errored) {
                     PorkBot.sendException(ping.error, evt);
                 } else {
                     //server's offline
@@ -72,7 +72,7 @@ public class CommandPePing extends Command {
             }
 
             PorkBot.sendMessage(builder, evt.getTextChannel());
-        } catch (IllegalStateException e)   {
+        } catch (IllegalStateException e) {
             PorkBot.sendMessage("Unable to parse server status!", evt.getTextChannel());
             return;
         }
@@ -84,7 +84,7 @@ public class CommandPePing extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..peping play.2p2e.tk";
     }
 }

@@ -8,7 +8,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
  */
 public class CommandHelp extends Command {
 
-    public CommandHelp () {
+    public CommandHelp() {
         super("help");
     }
 
@@ -23,7 +23,7 @@ public class CommandHelp extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..help";
     }
 }

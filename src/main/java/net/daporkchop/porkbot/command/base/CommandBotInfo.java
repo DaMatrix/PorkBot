@@ -38,7 +38,7 @@ public class CommandBotInfo extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..ping";
     }
 }

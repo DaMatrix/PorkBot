@@ -18,7 +18,7 @@ public class CommandMcHead extends Command {
 
     @Override
     public void excecute(MessageReceivedEvent evt, String[] args, String message) {
-        if (args.length < 2 || args[1].isEmpty())	{
+        if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "Name isn't given!");
             return;
         }
@@ -39,7 +39,7 @@ public class CommandMcHead extends Command {
     }
 
     @Override
-    public String getUsageExample()	{
+    public String getUsageExample() {
         return "..mchead Notch";
     }
 }
