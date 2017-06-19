@@ -9,9 +9,6 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import java.util.List;
 
-/**
- * Created by daporkchop on 05.03.17.
- */
 public class PorkListener extends ListenerAdapter {
 
 //    public static final MessageEmbed.Field PlayersHeader = new MessageEmbed.Field(null, "Test header!", false);

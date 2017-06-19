@@ -35,6 +35,10 @@ public abstract class CommandRegistry {
      */
     public static void runCommand(MessageReceivedEvent evt, String rawContent) {
         try {
+            if (evt.getTextChannel() == null) {
+                return;
+            }
+
             String[] split = rawContent.split(" ");
             Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
             if (cmd != null) {

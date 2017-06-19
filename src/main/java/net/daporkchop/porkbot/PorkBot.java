@@ -237,6 +237,10 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandTest());
         CommandRegistry.registerCommand(new CommandMcLatency());
         CommandRegistry.registerCommand(new CommandMcVersion());
+        CommandRegistry.registerCommand(new CommandPeCount());
+        CommandRegistry.registerCommand(new CommandPeLatency());
+        CommandRegistry.registerCommand(new CommandPeMOTD());
+        CommandRegistry.registerCommand(new CommandPeVersion());
 
         final String authToken = getAuthtoken();
 
