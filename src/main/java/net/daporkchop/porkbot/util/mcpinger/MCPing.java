@@ -108,8 +108,6 @@ public abstract class MCPing {
         try {
             InetAddress inet = InetAddress.getByName(ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee);
 
-            System.out.println("Sending Ping Request to " + ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee);
-
             long finish = 0;
             long start = new GregorianCalendar().getTimeInMillis();
 

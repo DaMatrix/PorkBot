@@ -21,7 +21,10 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 import javax.security.auth.login.LoginException;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -248,8 +251,7 @@ public class PorkBot {
                             "{ \"server_count\": " + PorkBot.INSTANCE.jda.getGuilds().size() + " }",
                             "application/json",
                             authToken);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
                 }
             }
         }, 1000, 120000);
