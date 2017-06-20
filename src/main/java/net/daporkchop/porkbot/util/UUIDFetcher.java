@@ -25,13 +25,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 
 public class UUIDFetcher {
     private static final double PROFILES_PER_REQUEST = 100;
@@ -81,24 +82,27 @@ public class UUIDFetcher {
     public static ArrayList<UUIDRequest> run() {
         try {
             ArrayList<UUIDRequest> uuidRequests = new ArrayList<>();
-            HttpURLConnection connection = createConnection();
-
-            List<UUIDRequest> cutRequests = requests.subList(0, requests.size() >= 100 ? 99 : requests.size() - 1);
             String body = "[";
-            for (UUIDRequest request : cutRequests) {
-                body += "\"" + request.name + "\",";
+            System.out.println(body);
+            for (int i = 0; i < requests.size() && i < 100; i++) {
+                System.out.println(body);
+                body += "\"" + requests.get(i).name + "\",";
+                System.out.println(body);
             }
             body = body.substring(0, body.length() - 1) + "]";
+            System.out.println(body);
 
-            writeBody(connection, body);
-            JsonArray array = (JsonArray) jsonParser.parse(new InputStreamReader(connection.getInputStream()));
+            String json = HTTPUtils.performPostRequest(new URL(PROFILE_URL), body, "application/json");
+            System.out.println(json);
+            JsonArray array = (JsonArray) jsonParser.parse(json);
             for (Object profile : array) {
                 JsonObject jsonProfile = (JsonObject) profile;
                 String id = jsonProfile.get("id").getAsString();
                 String name = jsonProfile.get("name").getAsString();
-                UUIDRequest uuidRequest = getRequestByName(name);
-                uuidRequest.uuid = id;
-                uuidRequests.add(uuidRequest);
+                UUIDRequest[] uuidRequest = getRequestByName(name);
+                for (UUIDRequest uuidRequest1 : uuidRequest) {
+                    uuidRequest1.uuidCompletable.run(id);
+                }
             }
             return uuidRequests;
         } catch (Exception e) {
@@ -114,50 +118,36 @@ public class UUIDFetcher {
                 if (requests.isEmpty()) {
                     return;
                 }
-                ArrayList<UUIDRequest> process = UUIDFetcher.run();
-                for (UUIDRequest request : process) {
-                    requests.remove(request);
-                    for (CompletableFuture<String> completableFuture : request.uuidCompletable) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                completableFuture.complete(request.uuid);
-                            }
-                        }.start();
-                    }
-                }
+                System.out.println(requests.size());
+                UUIDFetcher.run();
+                requests.clear(); //TODO fix this
             }
         }, 5000, 1000);
     }
 
-    public static void enqeueRequest(String name, CompletableFuture<String> completableFuture) {
-        UUIDRequest check = getRequestByName(name);
-        if (check == null) {
-            requests.add(new UUIDRequest(name, completableFuture));
-        } else {
-            check.uuidCompletable.add(completableFuture);
-        }
+    public static void enqeueRequest(String name, Skin completableFuture) {
+        requests.add(new UUIDRequest(name, completableFuture));
     }
 
-    private static UUIDRequest getRequestByName(String name) {
+    private static UUIDRequest[] getRequestByName(String name) {
+        ArrayList<UUIDRequest> arrayList = new ArrayList<>();
         for (UUIDRequest request : requests) {
             if (request.name.equals(name)) {
-                return request;
+                arrayList.add(request);
             }
         }
 
-        return null;
+        return arrayList.toArray(new UUIDRequest[arrayList.size()]);
     }
 
     public static class UUIDRequest {
         public String name;
-        public List<CompletableFuture<String>> uuidCompletable;
-        public String uuid = "";
+        public Skin uuidCompletable;
+        public String id;
 
-        public UUIDRequest(String a, CompletableFuture<String> b) {
+        public UUIDRequest(String a, Skin b) {
             name = a;
-            uuidCompletable = new ArrayList<>();
-            uuidCompletable.add(b);
+            uuidCompletable = b;
         }
     }
 }

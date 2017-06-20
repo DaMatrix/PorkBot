@@ -7,7 +7,6 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
-import java.util.concurrent.CompletableFuture;
 
 public class CommandMcHead extends Command {
 
@@ -23,18 +22,17 @@ public class CommandMcHead extends Command {
                 return;
             }
 
-            CompletableFuture<String> completableFuture = new CompletableFuture<>();
-            UUIDFetcher.enqeueRequest(args[1], completableFuture);
+            UUIDFetcher.enqeueRequest(args[1], uuid -> {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setImage("attachment://image.png");
+                builder.setColor(Color.DARK_GRAY);
 
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setImage("attachment://image.png");
-            builder.setColor(Color.DARK_GRAY);
+                byte[] outBytes = PorkBot.downloadImage("https://crafatar.com/renders/head/" + uuid + "?size=128&overlay");
 
-            byte[] outBytes = PorkBot.downloadImage("https://crafatar.com/renders/head/" + completableFuture.get() + "?size=128&overlay");
+                builder.addField(args[1] + "'s skin", "", false);
 
-            builder.addField(args[1] + "'s skin", "", false);
-
-            PorkBot.sendImage(builder, outBytes, "image.png", evt.getTextChannel());
+                PorkBot.sendImage(builder, outBytes, "image.png", evt.getTextChannel());
+            });
         } catch (Exception e) {
             PorkBot.sendException(e, evt);
         }
