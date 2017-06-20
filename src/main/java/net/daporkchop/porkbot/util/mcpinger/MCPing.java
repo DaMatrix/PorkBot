@@ -2,12 +2,11 @@ package net.daporkchop.porkbot.util.mcpinger;
 
 import ch.jamiete.mcping.MinecraftPing;
 import ch.jamiete.mcping.MinecraftPingReply;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.daporkchop.porkbot.util.HTTPUtils;
 import net.marfgamer.jraknet.identifier.Identifier;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
+import query.MCQuery;
+import query.QueryResponse;
 
 import java.net.InetAddress;
 import java.util.GregorianCalendar;
@@ -59,27 +58,49 @@ public abstract class MCPing {
      * @param pe   whether or not the server is a Pocket Edition server
      * @return a filled Query
      */
-    public static Query query(String ip, int port, boolean pe) {
+    public static Query query(String ip, int port, boolean pe, boolean getLatency) {
         try {
-            String s = HTTPUtils.performGetRequest(HTTPUtils.constantURL(BASE_URL + "query.php?ip=" + ip + "&port=" + port + (pe ? "&pe=true" : "")));
-
-            JsonObject json = new JsonParser().parse(s).getAsJsonObject();
-
-            if (!pe) {
-                s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/query/" + ip + ":" + port + "/motd"));
-            }
-
-            if (json.get("status").getAsBoolean()) {
-                if (json.get("noquery").getAsBoolean()) {
-                    return new Query(true, true, null, null, null, null, 0, null, null, false, null);
+            if (pe) {
+                PePing ping = pingPe(ip, port, getLatency);
+                if (ping.status) {
+                    try {
+                        QueryResponse response = new MCQuery(ip, port).fullStat();
+                        String playerNames = response.getPlayerList().size() > 0 ? response.getPlayerList().get(0) : null;
+                        if (playerNames != null) {
+                            for (int i = 1; i < response.getPlayerList().size(); i++) {
+                                playerNames += ", " + response.getPlayerList().get(i);
+                            }
+                        }
+                        return new Query(true, false, response.getMOTD(), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), ping.ping, ping.version, ping.protocol, playerNames, response.plugins, false, null, response.mapName, response.gameMode);
+                    } catch (Exception e) {
+                        //no query, as server is online
+                        return new Query(true, true, null, null, null, null, 0, null, null, false, null, null, null);
+                    }
                 } else {
-                    return new Query(true, false, (pe ? json.get("motd").getAsString() : new JsonParser().parse(s).getAsJsonObject().get("motd").getAsString()), json.get("players").getAsString(), json.get("ping").getAsString(), json.get("version").getAsString(), json.get("protocol").getAsInt(), json.get("playersample").getAsString(), json.get("plugins").getAsString(), false, null);
+                    return new Query(false, false, null, null, null, null, 0, null, null, false, null, null, null);
                 }
             } else {
-                return new Query(false, false, null, null, null, null, 0, null, null, false, null);
+                McPing ping = pingPc(ip, port, getLatency);
+                if (ping.status) {
+                    try {
+                        QueryResponse response = new MCQuery(ip, port).fullStat();
+                        String playerNames = response.getPlayerList().size() > 0 ? response.getPlayerList().get(0) : null;
+                        if (playerNames != null) {
+                            for (int i = 1; i < response.getPlayerList().size(); i++) {
+                                playerNames += ", " + response.getPlayerList().get(i);
+                            }
+                        }
+                        return new Query(true, false, response.getMOTD(), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), ping.ping, ping.version, ping.protocol, playerNames, response.plugins, false, null, response.mapName, response.gameMode);
+                    } catch (Exception e) {
+                        //no query, as the server is online
+                        return new Query(false, true, null, null, null, null, 0, null, null, false, null, null, null);
+                    }
+                } else {
+                    return new Query(false, false, null, null, null, null, 0, null, null, false, null, null, null);
+                }
             }
         } catch (Exception e) {
-            return new Query(false, false, null, null, null, null, 0, null, null, true, e);
+            return new Query(false, false, null, null, null, null, 0, null, null, true, e, null, null);
         }
     }
 
@@ -179,8 +200,10 @@ public abstract class MCPing {
         public int protocol;
         public String playerSample;
         public String plugins;
+        public String mapName;
+        public String gamemode;
 
-        public Query(boolean isOnline, boolean noQuery, String motd, String players, String ping, String version, int protocol, String playerSample, String plugins, boolean errored, Exception error) {
+        public Query(boolean isOnline, boolean noQuery, String motd, String players, String ping, String version, int protocol, String playerSample, String plugins, boolean errored, Exception error, String mapName, String gamemode) {
             super(isOnline, errored, error);
             this.noQuery = noQuery;
             this.players = players;
@@ -190,6 +213,8 @@ public abstract class MCPing {
             this.playerSample = playerSample;
             this.plugins = plugins;
             this.motd = motd;
+            this.mapName = mapName;
+            this.gamemode = gamemode;
         }
     }
 

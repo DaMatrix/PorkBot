@@ -79,21 +79,18 @@ public class UUIDFetcher {
         return new UUID(mostSignificant, leastSignificant);
     }
 
-    public static ArrayList<UUIDRequest> run() {
+    public static void run() {
         try {
-            ArrayList<UUIDRequest> uuidRequests = new ArrayList<>();
             String body = "[";
-            System.out.println(body);
+            ArrayList<UUIDRequest> temp = new ArrayList<>();
             for (int i = 0; i < requests.size() && i < 100; i++) {
-                System.out.println(body);
-                body += "\"" + requests.get(i).name + "\",";
-                System.out.println(body);
+                UUIDRequest request = requests.get(i);
+                body += "\"" + request.name + "\",";
+                temp.add(request);
             }
             body = body.substring(0, body.length() - 1) + "]";
-            System.out.println(body);
 
             String json = HTTPUtils.performPostRequest(new URL(PROFILE_URL), body, "application/json");
-            System.out.println(json);
             JsonArray array = (JsonArray) jsonParser.parse(json);
             for (Object profile : array) {
                 JsonObject jsonProfile = (JsonObject) profile;
@@ -102,12 +99,19 @@ public class UUIDFetcher {
                 UUIDRequest[] uuidRequest = getRequestByName(name);
                 for (UUIDRequest uuidRequest1 : uuidRequest) {
                     uuidRequest1.uuidCompletable.run(id);
+                    requests.remove(uuidRequest1);
+                    temp.remove(uuidRequest1);
                 }
             }
-            return uuidRequests;
+            for (UUIDRequest request : temp) {
+                UUIDRequest[] uuidRequest = getRequestByName(request.name);
+                for (UUIDRequest uuidRequest1 : uuidRequest) {
+                    requests.remove(uuidRequest1);
+                    uuidRequest1.uuidCompletable.run("11111111-1111-1111-1111-111111111111");
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<UUIDRequest>();
         }
     }
 
@@ -118,14 +122,13 @@ public class UUIDFetcher {
                 if (requests.isEmpty()) {
                     return;
                 }
-                System.out.println(requests.size());
                 UUIDFetcher.run();
-                requests.clear(); //TODO fix this
+                //requests.clear(); //TODO fix this
             }
         }, 5000, 1000);
     }
 
-    public static void enqeueRequest(String name, Skin completableFuture) {
+    public static void enqeueRequest(String name, StringImplicit completableFuture) {
         requests.add(new UUIDRequest(name, completableFuture));
     }
 
@@ -142,10 +145,9 @@ public class UUIDFetcher {
 
     public static class UUIDRequest {
         public String name;
-        public Skin uuidCompletable;
-        public String id;
+        public StringImplicit uuidCompletable;
 
-        public UUIDRequest(String a, Skin b) {
+        public UUIDRequest(String a, StringImplicit b) {
             name = a;
             uuidCompletable = b;
         }

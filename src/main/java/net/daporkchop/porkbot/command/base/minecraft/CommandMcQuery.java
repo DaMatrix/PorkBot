@@ -9,9 +9,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 
-/**
- * Created by daporkchop on 25.03.17.
- */
 public class CommandMcQuery extends Command {
     public CommandMcQuery() {
         super("mcquery");
@@ -29,12 +26,10 @@ public class CommandMcQuery extends Command {
         String[] ipPort = args[1].split(":");
 
         if (ipPort.length == 1) {
-            query = MCPing.query(ipPort[0], 25565, false);
-            ping = MCPing.pingPc(ipPort[0], 25565, false);
+            query = MCPing.query(ipPort[0], 25565, false, true);
         } else if (ipPort.length == 2) {
             try {
-                query = MCPing.query(ipPort[0], Integer.parseInt(ipPort[1]), false);
-                ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]), false);
+                query = MCPing.query(ipPort[0], Integer.parseInt(ipPort[1]), false, true);
             } catch (NumberFormatException e) {
                 PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;
@@ -66,11 +61,11 @@ public class CommandMcQuery extends Command {
 
                 builder.addField("Players:", ping.players, false);
 
-                if (!query.playerSample.isEmpty()) {
+                if (query.playerSample != null && !query.playerSample.isEmpty()) {
                     builder.addField("Player sample:", query.playerSample, false);
                 }
 
-                if (!query.plugins.isEmpty()) {
+                if (query.plugins != null && !query.plugins.isEmpty()) {
                     builder.addField("Plugins:", query.plugins, false);
                 }
 
