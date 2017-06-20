@@ -42,8 +42,8 @@ public class CommandMcVersion extends Command {
             //server's online
             builder.setColor(Color.GREEN);
 
-            builder.addField("**" + args[1] + "** network version", ping.protocol + "", true);
-            builder.addField("**" + args[1] + "** version", ping.version + "", true);
+            builder.addField("Network version", ping.protocol + "", true);
+            builder.addField("Version", ping.version + "", true);
         } else {
             //server's offline
             builder.setColor(Color.RED);

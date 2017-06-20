@@ -2,10 +2,12 @@ package net.daporkchop.porkbot.command.base.minecraft;
 
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
+import java.util.concurrent.CompletableFuture;
 
 public class CommandMcSkin extends Command {
 
@@ -21,11 +23,14 @@ public class CommandMcSkin extends Command {
                 return;
             }
 
+            CompletableFuture<String> completableFuture = new CompletableFuture<>();
+            UUIDFetcher.enqeueRequest(args[1], completableFuture);
+
             EmbedBuilder builder = new EmbedBuilder();
             builder.setImage("attachment://image.png");
             builder.setColor(Color.DARK_GRAY);
 
-            byte[] outBytes = PorkBot.downloadImage("https://crafatar.com/renders/body/" + args[1] + "?overlay");
+            byte[] outBytes = PorkBot.downloadImage("https://crafatar.com/renders/body/" + completableFuture.get() + "?overlay");
 
             builder.addField(args[1] + "'s skin", "", false);
 

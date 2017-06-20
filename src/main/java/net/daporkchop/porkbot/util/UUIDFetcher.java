@@ -21,7 +21,6 @@
  */
 package net.daporkchop.porkbot.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -32,23 +31,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
-public class UUIDFetcher implements Callable<Map<String, UUID>> {
+public class UUIDFetcher {
     private static final double PROFILES_PER_REQUEST = 100;
     private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
-    private final JsonParser jsonParser = new JsonParser();
-    private final List<String> names;
-    private final boolean rateLimiting;
-
-    public UUIDFetcher(List<String> names, boolean rateLimiting) {
-        this.names = ImmutableList.copyOf(names);
-        this.rateLimiting = rateLimiting;
-    }
-
-    public UUIDFetcher(List<String> names) {
-        this(names, true);
-    }
+    private static final JsonParser jsonParser = new JsonParser();
+    private static ArrayList<UUIDRequest> requests = new ArrayList<>();
 
     private static void writeBody(HttpURLConnection connection, String body) throws Exception {
         OutputStream stream = connection.getOutputStream();
@@ -89,20 +78,15 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
         return new UUID(mostSignificant, leastSignificant);
     }
 
-    public static UUID getUUIDOf(String name) throws Exception {
-        return new UUIDFetcher(Arrays.asList(name)).call().get(name);
-    }
-
-    public Map<String, UUID> call() throws Exception {
-        Map<String, UUID> uuidMap = new HashMap<String, UUID>();
-        int requests = (int) Math.ceil(names.size() / PROFILES_PER_REQUEST);
-        for (int i = 0; i < requests; i++) {
+    public static ArrayList<UUIDRequest> run() {
+        try {
+            ArrayList<UUIDRequest> uuidRequests = new ArrayList<>();
             HttpURLConnection connection = createConnection();
 
-            List<String> cutNames = names.subList(i * 100, Math.min((i + 1) * 100, names.size()));
+            List<UUIDRequest> cutRequests = requests.subList(0, 100);
             String body = "[";
-            for (String s : cutNames) {
-                body += "\"" + s + "\",";
+            for (UUIDRequest request : cutRequests) {
+                body += "\"" + request.name + "\",";
             }
             body = body.substring(0, body.length() - 1) + "]";
 
@@ -112,13 +96,68 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
                 JsonObject jsonProfile = (JsonObject) profile;
                 String id = jsonProfile.get("id").getAsString();
                 String name = jsonProfile.get("name").getAsString();
-                UUID uuid = UUIDFetcher.getUUID(id);
-                uuidMap.put(name, uuid);
+                UUIDRequest uuidRequest = getRequestByName(name);
+                uuidRequest.uuid = id;
+                uuidRequests.add(uuidRequest);
             }
-            if (rateLimiting && i != requests - 1) {
-                Thread.sleep(100L);
+            return uuidRequests;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<UUIDRequest>();
+        }
+    }
+
+    public static void init() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (requests.isEmpty()) {
+                    return;
+                }
+                ArrayList<UUIDRequest> process = UUIDFetcher.run();
+                for (UUIDRequest request : process) {
+                    requests.remove(request);
+                    for (CompletableFuture<String> completableFuture : request.uuidCompletable) {
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                completableFuture.complete(request.uuid);
+                            }
+                        }.start();
+                    }
+                }
+            }
+        }, 5000, 1000);
+    }
+
+    public static void enqeueRequest(String name, CompletableFuture<String> completableFuture) {
+        UUIDRequest check = getRequestByName(name);
+        if (check == null) {
+            requests.add(new UUIDRequest(name, completableFuture));
+        } else {
+            check.uuidCompletable.add(completableFuture);
+        }
+    }
+
+    private static UUIDRequest getRequestByName(String name) {
+        for (UUIDRequest request : requests) {
+            if (request.name.equals(name)) {
+                return request;
             }
         }
-        return uuidMap;
+
+        return null;
+    }
+
+    public static class UUIDRequest {
+        public String name;
+        public List<CompletableFuture<String>> uuidCompletable;
+        public String uuid = "";
+
+        public UUIDRequest(String a, CompletableFuture<String> b) {
+            name = a;
+            uuidCompletable = new ArrayList<>();
+            uuidCompletable.add(b);
+        }
     }
 }

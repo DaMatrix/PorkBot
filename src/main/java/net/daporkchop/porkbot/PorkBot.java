@@ -10,6 +10,7 @@ import net.daporkchop.porkbot.command.base.CommandSay;
 import net.daporkchop.porkbot.command.base.CommandTest;
 import net.daporkchop.porkbot.command.base.minecraft.*;
 import net.daporkchop.porkbot.util.HTTPUtils;
+import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -135,7 +136,6 @@ public class PorkBot {
      */
     public static void sendMessage(EmbedBuilder builder, TextChannel channel) {
         try {
-            builder.setAuthor("PorkBot", "http://www.daporkchop.net/porkbot", "https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif");
             channel.sendMessage(builder.build()).queue();
         } catch (PermissionException e) {
             //we can't do anything about it
@@ -249,6 +249,8 @@ public class PorkBot {
 
     public void start() {
         jda.getPresence().setGame(new GameImpl("Say ..help", "https://www.twitch.tv/daporkchop_", Game.GameType.TWITCH));
+
+        UUIDFetcher.init();
 
         CommandRegistry.registerCommand(new CommandHelp());
         CommandRegistry.registerCommand(new CommandInvite());

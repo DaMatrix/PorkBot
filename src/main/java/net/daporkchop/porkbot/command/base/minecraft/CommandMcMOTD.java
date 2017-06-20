@@ -43,7 +43,7 @@ public class CommandMcMOTD extends Command {
             //server's online
             builder.setColor(Color.GREEN);
 
-            builder.addField("**" + args[1] + "** MOTD:", TextFormat.clean(ping.motd), false);
+            builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
         } else {
             //server's offline
             builder.setColor(Color.RED);

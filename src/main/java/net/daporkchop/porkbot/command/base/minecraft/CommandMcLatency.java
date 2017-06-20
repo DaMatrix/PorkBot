@@ -42,7 +42,7 @@ public class CommandMcLatency extends Command {
             //server's online
             builder.setColor(Color.GREEN);
 
-            builder.addField("**" + args[1] + "** latency", ping.ping + "", false);
+            builder.addField("Server ping", ping.ping + "", false);
         } else {
             //server's offline
             builder.setColor(Color.RED);
