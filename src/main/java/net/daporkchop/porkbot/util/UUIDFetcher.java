@@ -83,7 +83,7 @@ public class UUIDFetcher {
             ArrayList<UUIDRequest> uuidRequests = new ArrayList<>();
             HttpURLConnection connection = createConnection();
 
-            List<UUIDRequest> cutRequests = requests.subList(0, 100);
+            List<UUIDRequest> cutRequests = requests.subList(0, Math.max(requests.size(), 100));
             String body = "[";
             for (UUIDRequest request : cutRequests) {
                 body += "\"" + request.name + "\",";
