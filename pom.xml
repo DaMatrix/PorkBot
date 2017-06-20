@@ -62,6 +62,11 @@
             <artifactId>jraknet</artifactId>
             <version>2.6.5</version>
         </dependency>
+		<dependency>
+			<groupId>dnsjava</groupId>
+			<artifactId>dnsjava</artifactId>
+			<version>2.1.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -25,7 +25,6 @@ public class CommandPeQuery extends Command {
             return;
         }
 
-        MCPing.PePing ping = null;
         MCPing.Query query = null;
         String[] ipPort = args[1].split(":");
 
@@ -45,49 +44,60 @@ public class CommandPeQuery extends Command {
             return;
         }
 
-        EmbedBuilder builder = new EmbedBuilder();
+        if (query.status) {
+            if (query.noQuery) {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(Color.ORANGE);
+                builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
 
-        if (query.status && ping.status) {
-            //server's online
-            builder.setColor(Color.GREEN);
-
-            builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
-
-            builder.addField("Version:", query.version, false);
-
-            //TODO: make PorkPingAPI support this
-            //builder.addField("Software:", query.software, false);
-
-            builder.addField("Protocol Version:", ping.protocol + "", false);
-
-            builder.addField("Players:", ping.players, false);
-
-            builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
-
-            if (query.playerSample != null && !query.playerSample.isEmpty()) {
-                builder.addField("Player sample:", query.playerSample, false);
+                PorkBot.sendMessage(builder, evt.getTextChannel());
+                return;
             } else {
-                builder.addField("Player sample:", "None!", false);
-            }
+                EmbedBuilder builder = new EmbedBuilder();
 
-            if (query.plugins != null && !query.plugins.isEmpty()) {
-                builder.addField("Plugins:", query.plugins, false);
-            } else {
-                builder.addField("Plugins:", "No plugins!", false);
+                builder.setColor(Color.GREEN);
+                builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
+
+                builder.addField("Ping", query.ping, true);
+
+                builder.addField("Version", query.version, true);
+
+                builder.addField("Players", query.players, true);
+
+                builder.addField("MOTD", TextFormat.clean(query.motd), false);
+
+                builder.addField("Gamemode", query.gamemode, true);
+
+                builder.addField("World name", query.mapName, true);
+
+                if (query.playerSample != null && !query.playerSample.isEmpty()) {
+                    builder.addField("Player sample", query.playerSample, false);
+                }
+
+                if (query.plugins != null && !query.plugins.isEmpty()) {
+                    builder.addField("Plugins", query.plugins, false);
+                }
+
+                PorkBot.sendMessage(builder, evt.getTextChannel());
+                return;
             }
-        } else if (ping.status && !query.status) {
-            builder.setColor(Color.ORANGE);
-            builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
-        } else if (!ping.status && !query.status) {
-            //server's offline
-            builder.setColor(Color.RED);
-            builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
         } else {
-            builder.setColor(Color.RED);
-            builder.addField("**Something's wrong!**", "We could query `" + args[1] + "`, but not ping it! Either there was a network failiure, or something is SERIOUSLY wrong!", false);
-        }
+            if (query.noQuery) {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(Color.ORANGE);
+                builder.addField("**Unable to query**", "The server `" + args[1] + "` is online, but we were unable to query it. Make sure that `enable-query` is set to `true` in `server.properties` and that the server's port is open on UDP!", false);
 
-        PorkBot.sendMessage(builder, evt.getTextChannel());
+                PorkBot.sendMessage(builder, evt.getTextChannel());
+                return;
+            } else {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(Color.RED);
+                builder.addField("**" + args[1] + "**", "Status: ***OFFLINE***", false);
+
+                PorkBot.sendMessage(builder, evt.getTextChannel());
+                return;
+            }
+        }
     }
 
     @Override

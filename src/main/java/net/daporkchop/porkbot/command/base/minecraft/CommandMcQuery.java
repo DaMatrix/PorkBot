@@ -6,8 +6,11 @@ import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import sun.misc.BASE64Decoder;
 
 import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 public class CommandMcQuery extends Command {
     public CommandMcQuery() {
@@ -22,7 +25,6 @@ public class CommandMcQuery extends Command {
         }
 
         MCPing.Query query = null;
-        MCPing.McPing ping = null;
         String[] ipPort = args[1].split(":");
 
         if (ipPort.length == 1) {
@@ -51,27 +53,42 @@ public class CommandMcQuery extends Command {
                 EmbedBuilder builder = new EmbedBuilder();
 
                 builder.setColor(Color.GREEN);
-                builder.setThumbnail("https://mc-api.net/v3/server/favicon/" + ipPort[0]);
+
+                String[] parts = query.favicon.split("\\,");
+                String imageString = parts[1];
+                byte[] imageByte = null;
+                BASE64Decoder decoder = new BASE64Decoder();
+                try {
+                    imageByte = decoder.decodeBuffer(imageString);
+                } catch (IOException e) {
+                    //whatever lol
+                }
+
+                builder.setThumbnail("attachment://image.png");
 
                 builder.addField("**" + args[1] + "**", "Status: ***ONLINE***", false);
 
-                builder.addField("Ping:", ping.ping, false);
+                builder.addField("Ping", query.ping, true);
 
-                builder.addField("Version:", ping.version, false);
+                builder.addField("Version", query.version, true);
 
-                builder.addField("Players:", ping.players, false);
+                builder.addField("Players", query.players, true);
+
+                builder.addField("MOTD", TextFormat.clean(query.motd), false);
+
+                builder.addField("Gamemode", query.gamemode, true);
+
+                builder.addField("World name", query.mapName, true);
 
                 if (query.playerSample != null && !query.playerSample.isEmpty()) {
-                    builder.addField("Player sample:", query.playerSample, false);
+                    builder.addField("Player sample", query.playerSample, false);
                 }
 
                 if (query.plugins != null && !query.plugins.isEmpty()) {
-                    builder.addField("Plugins:", query.plugins, false);
+                    builder.addField("Plugins", query.plugins, false);
                 }
 
-                builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
-
-                PorkBot.sendMessage(builder, evt.getTextChannel());
+                PorkBot.sendImage(builder, imageByte, "image.png", evt.getTextChannel());
                 return;
             }
         } else {

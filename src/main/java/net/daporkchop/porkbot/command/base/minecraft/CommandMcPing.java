@@ -53,7 +53,6 @@ public class CommandMcPing extends Command {
                 byte[] imageByte;
                 BASE64Decoder decoder = new BASE64Decoder();
                 imageByte = decoder.decodeBuffer(imageString);
-                ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
 
                 builder.setThumbnail("attachment://image.png");
 
