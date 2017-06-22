@@ -3,7 +3,7 @@ layout: default
 ---
 
 # PorkBot
-A Minecraft-focused Discord bot
+A Discord bot
 
 [Invite](https://discordapp.com/oauth2/authorize?client_id=287894637165936640&scope=bot&permissions=67226625&redirect_uri=http://www.daporkchop.tk/porkbot)
 
@@ -37,3 +37,6 @@ A Minecraft-focused Discord bot
 | mcstatus     | Gets the status of Mojang servers                                      | `..mcstatus`                                   | `..mcstatus`                                                           |                                                               |
 | mcuuid       | Gets the UUID associated with a Minecraft username                     | `..mcuuid <player name>`                       | `..mcuuid Notch`                                                       |                                                               |
 | offlineuuid  | Gets the UUID that a player would have on an offline-mode server       | `..offlineuuid <player name>`                  | `..offlineuuid Notch`                                                  |                                                               |
+| thonk        | ![thonk](https://cdn.discordapp.com/emojis/324070259265110016.png)     | `..thonk`                                      | `..thonk`                                                              |                                                               |
+| dice         | Rolls a die!                                                           | `..dice`                                       | `..dice`                                                               |                                                               |
+| emojiid      | Gets the ID of an emoji                                                | `..emojiid`                                    | `..emojiid`                                                            |                                                               |

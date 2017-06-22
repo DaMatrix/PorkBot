@@ -128,8 +128,9 @@ public class PorkBot {
      */
     public static void sendMessage(String s, TextChannel channel) {
         try {
+            Thread.sleep(500);
             channel.sendMessage(s).queue();
-        } catch (PermissionException e) {
+        } catch (PermissionException | InterruptedException e) {
             //we can't do anything about it
         }
     }
@@ -142,8 +143,9 @@ public class PorkBot {
      */
     public static void sendMessage(EmbedBuilder builder, TextChannel channel) {
         try {
+            Thread.sleep(500);
             channel.sendMessage(builder.build()).queue();
-        } catch (PermissionException e) {
+        } catch (PermissionException | InterruptedException e) {
             //we can't do anything about it
         }
     }
