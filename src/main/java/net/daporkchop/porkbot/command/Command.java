@@ -22,16 +22,24 @@ public abstract class Command {
     /**
      * Gets the command's usage
      *
+     * you should probably override this
+     *
      * @return
      */
-    public abstract String getUsage();
+    public String getUsage() {
+        return ".." + prefix;
+    }
 
     /**
      * Gets and example of using the command
      *
+     * you should probably override this
+     *
      * @return
      */
-    public abstract String getUsageExample();
+    public String getUsageExample() {
+        return ".." + prefix;
+    }
 
     public void sendErrorMessage(TextChannel channel, String message) {
         PorkBot.sendMessage((message == null ? "" : message + "\n") + "Usage: `" + getUsage() + "`\nExample: `" + getUsageExample() + "`", channel);

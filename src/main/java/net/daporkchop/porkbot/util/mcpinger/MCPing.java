@@ -1,7 +1,7 @@
 package net.daporkchop.porkbot.util.mcpinger;
 
-import ch.jamiete.mcping.MinecraftPing;
-import ch.jamiete.mcping.MinecraftPingReply;
+import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPing;
+import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPingReply;
 import net.marfgamer.jraknet.identifier.Identifier;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
@@ -57,7 +57,7 @@ public abstract class MCPing {
                 PePing ping = pingPe(ip, port, getLatency);
                 if (ping.status) {
                     try {
-                        vc.min.ryanshaw.Query.Query response = new vc.min.ryanshaw.Query.Query(ip, port, 0);
+                        net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
                         response.sendQuery();
                         if (response.values == null)    {
                             throw new IllegalStateException("Somehow or other there was no error while pinging, so we'll throw one now to make stuff do things!");
@@ -80,7 +80,7 @@ public abstract class MCPing {
                 McPing ping = pingPc(ip, port, getLatency);
                 if (ping.status) {
                     try {
-                        vc.min.ryanshaw.Query.Query response = new vc.min.ryanshaw.Query.Query(ip, port, 0);
+                        net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
                         response.sendQuery();
                         if (response.values == null)    {
                             throw new IllegalStateException("Somehow or other there was no error while pinging, so we'll throw one now to make stuff do things!");

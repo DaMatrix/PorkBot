@@ -1,4 +1,4 @@
-package vc.min.ryanshaw.Query;
+package net.daporkchop.porkbot.util.mcpinger.query;
 
 import org.xbill.DNS.*;
 

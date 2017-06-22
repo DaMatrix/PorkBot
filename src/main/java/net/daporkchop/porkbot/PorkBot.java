@@ -9,6 +9,8 @@ import net.daporkchop.porkbot.command.base.CommandPing;
 import net.daporkchop.porkbot.command.base.CommandSay;
 import net.daporkchop.porkbot.command.base.CommandTest;
 import net.daporkchop.porkbot.command.base.minecraft.*;
+import net.daporkchop.porkbot.command.base.misc.CommandDice;
+import net.daporkchop.porkbot.command.base.misc.CommandEmojiID;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.*;
@@ -22,6 +24,7 @@ import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.net.URL;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,16 +32,18 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-/**
- * Created by daporkchop on 05.03.17.
- */
 public class PorkBot {
 
     public static PorkBot INSTANCE;
     public static Logger logger;
-
+    /**
+     * A central Random instance, for random things
+     * literally
+     * kek
+     * eks dee
+     */
+    public static Random random = new Random(System.currentTimeMillis());
     public JDA jda;
-
     /**
      * The bot's main cache!
      */
@@ -277,6 +282,8 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandPeLatency());
         CommandRegistry.registerCommand(new CommandPeMOTD());
         CommandRegistry.registerCommand(new CommandPeVersion());
+        CommandRegistry.registerCommand(new CommandDice());
+        CommandRegistry.registerCommand(new CommandEmojiID());
 
         final String authToken = getAuthtoken();
 
