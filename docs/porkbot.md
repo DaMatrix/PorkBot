@@ -11,6 +11,13 @@ A Discord bot
 
 ## Commands
 
+#### Categories
+
+[Minecraft](#minecraft)
+[Misc](#misc)
+
+# Minecraft<a name="minecraft"></a>
+
 | Command name | Description                                                            | Usage                                          | Example                                                                | Note                                                          |
 |--------------|------------------------------------------------------------------------|------------------------------------------------|------------------------------------------------------------------------|---------------------------------------------------------------|
 | help         | Sends a link to this page                                              | `..help`                                       | `..help`                                                               |                                                               |
@@ -37,6 +44,12 @@ A Discord bot
 | mcstatus     | Gets the status of Mojang servers                                      | `..mcstatus`                                   | `..mcstatus`                                                           |                                                               |
 | mcuuid       | Gets the UUID associated with a Minecraft username                     | `..mcuuid <player name>`                       | `..mcuuid Notch`                                                       |                                                               |
 | offlineuuid  | Gets the UUID that a player would have on an offline-mode server       | `..offlineuuid <player name>`                  | `..offlineuuid Notch`                                                  |                                                               |
+
+
+# Misc<a name="misc"></a>
+
+| Command name | Description                                                            | Usage                                          | Example                                                                | Note                                                          |
+|--------------|------------------------------------------------------------------------|------------------------------------------------|------------------------------------------------------------------------|---------------------------------------------------------------|
 | thonk        | ![thonk](https://cdn.discordapp.com/emojis/324070259265110016.png)     | `..thonk`                                      | `..thonk`                                                              |                                                               |
 | dice         | Rolls a die!                                                           | `..dice`                                       | `..dice`                                                               |                                                               |
-| emojiid      | Gets the ID of an emoji                                                | `..emojiid`                                    | `..emojiid`                                                            |                                                               |
+| emojiid      | Gets the ID of an emoji                                                | `..emojiid`                                    | `..emojiid`                                                            | In format of `<:emotename:numberid>`                          |
