@@ -11,6 +11,7 @@ import net.daporkchop.porkbot.command.base.CommandTest;
 import net.daporkchop.porkbot.command.base.minecraft.*;
 import net.daporkchop.porkbot.command.base.misc.CommandDice;
 import net.daporkchop.porkbot.command.base.misc.CommandEmojiID;
+import net.daporkchop.porkbot.command.base.misc.CommandInterject;
 import net.daporkchop.porkbot.command.base.misc.CommandThonk;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
@@ -288,6 +289,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandDice());
         CommandRegistry.registerCommand(new CommandEmojiID());
         CommandRegistry.registerCommand(new CommandThonk());
+        CommandRegistry.registerCommand(new CommandInterject());
 
         final String authToken = getAuthtoken();
 
