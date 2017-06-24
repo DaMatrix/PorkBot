@@ -35,6 +35,7 @@ public class PorkListener extends ListenerAdapter {
                             public void run() {
                                 try {
                                     Thread.sleep(500);
+                                    CommandRegistry.save();
                                     PorkBot.INSTANCE.jda.shutdown();
                                     System.exit(0);
                                 } catch (InterruptedException e) {

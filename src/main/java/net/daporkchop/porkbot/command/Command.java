@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 public abstract class Command {
 
     public String prefix;
+    public int uses = 0;
 
     public Command(String prefix) {
         this.prefix = prefix;

@@ -32,6 +32,8 @@ public class CommandBotInfo extends Command {
 
         builder.addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true);
 
+        builder.addField("Commands all time:", String.valueOf(CommandRegistry.COMMAND_COUNT_TOTAL), true);
+
         builder.addField("Used RAM:", ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB", false);
 
         PorkBot.sendMessage(builder, evt.getTextChannel());
