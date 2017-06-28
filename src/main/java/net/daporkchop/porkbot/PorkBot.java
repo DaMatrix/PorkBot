@@ -4,10 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import net.daporkchop.porkbot.command.CommandHelp;
 import net.daporkchop.porkbot.command.CommandInvite;
 import net.daporkchop.porkbot.command.CommandRegistry;
-import net.daporkchop.porkbot.command.base.CommandBotInfo;
-import net.daporkchop.porkbot.command.base.CommandPing;
-import net.daporkchop.porkbot.command.base.CommandSay;
-import net.daporkchop.porkbot.command.base.CommandTest;
+import net.daporkchop.porkbot.command.base.*;
 import net.daporkchop.porkbot.command.base.minecraft.*;
 import net.daporkchop.porkbot.command.base.misc.CommandDice;
 import net.daporkchop.porkbot.command.base.misc.CommandEmojiID;
@@ -290,6 +287,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandEmojiID());
         CommandRegistry.registerCommand(new CommandThonk());
         CommandRegistry.registerCommand(new CommandInterject());
+        CommandRegistry.registerCommand(new CommandCommandInfo());
 
         final String authToken = getAuthtoken();
 
