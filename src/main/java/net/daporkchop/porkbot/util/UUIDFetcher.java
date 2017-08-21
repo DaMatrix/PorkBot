@@ -21,6 +21,7 @@
  */
 package net.daporkchop.porkbot.util;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -38,6 +39,7 @@ public class UUIDFetcher {
     private static final double PROFILES_PER_REQUEST = 100;
     private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
     private static final JsonParser jsonParser = new JsonParser();
+    private static final Gson gson = new Gson();
     private static ArrayList<UUIDRequest> requests = new ArrayList<>();
 
     private static void writeBody(HttpURLConnection connection, String body) throws Exception {
@@ -81,17 +83,16 @@ public class UUIDFetcher {
 
     public static void run() {
         try {
-            String body = "[";
             ArrayList<UUIDRequest> temp = new ArrayList<>();
+            ArrayList<String> jsonArray = new ArrayList<>();
             for (int i = 0; i < requests.size() && i < 100; i++) {
                 UUIDRequest request = requests.get(i);
-                body += "\"" + request.name + "\",";
+                jsonArray.add(request.name);
                 temp.add(request);
             }
-            body = body.substring(0, body.length() - 1) + "]";
 
-            String json = HTTPUtils.performPostRequest(new URL(PROFILE_URL), body, "application/json");
-            JsonArray array = (JsonArray) jsonParser.parse(json);
+            String json = HTTPUtils.performPostRequest(new URL(PROFILE_URL), gson.toJson(jsonArray), "application/json");
+            JsonArray array = jsonParser.parse(json).getAsJsonArray();
             for (Object profile : array) {
                 JsonObject jsonProfile = (JsonObject) profile;
                 String id = jsonProfile.get("id").getAsString();
