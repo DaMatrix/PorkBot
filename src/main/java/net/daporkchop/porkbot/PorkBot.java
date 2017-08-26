@@ -478,7 +478,11 @@ public class PorkBot {
                     if (entry.getValue().channel.getMembers().size() < 2) { //nobody's in the channel
                         entry.getValue().manager.player.destroy();
                         entry.getValue().channel.getGuild().getAudioManager().closeAudioConnection();
-                        entry.getValue().textChannel.sendMessage("All users have left the channel, clearing the playlist and stopping everything!").queue();
+                        iterator.remove();
+                    }
+                    if (entry.getValue().manager.scheduler.queue.size() == 0 && entry.getValue().manager.player.getPlayingTrack() == null)   {
+                        entry.getValue().manager.player.destroy();
+                        entry.getValue().channel.getGuild().getAudioManager().closeAudioConnection();
                         iterator.remove();
                     }
                 }
