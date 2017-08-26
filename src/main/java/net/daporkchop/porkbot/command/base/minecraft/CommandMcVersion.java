@@ -14,7 +14,7 @@ public class CommandMcVersion extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt, String[] args, String rawContent) {
+    public void execute(MessageReceivedEvent evt, String[] args, String rawContent) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;

@@ -9,7 +9,7 @@ public class CommandEmojiID extends Command {
         super("emojiid");
     }
 
-    public void excecute(MessageReceivedEvent evt, String[] split, String rawContent) {
+    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
         if (split.length != 2) {
             this.sendErrorMessage(evt.getTextChannel(), "You need to have 2 arguments!");
             return;

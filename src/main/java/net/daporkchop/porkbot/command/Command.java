@@ -18,7 +18,7 @@ public abstract class Command {
      *
      * @param evt The MessageReceivedEvent to be parsed
      */
-    public abstract void excecute(MessageReceivedEvent evt, String[] split, String rawContent);
+    public abstract void execute(MessageReceivedEvent evt, String[] split, String rawContent);
 
     /**
      * Gets the command's usage

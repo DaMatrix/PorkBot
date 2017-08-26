@@ -8,7 +8,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import sun.misc.BASE64Decoder;
 
 import java.awt.*;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
@@ -21,7 +20,7 @@ public class CommandMcIcon extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         try {
             if (args.length < 2 || args[1].isEmpty()) {
                 sendErrorMessage(evt.getTextChannel(), "IP isn't given!");

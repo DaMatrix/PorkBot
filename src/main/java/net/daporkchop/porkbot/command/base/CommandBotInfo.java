@@ -15,7 +15,7 @@ public class CommandBotInfo extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
         builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");

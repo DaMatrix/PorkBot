@@ -23,7 +23,7 @@ public class CommandMcStatus extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         String s;
         try {
             s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/mcstatus"));

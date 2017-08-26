@@ -13,3 +13,7 @@ porkbot-1\.0-SNAPSHOT\.jar
 .project
 
 target/
+
+command_info\.dat
+
+devkey\.txt

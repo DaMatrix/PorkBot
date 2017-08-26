@@ -62,7 +62,7 @@ public abstract class CommandRegistry {
                 new Thread() {
                     @Override
                     public void run() {
-                        cmd.excecute(evt, split, rawContent);
+                        cmd.execute(evt, split, rawContent);
                         COMMAND_COUNT++;
                         COMMAND_COUNT_TOTAL++;
                         cmd.uses++;

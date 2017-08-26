@@ -17,7 +17,7 @@ public class CommandMcCount extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;

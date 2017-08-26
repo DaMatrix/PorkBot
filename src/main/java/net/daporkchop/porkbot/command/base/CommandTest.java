@@ -10,7 +10,7 @@ public class CommandTest extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         PorkBot.sendMessage("Don't use this! It doesn't do anything!!!", evt.getTextChannel());
     }
 

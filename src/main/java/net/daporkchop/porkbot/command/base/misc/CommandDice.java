@@ -9,7 +9,7 @@ public class CommandDice extends Command {
         super("dice");
     }
 
-    public void excecute(MessageReceivedEvent evt, String[] split, String rawContent) {
+    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
         PorkBot.sendMessage(":game_die: | I rolled a **" + (PorkBot.random.nextInt(6) + 1) + "**!", evt.getTextChannel());
     }
 }

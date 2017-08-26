@@ -14,6 +14,7 @@ A Discord bot
 #### Categories
 
 [Minecraft](#minecraft)
+
 [Misc](#misc)
 
 # Minecraft<a name="minecraft"></a>

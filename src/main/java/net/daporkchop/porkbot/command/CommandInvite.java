@@ -13,7 +13,7 @@ public class CommandInvite extends Command {
     }
 
     @Override
-    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         PorkBot.sendMessage("***Invite link is on bot site:***\nhttp://www.daporkchop.net/porkbot", evt.getTextChannel());
     }
 

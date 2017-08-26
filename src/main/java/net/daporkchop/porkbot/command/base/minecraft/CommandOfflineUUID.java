@@ -17,7 +17,7 @@ public class CommandOfflineUUID extends Command {
 
     @Override
     @SuppressWarnings("deprecation")
-    public void excecute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "Name isn't given!");
             return;
