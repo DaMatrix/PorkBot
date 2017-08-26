@@ -64,6 +64,7 @@ public abstract class CommandRegistry {
                     public void run() {
                         cmd.excecute(evt, split, rawContent);
                         COMMAND_COUNT++;
+                        COMMAND_COUNT_TOTAL++;
                         cmd.uses++;
                     }
                 }.start();

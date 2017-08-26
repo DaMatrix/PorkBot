@@ -15,7 +15,6 @@ import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.impl.GameImpl;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
@@ -254,7 +253,7 @@ public class PorkBot {
     }
 
     public void start() {
-        jda.getPresence().setGame(new GameImpl("Say ..help", "https://www.twitch.tv/daporkchop_", Game.GameType.TWITCH));
+        jda.getPresence().setGame(Game.of("Say ..help", "https://www.twitch.tv/daporkchop_"));
 
         UUIDFetcher.init();
 
