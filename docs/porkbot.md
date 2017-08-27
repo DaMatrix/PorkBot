@@ -5,15 +5,17 @@ layout: default
 # PorkBot
 A Discord bot
 
-[Invite](https://discordapp.com/oauth2/authorize?client_id=287894637165936640&scope=bot&permissions=67226625&redirect_uri=http://www.daporkchop.tk/porkbot)
+<a href="https://discordapp.com/oauth2/authorize?client_id=287894637165936640&scope=bot&permissions=37014592" target="_blank">Invite</a>
 
-[Source code](https://github.com/DaMatrix/PorkBot)
+<a href="https://github.com/DaMatrix/PorkBot" target="_blank">Source code</a>
 
 ## Commands
 
 #### Categories
 
 [Minecraft](#minecraft)
+
+[Music](#music)
 
 [Misc](#misc)
 
@@ -45,6 +47,17 @@ A Discord bot
 | mcstatus     | Gets the status of Mojang servers                                      | `..mcstatus`                                   | `..mcstatus`                                                           |                                                               |
 | mcuuid       | Gets the UUID associated with a Minecraft username                     | `..mcuuid <player name>`                       | `..mcuuid Notch`                                                       |                                                               |
 | offlineuuid  | Gets the UUID that a player would have on an offline-mode server       | `..offlineuuid <player name>`                  | `..offlineuuid Notch`                                                  |                                                               |
+
+
+# Music<a name="music"></a>
+
+| Command name | Description                                                            | Usage                                          | Example                                                                | Note                                                          |
+|--------------|------------------------------------------------------------------------|------------------------------------------------|------------------------------------------------------------------------|---------------------------------------------------------------|
+| play         | Adds a song to the playlist.                                           | `..play <URL>` or `..play <search terms>`      | `..play Rick roll`                                                     |                                                               |
+| queue        | Shows the songs in the playlist.                                       | `..queue`                                      | `..queue`                                                              |                                                               |
+| shuffle      | Shuffles the playlist                                                  | `..shuffle`                                    | `..shuffle`                                                            |                                                               |
+| skip         | Skips the currently playing song                                       | `..skip`                                       | `..skip`                                                               |                                                               |
+| stop         | Clears the playlist and stops playing                                  | `..stop`                                       | `..stop`                                                               |                                                               |
 
 
 # Misc<a name="misc"></a>
