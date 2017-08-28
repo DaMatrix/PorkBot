@@ -395,7 +395,7 @@ public class PorkBot {
                             break;
                         }
                     } else {
-                        musicManager.manager.scheduler.queue.add(tracks.get(i));
+                        musicManager.manager.scheduler.queue(tracks.get(i));
                     }
                 }
             }
