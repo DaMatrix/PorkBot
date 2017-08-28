@@ -391,7 +391,9 @@ public class PorkBot {
 
                 for (int i = 0; i < tracks.size(); i++) {
                     if (i == 0) {
+                        channel.sendMessage("[DEBUG] Playing:" + (musicManager.manager.player.getPlayingTrack() == null)).queue();
                         play(channel.getGuild(), musicManager, playlist.getSelectedTrack(), user, channel);
+                        channel.sendMessage("[DEBUG] Playing:" + (musicManager.manager.player.getPlayingTrack() == null)).queue();
                         if (musicManager.channel == null) {
                             break;
                         }
@@ -399,6 +401,7 @@ public class PorkBot {
                         musicManager.manager.scheduler.queue(tracks.get(i));
                     }
                 }
+                channel.sendMessage("[DEBUG] Items in queue:" + musicManager.manager.scheduler.queue.size()).queue();
             }
 
             @Override
