@@ -23,8 +23,8 @@ import net.daporkchop.porkbot.music.GuildAudioInfo;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class CommandShuffle extends Command {
     public CommandShuffle() {
@@ -38,21 +38,10 @@ public class CommandShuffle extends Command {
                 message.editMessage("Not playing!").queue();
             } else {
                 BlockingQueue<AudioTrack> queue = info.manager.scheduler.queue;
-                AudioTrack[] tracks = queue.toArray(new AudioTrack[queue.size()]);
-                ArrayList<Integer> usedIndexes = new ArrayList<>();
-                while (usedIndexes.size() < tracks.length) {
-                    int index = PorkBot.random.nextInt(tracks.length);
-                    if (!usedIndexes.contains(index)) {
-                        AudioTrack track = tracks[index];
-                        tracks[index] = track;
-                        usedIndexes.add(index);
-                    }
-                }
-                BlockingQueue<AudioTrack> newQueue = new LinkedBlockingQueue<>();
-                for (AudioTrack track : tracks) {
-                    newQueue.add(track);
-                }
-                info.manager.scheduler.queue = newQueue;
+                ArrayList<AudioTrack> queueTemp;
+                Collections.shuffle(queueTemp = new ArrayList<>(queue));
+                queue.clear();
+                queue.addAll(queueTemp);
                 message.editMessage("Queue shuffled!").queue();
             }
         });
