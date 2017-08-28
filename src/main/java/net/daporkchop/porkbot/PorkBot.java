@@ -79,10 +79,10 @@ public class PorkBot {
             .maximumSize(5000)
             .expireAfterWrite(1, TimeUnit.DAYS)
             .build(new CacheLoader<String, String>() {
-                        public String load(String key) {
-                            return searchYoutube(key);
-                        }
-                    });
+                public String load(String key) {
+                    return searchYoutube(key);
+                }
+            });
 
     public AudioPlayerManager playerManager;
     public Map<Long, GuildAudioInfo> musicManagers;
@@ -334,7 +334,7 @@ public class PorkBot {
     public static VoiceChannel connectToFirstVoiceChannel(AudioManager audioManager, Member user, TextChannel channel) {
         VoiceChannel toReturn = null;
         if (!audioManager.isConnected() && !audioManager.isAttemptingToConnect()) {
-            if (user.getVoiceState().inVoiceChannel())  {
+            if (user.getVoiceState().inVoiceChannel()) {
                 audioManager.openAudioConnection(toReturn = user.getVoiceState().getChannel());
             } else {
                 sendMessage("You're not in a voice channel! REEEEEEEE", channel);
@@ -353,8 +353,8 @@ public class PorkBot {
 
             if (musicManager == null) {
                 musicManager = new GuildAudioInfo(new GuildAudioManager(playerManager));
-                musicManagers.put(guildId, musicManager);
             }
+            musicManagers.put(guildId, musicManager);
 
             guild.getAudioManager().setSendingHandler(musicManager.manager.getSendHandler());
 
@@ -421,12 +421,10 @@ public class PorkBot {
         if (!guild.getAudioManager().isConnected()) {
             musicManager.channel = connectToFirstVoiceChannel(guild.getAudioManager(), user, channel);
         }
-        if (musicManager.channel != null) {
-            musicManager.textChannel = channel;
+        musicManager.textChannel = channel;
 
-            for (AudioTrack track : tracks) {
-                musicManager.manager.scheduler.queue(track);
-            }
+        for (AudioTrack track : tracks) {
+            musicManager.manager.scheduler.queue(track);
         }
 
         return musicManager.channel != null;
@@ -434,10 +432,10 @@ public class PorkBot {
 
     public void skipTrack(TextChannel channel) {
         GuildAudioInfo musicManager = getGuildAudioPlayer(channel.getGuild(), false);
-        if (musicManager == null)   {
+        if (musicManager == null) {
             channel.sendMessage("Not playing!").queue();
         } else {
-            if (musicManager.manager.scheduler.queue.size() == 0)   {
+            if (musicManager.manager.scheduler.queue.size() == 0) {
                 musicManager.manager.player.destroy();
                 musicManager.channel.getGuild().getAudioManager().closeAudioConnection();
                 musicManager.textChannel.sendMessage("Stopped!").queue();
@@ -449,7 +447,7 @@ public class PorkBot {
         }
     }
 
-    public String searchYoutube(String query)   {
+    public String searchYoutube(String query) {
         try {
             YouTube.Search.List search = youTube.search().list("id,snippet");
             search.setKey(devKey);
@@ -514,7 +512,7 @@ public class PorkBot {
                         iterator.remove();
                         continue;
                     }
-                    if (entry.getValue().manager.scheduler.queue.size() == 0 && entry.getValue().manager.player.getPlayingTrack() == null)   {
+                    if (entry.getValue().manager.scheduler.queue.size() == 0 && entry.getValue().manager.player.getPlayingTrack() == null) {
                         entry.getValue().manager.player.destroy();
                         entry.getValue().channel.getGuild().getAudioManager().closeAudioConnection();
                         iterator.remove();
