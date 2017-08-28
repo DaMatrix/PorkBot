@@ -31,6 +31,9 @@ public class CommandPlay extends Command {
     }
 
     public void execute(MessageReceivedEvent evt, String[] split, String rawContent)    {
+        if (split.length < 2) {
+            sendErrorMessage(evt.getTextChannel(), "Not enough arguments!");
+        }
         if (validator.isValid(split[1])) {
             PorkBot.INSTANCE.loadAndPlay(evt.getTextChannel(), split[1], evt.getMember());
         } else {
@@ -40,5 +43,13 @@ public class CommandPlay extends Command {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getUsage() {
+        return "..play <url>` or `..play <youtube search terms>";
+    }
+
+    public String getUsageExample() {
+        return "..play https://www.youtube.com/watch?v=IvUU8joBb1Q` or `..play the floppotron the final countdown";
     }
 }

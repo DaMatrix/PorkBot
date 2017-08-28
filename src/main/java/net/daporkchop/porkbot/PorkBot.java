@@ -30,7 +30,6 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.command.CommandHelp;
 import net.daporkchop.porkbot.command.CommandInvite;
 import net.daporkchop.porkbot.command.CommandRegistry;
@@ -57,7 +56,6 @@ import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -363,7 +361,7 @@ public class PorkBot {
             return musicManager;
         } else {
             long guildId = Long.parseLong(guild.getId());
-            GuildAudioInfo musicManager = musicManagers.get(guildId);
+            GuildAudioInfo musicManager = musicManagers.getOrDefault(guildId, null);
 
             return musicManager;
         }
