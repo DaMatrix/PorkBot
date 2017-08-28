@@ -390,7 +390,13 @@ public class PorkBot {
                 channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
 
                 for (int i = 0; i < tracks.size(); i++) {
-                    play(channel.getGuild(), musicManager, i == 0 ? playlist.getSelectedTrack() : tracks.get(i), user, channel);
+                    if (i == 0) {
+                        if (!play(channel.getGuild(), musicManager, playlist.getSelectedTrack(), user, channel)) {
+                            break;
+                        }
+                    } else {
+                        musicManager.manager.scheduler.queue.add(tracks.get(i));
+                    }
                 }
             }
 
@@ -406,13 +412,17 @@ public class PorkBot {
         });
     }
 
-    public void play(Guild guild, GuildAudioInfo musicManager, AudioTrack track, Member user, TextChannel channel) {
+    public boolean play(Guild guild, GuildAudioInfo musicManager, AudioTrack track, Member user, TextChannel channel) {
         if (!guild.getAudioManager().isConnected()) {
             musicManager.channel = connectToFirstVoiceChannel(guild.getAudioManager(), user, channel);
         }
-        musicManager.textChannel = channel;
+        if (musicManager.channel != null) {
+            musicManager.textChannel = channel;
 
-        musicManager.manager.scheduler.queue(track);
+            musicManager.manager.scheduler.queue(track);
+        }
+
+        return musicManager.channel != null;
     }
 
     public void skipTrack(TextChannel channel) {
@@ -488,7 +498,7 @@ public class PorkBot {
                 while (iterator.hasNext()) {
                     Map.Entry<Long, GuildAudioInfo> entry = iterator.next();
                     if (entry.getValue().channel == null) {
-                        System.out.println("null channel");
+                        iterator.remove();
                         continue;
                     }
                     if (entry.getValue().channel.getMembers().size() < 2) { //nobody's in the channel
