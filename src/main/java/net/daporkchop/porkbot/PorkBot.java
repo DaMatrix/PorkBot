@@ -389,8 +389,8 @@ public class PorkBot {
 
                 channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
 
-                for (AudioTrack track : tracks) {
-                    play(channel.getGuild(), musicManager, track, user, channel);
+                for (int i = 0; i < tracks.size(); i++) {
+                    play(channel.getGuild(), musicManager, i == 0 ? playlist.getSelectedTrack() : tracks.get(i), user, channel);
                 }
             }
 
