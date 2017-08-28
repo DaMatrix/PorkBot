@@ -389,19 +389,7 @@ public class PorkBot {
 
                 channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
 
-                for (int i = 0; i < tracks.size(); i++) {
-                    if (i == 0) {
-                        channel.sendMessage("[DEBUG] Playing:" + (musicManager.manager.player.getPlayingTrack() == null)).queue();
-                        play(channel.getGuild(), musicManager, playlist.getSelectedTrack(), user, channel);
-                        channel.sendMessage("[DEBUG] Playing:" + (musicManager.manager.player.getPlayingTrack() == null)).queue();
-                        if (musicManager.channel == null) {
-                            break;
-                        }
-                    } else {
-                        musicManager.manager.scheduler.queue(tracks.get(i));
-                    }
-                }
-                channel.sendMessage("[DEBUG] Items in queue:" + musicManager.manager.scheduler.queue.size()).queue();
+                playList(channel.getGuild(), musicManager, tracks, user, channel);
             }
 
             @Override
@@ -424,6 +412,21 @@ public class PorkBot {
             musicManager.textChannel = channel;
 
             musicManager.manager.scheduler.queue(track);
+        }
+
+        return musicManager.channel != null;
+    }
+
+    public boolean playList(Guild guild, GuildAudioInfo musicManager, List<AudioTrack> tracks, Member user, TextChannel channel) {
+        if (!guild.getAudioManager().isConnected()) {
+            musicManager.channel = connectToFirstVoiceChannel(guild.getAudioManager(), user, channel);
+        }
+        if (musicManager.channel != null) {
+            musicManager.textChannel = channel;
+
+            for (AudioTrack track : tracks) {
+                musicManager.manager.scheduler.queue(track);
+            }
         }
 
         return musicManager.channel != null;
