@@ -381,15 +381,17 @@ public class PorkBot {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                AudioTrack firstTrack = playlist.getSelectedTrack();
+                List<AudioTrack> tracks = playlist.getTracks();
 
-                if (firstTrack == null) {
-                    firstTrack = playlist.getTracks().get(0);
+                if (tracks == null || tracks.size() == 0) {
+                    channel.sendMessage("Empty or invalid playlist, not loading");
                 }
 
-                channel.sendMessage("Adding to queue " + firstTrack.getInfo().title + " (first track of playlist " + playlist.getName() + ")").queue();
+                channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
 
-                play(channel.getGuild(), musicManager, firstTrack, user, channel);
+                for (AudioTrack track : tracks) {
+                    play(channel.getGuild(), musicManager, track, user, channel);
+                }
             }
 
             @Override
@@ -493,11 +495,13 @@ public class PorkBot {
                         entry.getValue().manager.player.destroy();
                         entry.getValue().channel.getGuild().getAudioManager().closeAudioConnection();
                         iterator.remove();
+                        continue;
                     }
                     if (entry.getValue().manager.scheduler.queue.size() == 0 && entry.getValue().manager.player.getPlayingTrack() == null)   {
                         entry.getValue().manager.player.destroy();
                         entry.getValue().channel.getGuild().getAudioManager().closeAudioConnection();
                         iterator.remove();
+                        continue;
                     }
                 }
             }
