@@ -391,7 +391,8 @@ public class PorkBot {
 
                 for (int i = 0; i < tracks.size(); i++) {
                     if (i == 0) {
-                        if (!play(channel.getGuild(), musicManager, playlist.getSelectedTrack(), user, channel)) {
+                        play(channel.getGuild(), musicManager, playlist.getSelectedTrack(), user, channel);
+                        if (musicManager.channel == null) {
                             break;
                         }
                     } else {
