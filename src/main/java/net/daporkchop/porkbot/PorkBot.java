@@ -104,7 +104,7 @@ public class PorkBot {
                     for (JDA jda : shards) {
                         HTTPUtils.performPostRequestWithAuth(HTTPUtils.constantURL("https://bots.discord.pw/api/bots/287894637165936640/stats"),
                                 "{" +
-                                        "\"server_count\": " + ShardUtils.getGuildCount() + "," +
+                                        "\"server_count\": " + jda.getGuilds().size() + "," +
                                         "\"shard_id\": " + jda.getShardInfo().getShardId() + "," +
                                         "\"shard_count\": " + shardCount +
                                         "}",
