@@ -18,6 +18,7 @@ package net.daporkchop.porkbot.util;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
@@ -53,8 +54,13 @@ public class MessageUtils {
         try {
             Thread.sleep(500);
             channel.sendMessage(builder.build()).queue();
-        } catch (PermissionException | InterruptedException e) {
+        } catch (PermissionException e) {
             //we can't do anything about it
+            if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
+                channel.sendMessage("Lacking permission to embed links!").queue();
+            }
+        } catch (InterruptedException e) {
+            //wtf java
         }
     }
 
@@ -71,6 +77,9 @@ public class MessageUtils {
             channel.sendFile(image, name, new MessageBuilder().setEmbed(builder.build()).build()).queue();
         } catch (PermissionException e) {
             //we can't do anything about it
+            if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
+                channel.sendMessage("Lacking permission to embed links!").queue();
+            }
         }
     }
 
