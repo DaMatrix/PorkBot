@@ -68,34 +68,37 @@ public abstract class CommandRegistry {
      * @param thisShardJDA
      */
     public static void runCommand(MessageReceivedEvent evt, String rawContent, JDA thisShardJDA) {
-        if (PorkBot.INSTANCE.shards.size() < PorkBot.shardCount) {
-            evt.getTextChannel().sendMessage("PorkBot is still starting up! Please wait.").queue();
-            return;
-        }
-
         try {
-            if (evt.getTextChannel() == null) {
-                return;
+            if (PorkBot.INSTANCE.shards.size() < PorkBot.shardCount) {
+                throw new NullPointerException();
             }
 
-            String[] split = rawContent.split(" ");
-            Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
-            if (cmd != null) {
-                evt.getTextChannel().sendTyping().queue();
+            try {
+                if (evt.getTextChannel() == null) {
+                    return;
+                }
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        cmd.execute(evt, split, rawContent, thisShardJDA);
-                        COMMAND_COUNT++;
-                        COMMAND_COUNT_TOTAL++;
-                        cmd.uses++;
-                    }
-                }.start();
+                String[] split = rawContent.split(" ");
+                Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
+                if (cmd != null) {
+                    evt.getTextChannel().sendTyping().queue();
+
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            cmd.execute(evt, split, rawContent, thisShardJDA);
+                            COMMAND_COUNT++;
+                            COMMAND_COUNT_TOTAL++;
+                            cmd.uses++;
+                        }
+                    }.start();
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+                MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
+        } catch (NullPointerException e) {
+            evt.getTextChannel().sendMessage("PorkBot is still starting up! Please wait.").queue();
         }
     }
 
