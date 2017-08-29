@@ -16,10 +16,11 @@
 
 package net.daporkchop.porkbot.command.base.minecraft;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -31,7 +32,7 @@ public class CommandMcHead extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         try {
             if (args.length < 2 || args[1].isEmpty()) {
                 sendErrorMessage(evt.getTextChannel(), "Name isn't given!");
@@ -43,14 +44,14 @@ public class CommandMcHead extends Command {
                 builder.setImage("attachment://image.png");
                 builder.setColor(Color.DARK_GRAY);
 
-                byte[] outBytes = PorkBot.downloadImage("https://crafatar.com/renders/head/" + uuid + "?size=128&overlay&default=MHF_Steve");
+                byte[] outBytes = MessageUtils.downloadImage("https://crafatar.com/renders/head/" + uuid + "?size=128&overlay&default=MHF_Steve");
 
                 builder.addField(args[1] + "'s skin", "", false);
 
-                PorkBot.sendImage(builder, outBytes, "image.png", evt.getTextChannel());
+                MessageUtils.sendImage(builder, outBytes, "image.png", evt.getTextChannel());
             });
         } catch (Exception e) {
-            PorkBot.sendException(e, evt);
+            MessageUtils.sendException(e, evt);
         }
     }
 

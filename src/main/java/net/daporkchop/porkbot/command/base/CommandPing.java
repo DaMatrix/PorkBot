@@ -16,9 +16,10 @@
 
 package net.daporkchop.porkbot.command.base;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -30,13 +31,13 @@ public class CommandPing extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
         builder.setTitle("PorkBot ping...", "http://www.daporkchop.net/porkbot");
 
-        builder.addField("**Pong:**", PorkBot.INSTANCE.jda.getPing() + "ms", false);
-        PorkBot.sendMessage(builder, evt.getTextChannel());
+        builder.addField("**Pong:**", thisShardJDA.getPing() + "ms", false);
+        MessageUtils.sendMessage(builder, evt.getTextChannel());
     }
 
     @Override

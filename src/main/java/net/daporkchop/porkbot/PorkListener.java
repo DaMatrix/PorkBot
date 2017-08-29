@@ -17,8 +17,12 @@
 package net.daporkchop.porkbot;
 
 import net.daporkchop.porkbot.command.CommandRegistry;
+import net.daporkchop.porkbot.util.ShardUtils;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -26,9 +30,11 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import java.util.List;
 
 public class PorkListener extends ListenerAdapter {
+    public JDA shard;
 
-//    public static final MessageEmbed.Field PlayersHeader = new MessageEmbed.Field(null, "Test header!", false);
-//   public static final MessageEmbed.Field PlayersSubHeader = new MessageEmbed.Field(null, "", false);
+    public PorkListener(JDA jda) {
+        shard = jda;
+    }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -39,7 +45,7 @@ public class PorkListener extends ListenerAdapter {
         String message = event.getMessage().getRawContent();
 
         if (message.startsWith("..")) {
-            CommandRegistry.runCommand(event, message);
+            CommandRegistry.runCommand(event, message, shard);
         } else if (event.getChannelType().ordinal() == ChannelType.PRIVATE.ordinal()) {
             if (event.getAuthor().getId().equals("226975061880471552")) {
                 switch (message) {
@@ -52,7 +58,7 @@ public class PorkListener extends ListenerAdapter {
                                 try {
                                     Thread.sleep(500);
                                     CommandRegistry.save();
-                                    PorkBot.INSTANCE.jda.shutdown();
+                                    ShardUtils.shutdown();
                                     System.exit(0);
                                 } catch (InterruptedException e) {
 
@@ -65,7 +71,7 @@ public class PorkListener extends ListenerAdapter {
                 if (message.startsWith(",,announce ")) {
                     String toAnnouce = message.substring(11);
 
-                    List<Guild> servers = PorkBot.INSTANCE.jda.getGuilds();
+                    List<Guild> servers = ShardUtils.guilds;
                     for (Guild server : servers) {
                         try {
                             server.getPublicChannel().sendMessage(toAnnouce).queue();
@@ -76,5 +82,15 @@ public class PorkListener extends ListenerAdapter {
                 }
             }
         }
+    }
+
+    @Override
+    public void onGuildJoin(GuildJoinEvent event) {
+        ShardUtils.guilds.add(event.getGuild());
+    }
+
+    @Override
+    public void onGuildLeave(GuildLeaveEvent event) {
+        ShardUtils.guilds.remove(event.getGuild());
     }
 }

@@ -19,13 +19,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.daporkchop.porkbot.PorkBot;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
@@ -111,7 +111,7 @@ public class UUIDFetcher {
     }
 
     public static void init() {
-        new Timer().schedule(new TimerTask() {
+        PorkBot.timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (requests.isEmpty()) {

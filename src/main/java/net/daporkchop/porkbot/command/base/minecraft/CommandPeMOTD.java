@@ -16,11 +16,12 @@
 
 package net.daporkchop.porkbot.command.base.minecraft;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -31,7 +32,7 @@ public class CommandPeMOTD extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;
@@ -46,11 +47,11 @@ public class CommandPeMOTD extends Command {
             try {
                 ping = MCPing.pingPe(ipPort[0], Integer.parseInt(ipPort[1]), false);
             } catch (NumberFormatException e) {
-                PorkBot.sendMessage("Unable to interpret port number!", evt.getTextChannel());
+                MessageUtils.sendMessage("Unable to interpret port number!", evt.getTextChannel());
                 return;
             }
         } else {
-            PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
+            MessageUtils.sendMessage("Unable to parse server ip!", evt.getTextChannel());
             return;
         }
 
@@ -71,7 +72,7 @@ public class CommandPeMOTD extends Command {
                 }
             } else {
                 if (ping.errored) {
-                    PorkBot.sendException(ping.error, evt);
+                    MessageUtils.sendException(ping.error, evt);
                 } else {
                     //server's offline
                     builder.setColor(Color.RED);
@@ -79,9 +80,9 @@ public class CommandPeMOTD extends Command {
                 }
             }
 
-            PorkBot.sendMessage(builder, evt.getTextChannel());
+            MessageUtils.sendMessage(builder, evt.getTextChannel());
         } catch (IllegalStateException e) {
-            PorkBot.sendMessage("Unable to parse server status!", evt.getTextChannel());
+            MessageUtils.sendMessage("Unable to parse server status!", evt.getTextChannel());
             return;
         }
     }

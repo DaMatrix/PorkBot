@@ -16,11 +16,12 @@
 
 package net.daporkchop.porkbot.command.base.minecraft;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -31,7 +32,7 @@ public class CommandMcMOTD extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;
@@ -45,11 +46,11 @@ public class CommandMcMOTD extends Command {
             try {
                 ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]), false);
             } catch (NumberFormatException e) {
-                PorkBot.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
+                MessageUtils.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;
             }
         } else {
-            PorkBot.sendMessage("Unable to parse server ip!", evt.getTextChannel());
+            MessageUtils.sendMessage("Unable to parse server ip!", evt.getTextChannel());
             return;
         }
 
@@ -66,7 +67,7 @@ public class CommandMcMOTD extends Command {
             builder.addField("**" + args[1] + "**", "***OFFLINE***", false);
         }
 
-        PorkBot.sendMessage(builder, evt.getTextChannel());
+        MessageUtils.sendMessage(builder, evt.getTextChannel());
     }
 
     @Override

@@ -18,6 +18,8 @@ package net.daporkchop.porkbot.command;
 
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.util.DataTag;
+import net.daporkchop.porkbot.util.MessageUtils;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.File;
@@ -63,8 +65,14 @@ public abstract class CommandRegistry {
      * Runs a comamnd
      *
      * @param evt
+     * @param thisShardJDA
      */
-    public static void runCommand(MessageReceivedEvent evt, String rawContent) {
+    public static void runCommand(MessageReceivedEvent evt, String rawContent, JDA thisShardJDA) {
+        if (PorkBot.INSTANCE.shards.size() < PorkBot.shardCount) {
+            evt.getTextChannel().sendMessage("PorkBot is still starting up! Please wait.").queue();
+            return;
+        }
+
         try {
             if (evt.getTextChannel() == null) {
                 return;
@@ -78,7 +86,7 @@ public abstract class CommandRegistry {
                 new Thread() {
                     @Override
                     public void run() {
-                        cmd.execute(evt, split, rawContent);
+                        cmd.execute(evt, split, rawContent, thisShardJDA);
                         COMMAND_COUNT++;
                         COMMAND_COUNT_TOTAL++;
                         cmd.uses++;
@@ -87,7 +95,7 @@ public abstract class CommandRegistry {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            PorkBot.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
+            MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
         }
     }
 

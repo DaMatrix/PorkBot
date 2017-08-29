@@ -23,6 +23,7 @@ import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.GregorianCalendar;
 
 /**
@@ -43,7 +44,13 @@ public abstract class MCPing {
      */
     public static PePing pingPe(String ip, int port, boolean measurePing) {
         try {
-            Identifier identifier = RakNetUtils.getServerIdentifier(ip, port);
+            Identifier identifier;
+
+            try {
+                identifier = RakNetUtils.getServerIdentifier(ip, port);
+            } catch (UnknownHostException e) {
+                identifier = null;
+            }
 
             if (identifier != null) {
                 if (!MCPEIdentifier.isMCPEIdentifier(identifier)) {

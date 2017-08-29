@@ -16,8 +16,9 @@
 
 package net.daporkchop.porkbot.command.base;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.MessageUtils;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class CommandSay extends Command {
@@ -27,13 +28,13 @@ public class CommandSay extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "Add a message!");
             return;
         }
 
-        PorkBot.sendMessage(evt.getAuthor().getName() + ": " + message.substring(6), evt.getTextChannel());
+        MessageUtils.sendMessage(evt.getAuthor().getName() + ": " + message.substring(6), evt.getTextChannel());
     }
 
     @Override

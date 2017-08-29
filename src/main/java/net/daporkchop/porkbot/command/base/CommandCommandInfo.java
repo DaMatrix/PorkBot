@@ -16,9 +16,10 @@
 
 package net.daporkchop.porkbot.command.base;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.command.CommandRegistry;
+import net.daporkchop.porkbot.util.MessageUtils;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class CommandCommandInfo extends Command {
@@ -28,7 +29,7 @@ public class CommandCommandInfo extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "You need to have at least one argument!");
             return;
@@ -36,11 +37,11 @@ public class CommandCommandInfo extends Command {
 
         Command command = CommandRegistry.COMMANDS.getOrDefault(args[1], null);
         if (command == null) {
-            PorkBot.sendMessage("No such command: `" + args[1] + "`", evt.getTextChannel());
+            MessageUtils.sendMessage("No such command: `" + args[1] + "`", evt.getTextChannel());
             return;
         }
 
-        PorkBot.sendMessage("Statistics of command: `" + command.prefix + "`\n\nUses: `" + command.uses + "`", evt.getTextChannel());
+        MessageUtils.sendMessage("Statistics of command: `" + command.prefix + "`\n\nUses: `" + command.uses + "`", evt.getTextChannel());
     }
 
     @Override

@@ -16,10 +16,12 @@
 
 package net.daporkchop.porkbot.command.base;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.command.CommandRegistry;
+import net.daporkchop.porkbot.util.MessageUtils;
+import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -31,20 +33,20 @@ public class CommandBotInfo extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
         builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");
 
         builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
 
-        builder.addField("Name:", "PorkBot#" + PorkBot.INSTANCE.jda.getSelfUser().getDiscriminator(), true);
+        builder.addField("Name:", "PorkBot#" + thisShardJDA.getSelfUser().getDiscriminator(), true);
 
-        builder.addField("Servers:", String.valueOf(PorkBot.INSTANCE.jda.getGuilds().size()), true);
+        builder.addField("Total servers:", String.valueOf(ShardUtils.getGuildCount()), true);
 
-        builder.addField("Known users:", String.valueOf(PorkBot.INSTANCE.jda.getUsers().size()), true);
+        builder.addField("Total users:", String.valueOf(ShardUtils.getUserCount()), true);
 
-        builder.addField("ID:", PorkBot.INSTANCE.jda.getSelfUser().getId(), true);
+        builder.addField("ID:", thisShardJDA.getSelfUser().getId(), true);
 
         builder.addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true);
 
@@ -52,7 +54,14 @@ public class CommandBotInfo extends Command {
 
         builder.addField("Used RAM:", ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB", false);
 
-        PorkBot.sendMessage(builder, evt.getTextChannel());
+        builder.addField("", "**SHARD INFO**", false);
+
+        builder.addField("Shard #:", String.valueOf(thisShardJDA.getShardInfo().getShardId()), true);
+        builder.addField("Shard servers:", String.valueOf(thisShardJDA.getGuilds().size()), true);
+
+        builder.addField("Shard users:", String.valueOf(thisShardJDA.getUsers().size()), true);
+
+        MessageUtils.sendMessage(builder, evt.getTextChannel());
     }
 
     @Override

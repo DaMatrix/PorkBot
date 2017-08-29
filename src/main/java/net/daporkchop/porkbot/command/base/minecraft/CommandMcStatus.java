@@ -19,10 +19,11 @@ package net.daporkchop.porkbot.command.base.minecraft;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.HTTPUtils;
+import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -36,13 +37,13 @@ public class CommandMcStatus extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         String s;
         try {
             s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/mcstatus"));
         } catch (IOException e) {
             e.printStackTrace();
-            PorkBot.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
+            MessageUtils.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
             return;
         }
 
@@ -79,9 +80,9 @@ public class CommandMcStatus extends Command {
                 }
             }
 
-            PorkBot.sendMessage(builder, evt.getTextChannel());
+            MessageUtils.sendMessage(builder, evt.getTextChannel());
         } catch (IllegalStateException e) {
-            PorkBot.sendMessage("Unable to parse minecraft status!", evt.getTextChannel());
+            MessageUtils.sendMessage("Unable to parse minecraft status!", evt.getTextChannel());
             return;
         }
     }

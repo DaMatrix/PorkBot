@@ -16,7 +16,8 @@
 
 package net.daporkchop.porkbot.command;
 
-import net.daporkchop.porkbot.PorkBot;
+import net.daporkchop.porkbot.util.MessageUtils;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class CommandInvite extends Command {
@@ -26,8 +27,8 @@ public class CommandInvite extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
-        PorkBot.sendMessage("***Invite link is on bot site:***\nhttp://www.daporkchop.net/porkbot", evt.getTextChannel());
+    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
+        MessageUtils.sendMessage("***Invite link is on bot site:***\nhttp://www.daporkchop.net/porkbot", evt.getTextChannel());
     }
 
     @Override

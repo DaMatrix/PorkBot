@@ -14,53 +14,55 @@
  *
  */
 
-package net.daporkchop.porkbot.command;
+package net.daporkchop.porkbot.util;
 
-import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.Guild;
 
-public abstract class Command {
+import java.util.ArrayList;
+import java.util.List;
 
-    public String prefix;
-    public int uses = 0;
+public class ShardUtils {
+    public static List<Guild> guilds = new ArrayList<>();
+    private static List<JDA> shards = null;
 
-    public Command(String prefix) {
-        this.prefix = prefix;
+    public static void setShards(List<JDA> shards) {
+        if (shards != null) {
+            ShardUtils.shards = shards;
+        }
+        ArrayList<Guild> guilds = new ArrayList<>();
+        for (JDA jda : shards) {
+            guilds.addAll(jda.getGuilds());
+        }
+        ShardUtils.guilds = guilds;
     }
 
-    /**
-     * Does command logic!
-     *
-     * @param evt The MessageReceivedEvent to be parsed
-     * @param thisShardJDA
-     */
-    public abstract void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA);
-
-    /**
-     * Gets the command's usage
-     *
-     * you should probably override this
-     *
-     * @return
-     */
-    public String getUsage() {
-        return ".." + prefix;
+    public static void setGame(Game game) {
+        for (JDA jda : shards) {
+            jda.getPresence().setGame(game);
+        }
     }
 
-    /**
-     * Gets and example of using the command
-     *
-     * you should probably override this
-     *
-     * @return
-     */
-    public String getUsageExample() {
-        return ".." + prefix;
+    public static int getGuildCount() {
+        int i = 0;
+        for (JDA jda : shards) {
+            i += jda.getGuilds().size();
+        }
+        return i;
     }
 
-    public void sendErrorMessage(TextChannel channel, String message) {
-        MessageUtils.sendMessage((message == null ? "" : message + "\n") + "Usage: `" + getUsage() + "`\nExample: `" + getUsageExample() + "`", channel);
+    public static int getUserCount() {
+        int i = 0;
+        for (JDA jda : shards) {
+            i += jda.getUsers().size();
+        }
+        return i;
+    }
+
+    public static void shutdown() {
+        for (JDA jda : shards) {
+            jda.shutdownNow();
+        }
     }
 }

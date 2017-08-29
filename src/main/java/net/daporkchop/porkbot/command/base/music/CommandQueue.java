@@ -17,9 +17,11 @@
 package net.daporkchop.porkbot.command.base.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.music.GuildAudioInfo;
+import net.daporkchop.porkbot.util.AudioUtils;
+import net.daporkchop.porkbot.util.MessageUtils;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
@@ -30,8 +32,8 @@ public class CommandQueue extends Command {
         super("queue");
     }
 
-    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
-        GuildAudioInfo info = PorkBot.INSTANCE.getGuildAudioPlayer(evt.getGuild(), false);
+    public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
+        GuildAudioInfo info = AudioUtils.getGuildAudioPlayer(evt.getGuild(), false);
         if (info == null)   {
             evt.getTextChannel().sendMessage("Not playing!").queue();
         } else {
@@ -43,7 +45,7 @@ public class CommandQueue extends Command {
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(track.getInfo().length);
                 msg += (i + 1) + ": " + tracks.get(i).getInfo().title + "(`" + minutes + ":" + seconds + "`)\n";
             }
-            PorkBot.sendMessage(msg, evt.getTextChannel());
+            MessageUtils.sendMessage(msg, evt.getTextChannel());
         }
     }
 }
