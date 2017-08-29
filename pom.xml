@@ -40,6 +40,10 @@
             <id>maven-repo</id>
             <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
