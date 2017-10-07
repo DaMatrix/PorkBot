@@ -21,7 +21,6 @@ import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -41,19 +40,15 @@ public class CommandSkinSteal extends Command {
             }
 
             UUIDFetcher.enqeueRequest(args[1], uuid -> {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setImage("attachment://image.png");
+                builder.setColor(Color.DARK_GRAY);
+
                 byte[] outBytes = MessageUtils.downloadImage("https://crafatar.com/skins/" + uuid + "?default=MHF_Steve");
 
-                evt.getTextChannel().sendFile(outBytes, uuid + ".png", new MessageBuilder().append(uuid).build()).queue(msg -> {
-                    String imageUrl = msg.getAttachments().get(0).getUrl();
-                    EmbedBuilder builder = new EmbedBuilder();
-                    builder.setImage(imageUrl);
-                    builder.setColor(Color.DARK_GRAY);
-                    builder.setTitle("Download skin", imageUrl);
+                builder.addField(args[1] + "'s skin", "", false);
 
-                    builder.addField(args[1] + "'s skin", "", false);
-
-                    MessageUtils.sendImage(builder, outBytes, "image.png", evt.getTextChannel());
-                });
+                MessageUtils.sendImage(builder, outBytes, "image.png", evt.getTextChannel());
             });
         } catch (Exception e) {
             MessageUtils.sendException(e, evt);

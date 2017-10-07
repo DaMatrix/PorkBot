@@ -34,6 +34,7 @@ public class CommandPlay extends Command {
     public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
         if (split.length < 2) {
             sendErrorMessage(evt.getTextChannel(), "Not enough arguments!");
+            return;
         }
         if (validator.isValid(split[1])) {
             AudioUtils.loadAndPlay(evt.getTextChannel(), split[1], evt.getMember());
