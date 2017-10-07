@@ -102,7 +102,7 @@ public class AudioUtils {
         playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                channel.sendMessage("Adding to queue " + track.getInfo().title).queue();
+                channel.sendMessage("Adding to queue: " + track.getInfo().title).queue();
 
                 play(channel.getGuild(), musicManager, track, user, channel);
             }

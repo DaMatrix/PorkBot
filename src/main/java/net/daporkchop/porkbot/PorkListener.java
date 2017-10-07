@@ -74,7 +74,7 @@ public class PorkListener extends ListenerAdapter {
                     List<Guild> servers = ShardUtils.guilds;
                     for (Guild server : servers) {
                         try {
-                            server.getPublicChannel().sendMessage(toAnnouce).queue();
+                            server.getDefaultChannel().sendMessage(toAnnouce).queue();
                         } catch (PermissionException e) {
                             //who cares, we can't do anything about it
                         }

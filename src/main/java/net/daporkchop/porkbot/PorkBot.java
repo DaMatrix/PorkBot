@@ -21,10 +21,7 @@ import net.daporkchop.porkbot.command.CommandInvite;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.base.*;
 import net.daporkchop.porkbot.command.base.minecraft.*;
-import net.daporkchop.porkbot.command.base.misc.CommandDice;
-import net.daporkchop.porkbot.command.base.misc.CommandEmojiID;
-import net.daporkchop.porkbot.command.base.misc.CommandInterject;
-import net.daporkchop.porkbot.command.base.misc.CommandThonk;
+import net.daporkchop.porkbot.command.base.misc.*;
 import net.daporkchop.porkbot.command.base.music.*;
 import net.daporkchop.porkbot.util.*;
 import net.dv8tion.jda.core.AccountType;
@@ -151,5 +148,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandQueue());
         CommandRegistry.registerCommand(new CommandStop());
         CommandRegistry.registerCommand(new CommandSkip());
+        CommandRegistry.registerCommand(new CommandSkinSteal());
+        CommandRegistry.registerCommand(new CommandShutdown());
     }
 }
