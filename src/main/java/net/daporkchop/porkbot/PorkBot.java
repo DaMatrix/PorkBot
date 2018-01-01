@@ -43,10 +43,7 @@ public class PorkBot {
     public
     static
     final
-    int
-            shardCount
-            =
-            2;
+    int shardCount = 4;
 
     public static PorkBot INSTANCE;
     public static Logger logger;
@@ -110,6 +107,7 @@ public class PorkBot {
                     }
                 } catch (Exception e) {
                 }
+                CommandRegistry.save();
             }
         }, 1000, 120000);
 

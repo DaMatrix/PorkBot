@@ -16,10 +16,11 @@
 
 package net.daporkchop.porkbot.util.mcpinger;
 
+import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPing;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPingReply;
 import net.marfgamer.jraknet.identifier.Identifier;
-import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 import java.net.InetAddress;
@@ -53,10 +54,10 @@ public abstract class MCPing {
             }
 
             if (identifier != null) {
-                if (!MCPEIdentifier.isMCPEIdentifier(identifier)) {
+                if (!MinecraftIdentifier.isMCPEIdentifier(identifier)) {
                     return new PePing(true, true, null, null, null, null, 0, false, null);
                 }
-                MCPEIdentifier mcpeIdentifier = new MCPEIdentifier(identifier);
+                MinecraftIdentifier mcpeIdentifier = new MinecraftIdentifier(identifier);
                 return new PePing(true, false, identifier.build().split(";")[1], mcpeIdentifier.getOnlinePlayerCount() + "/" + mcpeIdentifier.getMaxPlayerCount(), measurePing ? getPingToIP(ip) : "0 ms", mcpeIdentifier.getVersionTag(), mcpeIdentifier.getServerProtocol(), false, null);
             } else {
                 return new PePing(false, false, null, null, null, null, 0, false, null);
@@ -114,7 +115,7 @@ public abstract class MCPing {
                                 playerNames += ", " + response.onlineUsernames[i];
                             }
                         }
-                        return new Query(true, false, response.getMOTD(), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), getLatency ? ping.ping : "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), ping.favicon);
+                        return new Query(true, false, TextFormat.clean(response.getMOTD()), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), getLatency ? ping.ping : "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), ping.favicon);
                     } catch (Exception e) {
                         e.printStackTrace();
                         //no query, as the server is online

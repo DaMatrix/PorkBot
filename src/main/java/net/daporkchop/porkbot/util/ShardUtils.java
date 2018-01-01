@@ -19,6 +19,7 @@ package net.daporkchop.porkbot.util;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.managers.AudioManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +65,20 @@ public class ShardUtils {
         for (JDA jda : shards) {
             jda.shutdownNow();
         }
+    }
+
+    /**
+     * WARNING: DO NOT USE FREQUENTLY!
+     */
+    public static List<AudioManager> getConnectedVoice() {
+        List<AudioManager> list = new ArrayList<>();
+        for (JDA jda : shards) {
+            for (AudioManager manager : jda.getAudioManagers()) {
+                if (manager.isConnected()) {
+                    list.add(manager);
+                }
+            }
+        }
+        return list;
     }
 }

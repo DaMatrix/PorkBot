@@ -227,6 +227,15 @@ public class AudioUtils {
                         continue;
                     }
                 }
+
+                //hacky fix for things
+                //xd
+                List<AudioManager> list = ShardUtils.getConnectedVoice();
+                for (AudioManager manager : list) {
+                    if (manager.getConnectedChannel().getMembers().size() < 2) {
+                        manager.closeAudioConnection();
+                    }
+                }
             }
         }, 10000, 5000);
     }
