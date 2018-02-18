@@ -16,12 +16,12 @@
 
 package net.daporkchop.porkbot.util.mcpinger;
 
+import com.whirvis.jraknet.identifier.Identifier;
+import com.whirvis.jraknet.identifier.MinecraftIdentifier;
+import com.whirvis.jraknet.util.RakNetUtils;
 import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPing;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPingReply;
-import net.marfgamer.jraknet.identifier.Identifier;
-import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
-import net.marfgamer.jraknet.util.RakNetUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

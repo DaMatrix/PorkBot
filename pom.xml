@@ -36,10 +36,10 @@
 			<name>jcenter-bintray</name>
 			<url>http://jcenter.bintray.com</url>
 		</repository>
-        <repository>
-            <id>maven-repo</id>
-            <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
-        </repository>
+		<repository>
+			<id>maven-repo</id>
+			<url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
+		</repository>
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -77,11 +77,11 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.5</version>
         </dependency>
-        <dependency>
-            <groupId>net.marfgamer</groupId>
-            <artifactId>jraknet</artifactId>
-            <version>2.8.4</version>
-        </dependency>
+		<dependency>
+			<groupId>com.whirvis</groupId>
+			<artifactId>jraknet</artifactId>
+			<version>2.9.0</version>
+		</dependency>
 		<dependency>
 			<groupId>dnsjava</groupId>
 			<artifactId>dnsjava</artifactId>
