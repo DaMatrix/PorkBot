@@ -42,12 +42,12 @@ public class PorkListener extends ListenerAdapter {
             //bots don't matter to us!
             return;
         }
-        String message = event.getMessage().getRawContent();
+        String message = event.getMessage().getContentRaw();
 
         if (message.startsWith("..")) {
             CommandRegistry.runCommand(event, message, shard);
         } else if (event.getChannelType().ordinal() == ChannelType.PRIVATE.ordinal()) {
-            if (event.getAuthor().getId().equals("226975061880471552")) {
+            if (event.getAuthor().getIdLong() == 226975061880471552L) {
                 switch (message) {
                     case ",,instareboot":
                         event.getChannel().sendMessage("Rebooting...").queue();

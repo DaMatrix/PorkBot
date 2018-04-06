@@ -95,7 +95,7 @@ public abstract class CommandRegistry {
                 }
             } catch (Throwable e) {
                 e.printStackTrace();
-                MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getRawContent() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
+                MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
             }
         } catch (NullPointerException e) {
             evt.getTextChannel().sendMessage("PorkBot is still starting up! Please wait.").queue();

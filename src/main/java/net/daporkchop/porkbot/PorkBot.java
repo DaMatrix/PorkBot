@@ -19,16 +19,50 @@ package net.daporkchop.porkbot;
 import net.daporkchop.porkbot.command.CommandHelp;
 import net.daporkchop.porkbot.command.CommandInvite;
 import net.daporkchop.porkbot.command.CommandRegistry;
-import net.daporkchop.porkbot.command.base.*;
-import net.daporkchop.porkbot.command.base.minecraft.*;
-import net.daporkchop.porkbot.command.base.misc.*;
-import net.daporkchop.porkbot.command.base.music.*;
-import net.daporkchop.porkbot.util.*;
+import net.daporkchop.porkbot.command.base.CommandBotInfo;
+import net.daporkchop.porkbot.command.base.CommandCommandInfo;
+import net.daporkchop.porkbot.command.base.CommandPing;
+import net.daporkchop.porkbot.command.base.CommandSay;
+import net.daporkchop.porkbot.command.base.CommandTest;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcAvatar;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcCount;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcHead;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcIcon;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcLatency;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcMOTD;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcPing;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcQuery;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcSkin;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcStatus;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcUUID;
+import net.daporkchop.porkbot.command.base.minecraft.CommandMcVersion;
+import net.daporkchop.porkbot.command.base.minecraft.CommandOfflineUUID;
+import net.daporkchop.porkbot.command.base.minecraft.CommandPeCount;
+import net.daporkchop.porkbot.command.base.minecraft.CommandPeLatency;
+import net.daporkchop.porkbot.command.base.minecraft.CommandPeMOTD;
+import net.daporkchop.porkbot.command.base.minecraft.CommandPePing;
+import net.daporkchop.porkbot.command.base.minecraft.CommandPeQuery;
+import net.daporkchop.porkbot.command.base.minecraft.CommandPeVersion;
+import net.daporkchop.porkbot.command.base.minecraft.CommandSkinSteal;
+import net.daporkchop.porkbot.command.base.misc.CommandDice;
+import net.daporkchop.porkbot.command.base.misc.CommandEmojiID;
+import net.daporkchop.porkbot.command.base.misc.CommandInterject;
+import net.daporkchop.porkbot.command.base.misc.CommandShutdown;
+import net.daporkchop.porkbot.command.base.misc.CommandThonk;
+import net.daporkchop.porkbot.command.base.music.CommandPlay;
+import net.daporkchop.porkbot.command.base.music.CommandQueue;
+import net.daporkchop.porkbot.command.base.music.CommandShuffle;
+import net.daporkchop.porkbot.command.base.music.CommandSkip;
+import net.daporkchop.porkbot.command.base.music.CommandStop;
+import net.daporkchop.porkbot.util.AudioUtils;
+import net.daporkchop.porkbot.util.HTTPUtils;
+import net.daporkchop.porkbot.util.KeyGetter;
+import net.daporkchop.porkbot.util.ShardUtils;
+import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
@@ -70,7 +104,7 @@ public class PorkBot {
                 System.out.println("Started shard " + (i + 1) + " out of " + shardCount);
                 Thread.sleep(5000); //rate limiting
             }
-        } catch (LoginException | InterruptedException | RateLimitedException e) {
+        } catch (LoginException | InterruptedException e) {
             e.printStackTrace();
             System.exit(0);
         }
@@ -84,7 +118,7 @@ public class PorkBot {
 
     public void start() {
         ShardUtils.setShards(shards);
-        ShardUtils.setGame(Game.of("Say ..help", "https://www.twitch.tv/daporkchop_"));
+        ShardUtils.setGame(Game.of(Game.GameType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
 
         UUIDFetcher.init();
         AudioUtils.init();
