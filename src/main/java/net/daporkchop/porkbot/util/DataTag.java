@@ -34,7 +34,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ObjectDB implements Serializable {
+public class DataTag implements Serializable {
     public static final File USER_FOLDER = new File(System.getProperty("user.dir"));
     public static final File HOME_FOLDER = new File(System.getProperty("user.home"));
     private static final long serialVersionUID = 1L;
@@ -47,7 +47,7 @@ public class ObjectDB implements Serializable {
     private HashMap<String, Short> shorts;
     private HashMap<String, Double> doubles;
     private HashMap<String, Long> longs;
-    private HashMap<String, ObjectDB> tags;
+    private HashMap<String, DataTag> tags;
     private HashMap<String, Serializable> objs;
 
     private HashMap<String, int[]> intArrays;
@@ -60,13 +60,13 @@ public class ObjectDB implements Serializable {
     private HashMap<String, long[]> longArrays;
     private HashMap<String, Serializable[]> objArrays;
 
-    public ObjectDB(File saveTo) {
+    public DataTag(File saveTo) {
         file = saveTo;
         set();
         init();
     }
 
-    public ObjectDB(ObjectDB tag) {
+    public DataTag(DataTag tag) {
         createFile(new File(tag.file.getParentFile(), tag.file.getName().replaceAll(".dat", "")).toString(), true);
         file = new File(tag.file.getParentFile(), tag.file.getName().replaceAll(".dat", "") + "/" + tag.file.getName().replaceAll(".dat", "") + " tag - " + tag.tags.size() + ".dat");
         set();
@@ -286,7 +286,7 @@ public class ObjectDB implements Serializable {
         shorts = new HashMap<String, Short>();
         doubles = new HashMap<String, Double>();
         longs = new HashMap<String, Long>();
-        tags = new HashMap<String, ObjectDB>();
+        tags = new HashMap<String, DataTag>();
         objs = new HashMap<String, Serializable>();
         intArrays = new HashMap<String, int[]>();
         stringArrays = new HashMap<String, String[]>();
@@ -357,7 +357,7 @@ public class ObjectDB implements Serializable {
         return value;
     }
 
-    public ObjectDB setTag(String name, ObjectDB value) {
+    public DataTag setTag(String name, DataTag value) {
         check(name);
         tags.put(name, value);
         return value;
@@ -455,7 +455,7 @@ public class ObjectDB implements Serializable {
         return longs.containsKey(name) ? longs.get(name) : this.setLong(name, def);
     }
 
-    public ObjectDB getTag(String name, ObjectDB def) {
+    public DataTag getTag(String name, DataTag def) {
         return tags.containsKey(name) ? tags.get(name).load() : this.setTag(name, def);
     }
 
@@ -531,8 +531,8 @@ public class ObjectDB implements Serializable {
         return longs.containsKey(name) ? longs.get(name) : 0L;
     }
 
-    public ObjectDB getTag(String name) {
-        return tags.containsKey(name) ? tags.get(name).load() : new ObjectDB(this);
+    public DataTag getTag(String name) {
+        return tags.containsKey(name) ? tags.get(name).load() : new DataTag(this);
     }
 
     public Serializable getSerializable(String name) {
@@ -575,10 +575,10 @@ public class ObjectDB implements Serializable {
         return objArrays.containsKey(name) ? objArrays.get(name) : null;
     }
 
-    private ObjectDB load() {
+    private DataTag load() {
         try {
             ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-            ObjectDB obj = (ObjectDB) in.readObject();
+            DataTag obj = (DataTag) in.readObject();
 
             ints = obj.ints;
             strings = obj.strings;
@@ -611,7 +611,7 @@ public class ObjectDB implements Serializable {
         return this;
     }
 
-    public ObjectDB save() {
+    public DataTag save() {
         try {
             file.delete();
             file.createNewFile();

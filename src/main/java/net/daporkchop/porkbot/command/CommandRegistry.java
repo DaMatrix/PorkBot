@@ -16,8 +16,8 @@
 
 package net.daporkchop.porkbot.command;
 
+import net.daporkchop.porkbot.util.DataTag;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.daporkchop.porkbot.util.ObjectDB;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -41,10 +41,10 @@ public abstract class CommandRegistry {
      */
     public static long COMMAND_COUNT_TOTAL;
 
-    private static ObjectDB command_save;
+    private static DataTag command_save;
 
     static {
-        command_save = new ObjectDB(new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"));
+        command_save = new DataTag(new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"));
         COMMAND_COUNT_TOTAL = command_save.getLong("totalCommands", 0L);
     }
 
