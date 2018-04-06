@@ -19,6 +19,7 @@ package net.daporkchop.porkbot.command;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.util.DataTag;
 import net.daporkchop.porkbot.util.MessageUtils;
+import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -69,7 +70,7 @@ public abstract class CommandRegistry {
      */
     public static void runCommand(MessageReceivedEvent evt, String rawContent, JDA thisShardJDA) {
         try {
-            if (PorkBot.INSTANCE.shards.size() < PorkBot.shardCount) {
+            if (PorkBot.INSTANCE.shards.size() < ShardUtils.shardCount) {
                 throw new NullPointerException();
             }
 

@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShardUtils {
+    public
+    static
+    final
+    int shardCount = 4;
     public static List<Guild> guilds = new ArrayList<>();
     private static List<JDA> shards = null;
 

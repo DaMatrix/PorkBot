@@ -14,10 +14,12 @@
  *
  */
 
-package net.daporkchop.porkbot.util;
+package net.daporkchop.porkbot.audio;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.common.cache.CacheBuilder;
@@ -30,9 +32,15 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import gnu.trove.impl.sync.TSynchronizedLongObjectMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import net.daporkchop.porkbot.PorkBot;
-import net.daporkchop.porkbot.music.GuildAudioInfo;
-import net.daporkchop.porkbot.music.GuildAudioManager;
+import net.daporkchop.porkbot.util.KeyGetter;
+import net.daporkchop.porkbot.util.MessageUtils;
+import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -40,7 +48,8 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.managers.AudioManager;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class AudioUtils {
@@ -48,7 +57,7 @@ public class AudioUtils {
     protected static String devKey;
 
     public static LoadingCache<String, String> videoNameCache = CacheBuilder.newBuilder()
-            .maximumSize(5000)
+            .maximumSize(10000)
             .expireAfterWrite(1, TimeUnit.DAYS)
             .build(new CacheLoader<String, String>() {
                 public String load(String key) {
@@ -57,7 +66,7 @@ public class AudioUtils {
             });
 
     protected static AudioPlayerManager playerManager;
-    protected static Map<Long, GuildAudioInfo> musicManagers;
+    protected static TLongObjectMap<GuildAudioInfo> musicManagers;
 
     public static VoiceChannel connectToFirstVoiceChannel(AudioManager audioManager, Member user, TextChannel channel) {
         VoiceChannel toReturn = null;
@@ -83,20 +92,17 @@ public class AudioUtils {
                 musicManager = new GuildAudioInfo(new GuildAudioManager(playerManager));
             }
             musicManagers.put(guildId, musicManager);
-
             guild.getAudioManager().setSendingHandler(musicManager.manager.getSendHandler());
-
             return musicManager;
         } else {
             long guildId = Long.parseLong(guild.getId());
-            GuildAudioInfo musicManager = musicManagers.getOrDefault(guildId, null);
+            GuildAudioInfo musicManager = musicManagers.get(guildId);
 
             return musicManager;
         }
     }
 
     public static void loadAndPlay(final TextChannel channel, final String trackUrl, final Member user) {
-
         GuildAudioInfo musicManager = getGuildAudioPlayer(channel.getGuild(), true);
 
         playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
@@ -193,13 +199,14 @@ public class AudioUtils {
     }
 
     public static void init() {
-        youTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, new HttpRequestInitializer() {
+        youTube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), new HttpRequestInitializer() {
+            @Override
             public void initialize(HttpRequest request) throws IOException {
             }
         }).setApplicationName("youtube-cmdline-search-sample").build();
         devKey = KeyGetter.getDevKey();
 
-        musicManagers = new HashMap<>();
+        musicManagers = new TSynchronizedLongObjectMap<>(new TLongObjectHashMap<>());
         playerManager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(playerManager);
         AudioSourceManagers.registerLocalSource(playerManager);
@@ -207,29 +214,30 @@ public class AudioUtils {
         PorkBot.timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Iterator<Map.Entry<Long, GuildAudioInfo>> iterator = musicManagers.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    Map.Entry<Long, GuildAudioInfo> entry = iterator.next();
-                    if (entry.getValue().channel == null) {
-                        iterator.remove();
-                        continue;
+                TLongSet toRemove = new TLongHashSet();
+                musicManagers.forEachEntry((key, value) -> {
+                    A:
+                    {
+                        if (value.channel == null) {
+                            toRemove.add(key);
+                            break A;
+                        }
+                        if (value.channel.getMembers().size() < 2
+                                || (value.manager.scheduler.queue.size() == 0 && value.manager.player.getPlayingTrack() == null)) { //nobody's in the channel
+                            value.manager.player.destroy();
+                            value.channel.getGuild().getAudioManager().closeAudioConnection();
+                            toRemove.add(key);
+                            break A;
+                        }
                     }
-                    if (entry.getValue().channel.getMembers().size() < 2) { //nobody's in the channel
-                        entry.getValue().manager.player.destroy();
-                        entry.getValue().channel.getGuild().getAudioManager().closeAudioConnection();
-                        iterator.remove();
-                        continue;
-                    }
-                    if (entry.getValue().manager.scheduler.queue.size() == 0 && entry.getValue().manager.player.getPlayingTrack() == null) {
-                        entry.getValue().manager.player.destroy();
-                        entry.getValue().channel.getGuild().getAudioManager().closeAudioConnection();
-                        iterator.remove();
-                        continue;
-                    }
-                }
+                    return true;
+                });
+                toRemove.forEach(l -> {
+                    musicManagers.remove(l);
+                    return true;
+                });
 
-                //hacky fix for things
-                //xd
+                //not sure why or how this is happening, but it does apparently
                 List<AudioManager> list = ShardUtils.getConnectedVoice();
                 for (AudioManager manager : list) {
                     if (manager.getConnectedChannel().getMembers().size() < 2) {

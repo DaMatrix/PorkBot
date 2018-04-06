@@ -39,7 +39,7 @@ public class CommandSkinSteal extends Command {
                 return;
             }
 
-            UUIDFetcher.enqeueRequest(args[1], uuid -> {
+            UUIDFetcher.enqueueRequest(args[1], uuid -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setImage("attachment://image.png");
                 builder.setColor(Color.DARK_GRAY);

@@ -26,63 +26,34 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Queue;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 
 public class UUIDFetcher {
     private static final double PROFILES_PER_REQUEST = 100;
     private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
     private static final JsonParser jsonParser = new JsonParser();
     private static final Gson gson = new Gson();
-    private static ArrayList<UUIDRequest> requests = new ArrayList<>();
-
-    private static void writeBody(HttpURLConnection connection, String body) throws Exception {
-        OutputStream stream = connection.getOutputStream();
-        stream.write(body.getBytes());
-        stream.flush();
-        stream.close();
-    }
-
-    private static HttpURLConnection createConnection() throws Exception {
-        URL url = new URL(PROFILE_URL);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setUseCaches(false);
-        connection.setDoInput(true);
-        connection.setDoOutput(true);
-        return connection;
-    }
+    private static Queue<UUIDRequest> requests = new ConcurrentLinkedQueue<>();
 
     public static UUID getUUID(String id) {
         return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32));
-    }
-
-    public static byte[] toBytes(UUID uuid) {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[16]);
-        byteBuffer.putLong(uuid.getMostSignificantBits());
-        byteBuffer.putLong(uuid.getLeastSignificantBits());
-        return byteBuffer.array();
-    }
-
-    public static UUID fromBytes(byte[] array) {
-        if (array.length != 16) {
-            throw new IllegalArgumentException("Illegal byte array length: " + array.length);
-        }
-        ByteBuffer byteBuffer = ByteBuffer.wrap(array);
-        long mostSignificant = byteBuffer.getLong();
-        long leastSignificant = byteBuffer.getLong();
-        return new UUID(mostSignificant, leastSignificant);
     }
 
     public static void run() {
         try {
             ArrayList<UUIDRequest> temp = new ArrayList<>();
             ArrayList<String> jsonArray = new ArrayList<>();
-            for (int i = 0; i < requests.size() && i < 100; i++) {
-                UUIDRequest request = requests.get(i);
-                jsonArray.add(request.name);
-                temp.add(request);
+            {
+                UUIDRequest request;
+                int i = 0;
+                while (i++ < PROFILES_PER_REQUEST && (request = requests.poll()) != null)  {
+                    jsonArray.add(request.name);
+                    temp.add(request);
+                }
             }
 
             String json = HTTPUtils.performPostRequest(new URL(PROFILE_URL), gson.toJson(jsonArray), "application/json");
@@ -93,16 +64,14 @@ public class UUIDFetcher {
                 String name = jsonProfile.get("name").getAsString();
                 UUIDRequest[] uuidRequest = getRequestByName(name);
                 for (UUIDRequest uuidRequest1 : uuidRequest) {
-                    uuidRequest1.uuidCompletable.run(id);
-                    requests.remove(uuidRequest1);
+                    uuidRequest1.uuidCompletable.accept(id);
                     temp.remove(uuidRequest1);
                 }
             }
             for (UUIDRequest request : temp) {
                 UUIDRequest[] uuidRequest = getRequestByName(request.name);
                 for (UUIDRequest uuidRequest1 : uuidRequest) {
-                    requests.remove(uuidRequest1);
-                    uuidRequest1.uuidCompletable.run("11111111-1111-1111-1111-111111111111");
+                    uuidRequest1.uuidCompletable.accept("11111111-1111-1111-1111-111111111111");
                 }
             }
         } catch (Exception e) {
@@ -118,13 +87,12 @@ public class UUIDFetcher {
                     return;
                 }
                 UUIDFetcher.run();
-                //requests.clear(); //TODO fix this
             }
-        }, 5000, 1000);
+        }, 5000, 1200);
     }
 
-    public static void enqeueRequest(String name, StringImplicit completableFuture) {
-        requests.add(new UUIDRequest(name, completableFuture));
+    public static void enqueueRequest(String name, Consumer<String> callback) {
+        requests.add(new UUIDRequest(name, callback));
     }
 
     private static UUIDRequest[] getRequestByName(String name) {
@@ -140,9 +108,9 @@ public class UUIDFetcher {
 
     public static class UUIDRequest {
         public String name;
-        public StringImplicit uuidCompletable;
+        public Consumer<String> uuidCompletable;
 
-        public UUIDRequest(String a, StringImplicit b) {
+        public UUIDRequest(String a, Consumer<String> b) {
             name = a;
             uuidCompletable = b;
         }

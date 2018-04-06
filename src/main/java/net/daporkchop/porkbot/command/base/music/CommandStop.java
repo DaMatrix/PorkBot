@@ -17,8 +17,8 @@
 package net.daporkchop.porkbot.command.base.music;
 
 import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.music.GuildAudioInfo;
-import net.daporkchop.porkbot.util.AudioUtils;
+import net.daporkchop.porkbot.audio.GuildAudioInfo;
+import net.daporkchop.porkbot.audio.AudioUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 

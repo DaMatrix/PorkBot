@@ -54,7 +54,7 @@ import net.daporkchop.porkbot.command.base.music.CommandQueue;
 import net.daporkchop.porkbot.command.base.music.CommandShuffle;
 import net.daporkchop.porkbot.command.base.music.CommandSkip;
 import net.daporkchop.porkbot.command.base.music.CommandStop;
-import net.daporkchop.porkbot.util.AudioUtils;
+import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.KeyGetter;
 import net.daporkchop.porkbot.util.ShardUtils;
@@ -66,42 +66,28 @@ import net.dv8tion.jda.core.entities.Game;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
 public class PorkBot {
 
-    //REEEEEEE
-    public
-    static
-    final
-    int shardCount = 4;
-
     public static PorkBot INSTANCE;
     public static Logger logger;
-    /**
-     * A central Random instance, for random things
-     * literally
-     * kek
-     * eks dee
-     */
-    public static Random random = new Random(System.currentTimeMillis());
     public static Timer timer = new Timer();
     public ArrayList<JDA> shards = new ArrayList<>();
 
     public PorkBot() {
         logger.info("Starting PorkBot...");
         try {
-            for (int i = 0; i < shardCount; i++) {
+            for (int i = 0; i < ShardUtils.shardCount; i++) {
                 JDA newlyCreated;
                 shards.add(newlyCreated = new JDABuilder(AccountType.BOT)
-                        .useSharding(i, shardCount)
+                        .useSharding(i, ShardUtils.shardCount)
                         .setToken(KeyGetter.getToken())
                         .buildBlocking());
                 newlyCreated.addEventListener(new PorkListener(newlyCreated));
-                System.out.println("Started shard " + (i + 1) + " out of " + shardCount);
+                System.out.println("Started shard " + (i + 1) + " out of " + ShardUtils.shardCount);
                 Thread.sleep(5000); //rate limiting
             }
         } catch (LoginException | InterruptedException e) {
@@ -134,7 +120,7 @@ public class PorkBot {
                                 "{" +
                                         "\"server_count\": " + jda.getGuilds().size() + "," +
                                         "\"shard_id\": " + jda.getShardInfo().getShardId() + "," +
-                                        "\"shard_count\": " + shardCount +
+                                        "\"shard_count\": " + ShardUtils.shardCount +
                                         "}",
                                 "application/json",
                                 authToken);

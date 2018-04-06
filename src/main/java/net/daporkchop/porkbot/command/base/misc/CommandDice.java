@@ -22,12 +22,14 @@ import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class CommandDice extends Command {
     public CommandDice() {
         super("dice");
     }
 
     public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
-        MessageUtils.sendMessage(":game_die: | I rolled a **" + (PorkBot.random.nextInt(6) + 1) + "**!", evt.getTextChannel());
+        MessageUtils.sendMessage(":game_die: | I rolled a **" + (ThreadLocalRandom.current().nextInt(6) + 1) + "**!", evt.getTextChannel());
     }
 }
