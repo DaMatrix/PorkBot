@@ -23,6 +23,7 @@ public class GuildAudioInfo {
     public GuildAudioManager manager;
     public VoiceChannel channel;
     public TextChannel textChannel;
+    public final long created = System.currentTimeMillis();
 
     public GuildAudioInfo(GuildAudioManager manager, VoiceChannel channel) {
         this.manager = manager;

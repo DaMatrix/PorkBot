@@ -84,22 +84,14 @@ public class AudioUtils {
     }
 
     public static synchronized GuildAudioInfo getGuildAudioPlayer(Guild guild, boolean createIfNotExists) {
-        if (createIfNotExists) {
-            long guildId = Long.parseLong(guild.getId());
-            GuildAudioInfo musicManager = musicManagers.get(guildId);
-
-            if (musicManager == null) {
-                musicManager = new GuildAudioInfo(new GuildAudioManager(playerManager));
-            }
-            musicManagers.put(guildId, musicManager);
-            guild.getAudioManager().setSendingHandler(musicManager.manager.getSendHandler());
-            return musicManager;
-        } else {
-            long guildId = Long.parseLong(guild.getId());
-            GuildAudioInfo musicManager = musicManagers.get(guildId);
-
-            return musicManager;
+        long guildId = guild.getIdLong();
+        GuildAudioInfo info = musicManagers.get(guildId);
+        if (createIfNotExists && info == null) {
+            info = new GuildAudioInfo(new GuildAudioManager(playerManager));
+            musicManagers.put(guildId, info);
+            guild.getAudioManager().setSendingHandler(info.manager.getSendHandler());
         }
+        return info;
     }
 
     public static void loadAndPlay(final TextChannel channel, final String trackUrl, final Member user) {
@@ -220,6 +212,7 @@ public class AudioUtils {
             @Override
             public void run() {
                 TLongSet toRemove = new TLongHashSet();
+                long now = System.currentTimeMillis();
                 musicManagers.forEachEntry((key, value) -> {
                     A:
                     {
@@ -227,8 +220,9 @@ public class AudioUtils {
                             toRemove.add(key);
                             break A;
                         }
-                        if (value.channel.getMembers().size() < 2
-                                || (value.manager.scheduler.queue.size() == 0 && value.manager.player.getPlayingTrack() == null)) { //nobody's in the channel
+                        if (value.created + 10000 < now
+                                && (value.channel.getMembers().size() < 2
+                                || (value.manager.scheduler.queue.size() == 0 && value.manager.player.getPlayingTrack() == null))) { //nobody's in the channel
                             value.manager.player.destroy();
                             value.channel.getGuild().getAudioManager().closeAudioConnection();
                             toRemove.add(key);

@@ -74,11 +74,10 @@ public abstract class CommandRegistry {
                 String[] split = rawContent.split(" ");
                 Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
                 if (cmd != null) {
-                    evt.getTextChannel().sendTyping().queue();
-
                     new Thread() {
                         @Override
                         public void run() {
+                            evt.getTextChannel().sendTyping().complete();
                             cmd.execute(evt, split, rawContent);
                             COMMAND_COUNT++;
                             COMMAND_COUNT_TOTAL++;
