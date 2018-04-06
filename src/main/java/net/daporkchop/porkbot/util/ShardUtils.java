@@ -26,14 +26,12 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.managers.AudioManager;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ShardUtils {
     public static volatile int guildCount = 0;
-    private static Set<JDA> shards = new HashSet<>();
     private static ShardManager manager;
 
     static {
@@ -43,8 +41,7 @@ public class ShardUtils {
             builder.setToken(KeyGetter.getToken());
             builder.setShardsTotal(-1);
             manager = builder.build();
-            shards.addAll(manager.getShards());
-            shards.forEach(jda -> jda.addEventListener(new PorkListener(jda)));
+            manager.getShards().forEach(jda -> jda.addEventListener(new PorkListener(jda)));
             manager.setGame(Game.of(Game.GameType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
             guildCount = manager.getGuilds().size();
         } catch (Throwable t) {
@@ -67,16 +64,16 @@ public class ShardUtils {
     }
 
     public static int getUserCount() {
-        int i = 0;
-        for (JDA jda : shards) {
-            i += jda.getUsers().size();
-        }
-        return i;
+        AtomicInteger i = new AtomicInteger(0);
+        manager.getShards().forEach(jda -> {
+            i.addAndGet(jda.getUsers().size());
+        });
+        return i.get();
     }
 
     public static void forEachShard(Consumer<JDA> consumer) {
         if (consumer == null) return;
-        shards.forEach(consumer);
+        manager.getShards().forEach(consumer);
     }
 
     public static int getShardCount() {
@@ -93,13 +90,13 @@ public class ShardUtils {
      */
     public static List<AudioManager> getConnectedVoice() {
         List<AudioManager> list = new ArrayList<>();
-        for (JDA jda : shards) {
+        manager.getShards().forEach(jda -> {
             for (AudioManager manager : jda.getAudioManagers()) {
                 if (manager.isConnected()) {
                     list.add(manager);
                 }
             }
-        }
+        });
         return list;
     }
 }
