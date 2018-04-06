@@ -16,6 +16,7 @@
 
 package net.daporkchop.porkbot;
 
+import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.command.CommandHelp;
 import net.daporkchop.porkbot.command.CommandInvite;
 import net.daporkchop.porkbot.command.CommandRegistry;
@@ -54,18 +55,12 @@ import net.daporkchop.porkbot.command.base.music.CommandQueue;
 import net.daporkchop.porkbot.command.base.music.CommandShuffle;
 import net.daporkchop.porkbot.command.base.music.CommandSkip;
 import net.daporkchop.porkbot.command.base.music.CommandStop;
-import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.KeyGetter;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
 
-import javax.security.auth.login.LoginException;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -75,25 +70,10 @@ public class PorkBot {
     public static PorkBot INSTANCE;
     public static Logger logger;
     public static Timer timer = new Timer();
-    public ArrayList<JDA> shards = new ArrayList<>();
 
     public PorkBot() {
         logger.info("Starting PorkBot...");
-        try {
-            for (int i = 0; i < ShardUtils.shardCount; i++) {
-                JDA newlyCreated;
-                shards.add(newlyCreated = new JDABuilder(AccountType.BOT)
-                        .useSharding(i, ShardUtils.shardCount)
-                        .setToken(KeyGetter.getToken())
-                        .buildBlocking());
-                newlyCreated.addEventListener(new PorkListener(newlyCreated));
-                System.out.println("Started shard " + (i + 1) + " out of " + ShardUtils.shardCount);
-                Thread.sleep(5000); //rate limiting
-            }
-        } catch (LoginException | InterruptedException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
+        ShardUtils.loadClass();
     }
 
     public static void main(String[] args) {
@@ -103,9 +83,6 @@ public class PorkBot {
     }
 
     public void start() {
-        ShardUtils.setShards(shards);
-        ShardUtils.setGame(Game.of(Game.GameType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
-
         UUIDFetcher.init();
         AudioUtils.init();
 
@@ -114,19 +91,19 @@ public class PorkBot {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    for (JDA jda : shards) {
+                ShardUtils.forEachShard(jda -> {
+                    try {
                         HTTPUtils.performPostRequestWithAuth(HTTPUtils.constantURL("https://bots.discord.pw/api/bots/287894637165936640/stats"),
                                 "{" +
                                         "\"server_count\": " + jda.getGuilds().size() + "," +
                                         "\"shard_id\": " + jda.getShardInfo().getShardId() + "," +
-                                        "\"shard_count\": " + ShardUtils.shardCount +
+                                        "\"shard_count\": " + ShardUtils.getShardCount() +
                                         "}",
                                 "application/json",
                                 authToken);
+                    } catch (IOException e) {
                     }
-                } catch (Exception e) {
-                }
+                });
                 CommandRegistry.save();
             }
         }, 1000, 120000);

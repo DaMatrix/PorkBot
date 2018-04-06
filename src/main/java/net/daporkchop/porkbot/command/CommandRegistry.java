@@ -16,10 +16,8 @@
 
 package net.daporkchop.porkbot.command;
 
-import net.daporkchop.porkbot.PorkBot;
-import net.daporkchop.porkbot.util.DataTag;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.daporkchop.porkbot.util.ShardUtils;
+import net.daporkchop.porkbot.util.ObjectDB;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -43,10 +41,10 @@ public abstract class CommandRegistry {
      */
     public static long COMMAND_COUNT_TOTAL;
 
-    private static DataTag command_save;
+    private static ObjectDB command_save;
 
     static {
-        command_save = new DataTag(new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"));
+        command_save = new ObjectDB(new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"));
         COMMAND_COUNT_TOTAL = command_save.getLong("totalCommands", 0L);
     }
 
@@ -63,17 +61,13 @@ public abstract class CommandRegistry {
     }
 
     /**
-     * Runs a comamnd
+     * Runs a command
      *
      * @param evt
      * @param thisShardJDA
      */
     public static void runCommand(MessageReceivedEvent evt, String rawContent, JDA thisShardJDA) {
         try {
-            if (PorkBot.INSTANCE.shards.size() < ShardUtils.shardCount) {
-                throw new NullPointerException();
-            }
-
             try {
                 if (evt.getTextChannel() == null) {
                     return;

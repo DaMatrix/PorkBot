@@ -16,7 +16,6 @@
 
 package net.daporkchop.porkbot.command.base.misc;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.JDA;

@@ -16,8 +16,8 @@
 
 package net.daporkchop.porkbot.command.base.music;
 
-import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.audio.AudioUtils;
+import net.daporkchop.porkbot.command.Command;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 public class CommandPlay extends Command {
     private UrlValidator validator = new UrlValidator();
 
-    public CommandPlay()    {
+    public CommandPlay() {
         super("play");
     }
 
@@ -41,7 +41,7 @@ public class CommandPlay extends Command {
         } else {
             try {
                 AudioUtils.loadAndPlay(evt.getTextChannel(), AudioUtils.videoNameCache.get(rawContent.substring(7)), evt.getMember());
-            } catch (ExecutionException e)  {
+            } catch (ExecutionException e) {
                 e.printStackTrace();
             }
         }

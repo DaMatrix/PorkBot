@@ -16,14 +16,22 @@
 
 package net.daporkchop.porkbot.util.mcpinger.query;
 
-import org.xbill.DNS.*;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -257,11 +265,11 @@ public class Query {
         return values.getOrDefault("hostname", "A Minecraft server");
     }
 
-    public int getOnlinePlayers()   {
+    public int getOnlinePlayers() {
         return Integer.parseInt(values.getOrDefault("numplayers", "0"));
     }
 
-    public int getMaxPlayers()   {
+    public int getMaxPlayers() {
         return Integer.parseInt(values.getOrDefault("maxplayers", "20"));
     }
 

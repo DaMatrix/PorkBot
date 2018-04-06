@@ -21,10 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.daporkchop.porkbot.PorkBot;
 
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.TimerTask;
@@ -50,7 +47,7 @@ public class UUIDFetcher {
             {
                 UUIDRequest request;
                 int i = 0;
-                while (i++ < PROFILES_PER_REQUEST && (request = requests.poll()) != null)  {
+                while (i++ < PROFILES_PER_REQUEST && (request = requests.poll()) != null) {
                     jsonArray.add(request.name);
                     temp.add(request);
                 }

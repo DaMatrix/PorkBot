@@ -17,7 +17,6 @@
 package net.daporkchop.porkbot.command.base.misc;
 
 import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.JDA;
@@ -31,21 +30,9 @@ public class CommandShutdown extends Command {
     @Override
     public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         if (evt.getAuthor().getIdLong() == 226975061880471552L) {
-            evt.getChannel().sendMessage("Rebooting...").queue();
+            evt.getChannel().sendMessage("Rebooting...").complete();
             System.out.println("Rebooting...");
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(500);
-                        CommandRegistry.save();
-                        ShardUtils.shutdown();
-                        System.exit(0);
-                    } catch (InterruptedException e) {
-
-                    }
-                }
-            }.start();
+            ShardUtils.shutdown();
             return;
         } else {
             MessageUtils.sendMessage("Don't use this! It doesn't do anything!!!", evt.getTextChannel());

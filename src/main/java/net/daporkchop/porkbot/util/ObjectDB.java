@@ -16,10 +16,25 @@
 
 package net.daporkchop.porkbot.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class DataTag implements Serializable {
+public class ObjectDB implements Serializable {
     public static final File USER_FOLDER = new File(System.getProperty("user.dir"));
     public static final File HOME_FOLDER = new File(System.getProperty("user.home"));
     private static final long serialVersionUID = 1L;
@@ -32,7 +47,7 @@ public class DataTag implements Serializable {
     private HashMap<String, Short> shorts;
     private HashMap<String, Double> doubles;
     private HashMap<String, Long> longs;
-    private HashMap<String, DataTag> tags;
+    private HashMap<String, ObjectDB> tags;
     private HashMap<String, Serializable> objs;
 
     private HashMap<String, int[]> intArrays;
@@ -45,17 +60,221 @@ public class DataTag implements Serializable {
     private HashMap<String, long[]> longArrays;
     private HashMap<String, Serializable[]> objArrays;
 
-    public DataTag(File saveTo) {
+    public ObjectDB(File saveTo) {
         file = saveTo;
         set();
         init();
     }
 
-    public DataTag(DataTag tag) {
-        FileHelper.createFile(new File(tag.file.getParentFile(), tag.file.getName().replaceAll(".dat", "")).toString(), true);
+    public ObjectDB(ObjectDB tag) {
+        createFile(new File(tag.file.getParentFile(), tag.file.getName().replaceAll(".dat", "")).toString(), true);
         file = new File(tag.file.getParentFile(), tag.file.getName().replaceAll(".dat", "") + "/" + tag.file.getName().replaceAll(".dat", "") + " tag - " + tag.tags.size() + ".dat");
         set();
         init();
+    }
+
+    /**
+     * Create a file by default (Not a directory)
+     *
+     * @param dir The path for the file
+     * @return True: If the file was created
+     */
+    public static boolean createFile(String dir) {
+        return createFile(dir, false);
+    }
+
+    /**
+     * Create a file or a directory by default
+     *
+     * @param dir         The path for the file
+     * @param isDirectory Is is a directory of a file
+     * @return True: If the file was created
+     */
+    public static boolean createFile(String dir, boolean isDirectory) {
+        boolean returning = false;
+
+        Path p = Paths.get(dir);
+        try {
+            if (Files.exists(p)) {
+                returning = true;
+            } else if (isDirectory) {
+                Files.createDirectory(p);
+                returning = true;
+            } else {
+                Files.createFile(p);
+                returning = true;
+            }
+        } catch (IOException e) {
+            System.err.println("Error Creating File!");
+            System.err.println("Path: " + dir);
+            System.err.println("Directory: " + isDirectory);
+            e.printStackTrace();
+        }
+        return returning;
+    }
+
+    /**
+     * Deletes the given file
+     *
+     * @param fileName The path for the file
+     * @return True: If the file was successfully deleted
+     */
+    public static boolean deleteFile(String fileName) {
+        Path p = Paths.get(fileName);
+
+        try {
+            return Files.deleteIfExists(p);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static ArrayList<File> files(File dir) {
+        ArrayList<File> files = new ArrayList<File>();
+
+        if (!dir.isDirectory())
+            throw new IllegalArgumentException("dir Isn't a Directory! " + dir);
+
+        for (int i = 0; i < dir.listFiles().length; i++) {
+            if (dir.listFiles()[i].isDirectory()) {
+                files.addAll(files(dir.listFiles()[i]));
+            }
+            files.add(dir.listFiles()[i]);
+        }
+
+        return files;
+    }
+
+    /**
+     * Retrieves all the lines of a file and neatly puts them into an array!
+     *
+     * @param fileName The path for the file
+     * @return The Lines of the given file
+     */
+    public static String[] getFileContents(String fileName) {
+        ArrayList<String> lines = new ArrayList<String>();
+        String line = "";
+        BufferedReader reader = getFileReader(fileName);
+
+        try {
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lines.toArray(new String[0]);
+    }
+
+    /**
+     * Creates a <code>BufferedReader</code> for the given File
+     * <p>
+     * <b><i>WARNING:</i></b> CAN STILL, VERY EASILY CAUSE AN {@link IOException}
+     * <p>
+     * Recommended you don't use this and use {@link #getFileContents(String)} instead!
+     *
+     * @param fileName The path for the file
+     * @return The given file's <code>BufferedReader</code>
+     */
+    public static BufferedReader getFileReader(String fileName) {
+        Charset c = Charset.forName("US-ASCII");
+        Path p = Paths.get(fileName);
+
+        try {
+            return Files.newBufferedReader(p, c);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Returns all the Files in the specified directory and all sub-directories.
+     * <p>
+     * <p>
+     * For instance, If you have a folder, /Files/Documents/Maps, and call this method for Hello. It will return all the files in Documents and all the files in Maps!
+     *
+     * @param directory The directory to check.
+     * @return All the files in the folder and sub folders
+     */
+    public static File[] getFilesInFolder(File dir) {
+        return files(dir).toArray(new File[0]);
+    }
+
+    /**
+     * Prints the files lines to the console
+     *
+     * @param fileName The path for the file
+     */
+    public static void printFileContents(String fileName) {
+        String[] lines = getFileContents(fileName);
+
+        for (int i = 0; i < lines.length; i++) {
+            System.out.println("Line[" + i + "]: " + lines[i]);
+        }
+    }
+
+    /**
+     * Deletes the given file and creates a new one with no content
+     *
+     * @param fileName The path for the file
+     * @return A Path to the given File
+     */
+    public static Path resetFile(String fileName) {
+        return resetFile(fileName, "");
+    }
+
+    /**
+     * Deletes the given file and creates a new one with the given text
+     *
+     * @param fileName  The path for the file
+     * @param textToAdd Any text you would like to add to the new file
+     * @return A Path to the given File
+     */
+    public static Path resetFile(String fileName, String textToAdd) {
+        Path p = Paths.get(fileName);
+
+        deleteFile(fileName);
+        createFile(fileName, false);
+        writeToFile(fileName, textToAdd, false);
+
+        return p;
+    }
+
+    /**
+     * Writes the given string to the given File with a new line afterwards
+     *
+     * @param fileName The path for the file
+     * @param stuff    The String you want to write to the given file
+     * @return True: if the String was written to the file
+     */
+    public static boolean writeToFile(String fileName, String stuff) {
+        return writeToFile(fileName, stuff, true);
+    }
+
+    /**
+     * Writes the given string to the given File with
+     *
+     * @param fileName The path for the file
+     * @param stuff    The String you want to write to the given file
+     * @param newLine  If you want a '\n' character after the 'stuff' parameter
+     * @return True: if the String was written to the file
+     */
+    public static boolean writeToFile(String fileName, String stuff, boolean newLine) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
+            writer.write(stuff);
+            if (newLine) {
+                writer.newLine();
+            }
+            writer.close();
+            return true;
+        } catch (IOException x) {
+            System.err.format("IOException: %s%n", x);
+            x.printStackTrace();
+            return false;
+        }
     }
 
     private void set() {
@@ -67,7 +286,7 @@ public class DataTag implements Serializable {
         shorts = new HashMap<String, Short>();
         doubles = new HashMap<String, Double>();
         longs = new HashMap<String, Long>();
-        tags = new HashMap<String, DataTag>();
+        tags = new HashMap<String, ObjectDB>();
         objs = new HashMap<String, Serializable>();
         intArrays = new HashMap<String, int[]>();
         stringArrays = new HashMap<String, String[]>();
@@ -81,7 +300,7 @@ public class DataTag implements Serializable {
     }
 
     public void init() {
-        FileHelper.createFile(file.getPath());
+        createFile(file.getPath());
         load();
     }
 
@@ -138,7 +357,7 @@ public class DataTag implements Serializable {
         return value;
     }
 
-    public DataTag setTag(String name, DataTag value) {
+    public ObjectDB setTag(String name, ObjectDB value) {
         check(name);
         tags.put(name, value);
         return value;
@@ -236,7 +455,7 @@ public class DataTag implements Serializable {
         return longs.containsKey(name) ? longs.get(name) : this.setLong(name, def);
     }
 
-    public DataTag getTag(String name, DataTag def) {
+    public ObjectDB getTag(String name, ObjectDB def) {
         return tags.containsKey(name) ? tags.get(name).load() : this.setTag(name, def);
     }
 
@@ -312,8 +531,8 @@ public class DataTag implements Serializable {
         return longs.containsKey(name) ? longs.get(name) : 0L;
     }
 
-    public DataTag getTag(String name) {
-        return tags.containsKey(name) ? tags.get(name).load() : new DataTag(this);
+    public ObjectDB getTag(String name) {
+        return tags.containsKey(name) ? tags.get(name).load() : new ObjectDB(this);
     }
 
     public Serializable getSerializable(String name) {
@@ -356,10 +575,10 @@ public class DataTag implements Serializable {
         return objArrays.containsKey(name) ? objArrays.get(name) : null;
     }
 
-    private DataTag load() {
+    private ObjectDB load() {
         try {
             ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-            DataTag obj = (DataTag) in.readObject();
+            ObjectDB obj = (ObjectDB) in.readObject();
 
             ints = obj.ints;
             strings = obj.strings;
@@ -392,7 +611,7 @@ public class DataTag implements Serializable {
         return this;
     }
 
-    public DataTag save() {
+    public ObjectDB save() {
         try {
             file.delete();
             file.createNewFile();

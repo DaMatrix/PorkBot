@@ -17,9 +17,9 @@
 package net.daporkchop.porkbot.command.base.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.audio.GuildAudioInfo;
 import net.daporkchop.porkbot.audio.AudioUtils;
+import net.daporkchop.porkbot.audio.GuildAudioInfo;
+import net.daporkchop.porkbot.command.Command;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -35,7 +35,7 @@ public class CommandShuffle extends Command {
     public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
         evt.getTextChannel().sendMessage("Shuffling queue...").queue(message -> {
             GuildAudioInfo info = AudioUtils.getGuildAudioPlayer(evt.getGuild(), false);
-            if (info == null)   {
+            if (info == null) {
                 message.editMessage("Not playing!").queue();
             } else {
                 BlockingQueue<AudioTrack> queue = info.manager.scheduler.queue;

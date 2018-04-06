@@ -17,9 +17,9 @@
 package net.daporkchop.porkbot.command.base.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.audio.GuildAudioInfo;
 import net.daporkchop.porkbot.audio.AudioUtils;
+import net.daporkchop.porkbot.audio.GuildAudioInfo;
+import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -34,7 +34,7 @@ public class CommandQueue extends Command {
 
     public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
         GuildAudioInfo info = AudioUtils.getGuildAudioPlayer(evt.getGuild(), false);
-        if (info == null)   {
+        if (info == null) {
             evt.getTextChannel().sendMessage("Not playing!").queue();
         } else {
             String msg = "Queue: `" + info.manager.scheduler.queue.size() + "` tracks queued\n\nCurrently playing: `" + info.manager.scheduler.player.getPlayingTrack().getInfo().title + "`\n\nQueue:\n";

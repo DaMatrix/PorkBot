@@ -33,14 +33,14 @@ public abstract class Command {
     /**
      * Does command logic!
      *
-     * @param evt The MessageReceivedEvent to be parsed
+     * @param evt          The MessageReceivedEvent to be parsed
      * @param thisShardJDA
      */
     public abstract void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA);
 
     /**
      * Gets the command's usage
-     *
+     * <p>
      * you should probably override this
      *
      * @return
@@ -51,7 +51,7 @@ public abstract class Command {
 
     /**
      * Gets and example of using the command
-     *
+     * <p>
      * you should probably override this
      *
      * @return

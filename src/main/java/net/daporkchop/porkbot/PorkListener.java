@@ -20,14 +20,11 @@ import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-
-import java.util.List;
 
 public class PorkListener extends ListenerAdapter {
     public JDA shard;
@@ -50,35 +47,24 @@ public class PorkListener extends ListenerAdapter {
             if (event.getAuthor().getIdLong() == 226975061880471552L) {
                 switch (message) {
                     case ",,instareboot":
-                        event.getChannel().sendMessage("Rebooting...").queue();
+                        event.getChannel().sendMessage("Rebooting...").complete();
                         System.out.println("Rebooting...");
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(500);
-                                    CommandRegistry.save();
-                                    ShardUtils.shutdown();
-                                    System.exit(0);
-                                } catch (InterruptedException e) {
-
-                                }
-                            }
-                        }.start();
+                        ShardUtils.shutdown();
                         return;
                 }
 
                 if (message.startsWith(",,announce ")) {
                     String toAnnouce = message.substring(11);
 
-                    List<Guild> servers = ShardUtils.guilds;
-                    for (Guild server : servers) {
+                    ShardUtils.forEachGuild(server -> {
                         try {
-                            server.getDefaultChannel().sendMessage(toAnnouce).queue();
+                            if (server.getDefaultChannel() != null) {
+                                server.getDefaultChannel().sendMessage(toAnnouce).queue();
+                            }
                         } catch (PermissionException e) {
                             //who cares, we can't do anything about it
                         }
-                    }
+                    });
                 }
             }
         }
@@ -86,11 +72,11 @@ public class PorkListener extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
-        ShardUtils.guilds.add(event.getGuild());
+        ShardUtils.guildCount++;
     }
 
     @Override
     public void onGuildLeave(GuildLeaveEvent event) {
-        ShardUtils.guilds.remove(event.getGuild());
+        ShardUtils.guildCount--;
     }
 }

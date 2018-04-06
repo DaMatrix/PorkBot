@@ -16,45 +16,54 @@
 
 package net.daporkchop.porkbot.util;
 
+import net.daporkchop.porkbot.PorkListener;
+import net.daporkchop.porkbot.command.CommandRegistry;
+import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.managers.AudioManager;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class ShardUtils {
-    public
-    static
-    final
-    int shardCount = 4;
-    public static List<Guild> guilds = new ArrayList<>();
-    private static List<JDA> shards = null;
+    public static volatile int guildCount = 0;
+    private static Set<JDA> shards = new HashSet<>();
+    private static ShardManager manager;
 
-    public static void setShards(List<JDA> shards) {
-        if (shards != null) {
-            ShardUtils.shards = shards;
+    static {
+        System.out.println("Starting shards...");
+        try {
+            DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder();
+            builder.setToken(KeyGetter.getToken());
+            builder.setShardsTotal(-1);
+            manager = builder.build();
+            shards.addAll(manager.getShards());
+            shards.forEach(jda -> jda.addEventListener(new PorkListener(jda)));
+            manager.setGame(Game.of(Game.GameType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
+            guildCount = manager.getGuilds().size();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            System.exit(1);
         }
-        ArrayList<Guild> guilds = new ArrayList<>();
-        for (JDA jda : shards) {
-            guilds.addAll(jda.getGuilds());
-        }
-        ShardUtils.guilds = guilds;
+        System.out.println("Shards started!");
     }
 
-    public static void setGame(Game game) {
-        for (JDA jda : shards) {
-            jda.getPresence().setGame(game);
-        }
+    public static void loadClass() {
+    }
+
+    public static void forEachGuild(Consumer<Guild> consumer) {
+        if (consumer == null) return;
+        manager.getGuilds().forEach(consumer);
     }
 
     public static int getGuildCount() {
-        int i = 0;
-        for (JDA jda : shards) {
-            i += jda.getGuilds().size();
-        }
-        return i;
+        return guildCount;
     }
 
     public static int getUserCount() {
@@ -65,10 +74,18 @@ public class ShardUtils {
         return i;
     }
 
+    public static void forEachShard(Consumer<JDA> consumer) {
+        if (consumer == null) return;
+        shards.forEach(consumer);
+    }
+
+    public static int getShardCount() {
+        return manager.getShardsTotal();
+    }
+
     public static void shutdown() {
-        for (JDA jda : shards) {
-            jda.shutdownNow();
-        }
+        CommandRegistry.save();
+        manager.shutdown();
     }
 
     /**

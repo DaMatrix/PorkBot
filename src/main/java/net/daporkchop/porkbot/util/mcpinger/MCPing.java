@@ -83,7 +83,7 @@ public abstract class MCPing {
                     try {
                         net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
                         response.sendQuery();
-                        if (response.values == null)    {
+                        if (response.values == null) {
                             throw new IllegalStateException("Somehow or other there was no error while pinging, so we'll throw one now to make stuff do things!");
                         }
                         String playerNames = response.onlineUsernames.length > 0 ? response.onlineUsernames[0] : null;
@@ -106,7 +106,7 @@ public abstract class MCPing {
                     try {
                         net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
                         response.sendQuery();
-                        if (response.values == null)    {
+                        if (response.values == null) {
                             throw new IllegalStateException("Somehow or other there was no error while pinging, so we'll throw one now to make stuff do things!");
                         }
                         String playerNames = response.onlineUsernames.length > 0 ? response.onlineUsernames[0] : null;
