@@ -16,6 +16,7 @@
 
 package net.daporkchop.porkbot.util;
 
+import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.PorkListener;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
@@ -81,6 +82,8 @@ public class ShardUtils {
     public static void shutdown() {
         CommandRegistry.save();
         manager.shutdown();
+        PorkBot.timer.cancel();
+        PorkBot.timer.purge();
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {

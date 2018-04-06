@@ -23,6 +23,8 @@ import net.daporkchop.porkbot.PorkBot;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Queue;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -40,16 +42,17 @@ public class UUIDFetcher {
         return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32));
     }
 
-    public static void run() {
+    private static void run() {
         try {
-            ArrayList<UUIDRequest> temp = new ArrayList<>();
+            System.out.println("Checking " + requests.size() + " UUIDs");
+            Map<String, UUIDRequest> temp = new Hashtable<>();
             ArrayList<String> jsonArray = new ArrayList<>();
             {
                 UUIDRequest request;
                 int i = 0;
-                while (i++ < PROFILES_PER_REQUEST && (request = requests.poll()) != null) {
+                while (++i < PROFILES_PER_REQUEST && (request = requests.poll()) != null) {
                     jsonArray.add(request.name);
-                    temp.add(request);
+                    temp.put(request.name, request);
                 }
             }
 
@@ -59,18 +62,12 @@ public class UUIDFetcher {
                 JsonObject jsonProfile = (JsonObject) profile;
                 String id = jsonProfile.get("id").getAsString();
                 String name = jsonProfile.get("name").getAsString();
-                UUIDRequest[] uuidRequest = getRequestByName(name);
-                for (UUIDRequest uuidRequest1 : uuidRequest) {
-                    uuidRequest1.uuidCompletable.accept(id);
-                    temp.remove(uuidRequest1);
-                }
+                temp.get(name).uuidCompletable.accept(id);
+                temp.remove(name);
             }
-            for (UUIDRequest request : temp) {
-                UUIDRequest[] uuidRequest = getRequestByName(request.name);
-                for (UUIDRequest uuidRequest1 : uuidRequest) {
-                    uuidRequest1.uuidCompletable.accept(null);
-                }
-            }
+            temp.values().forEach(request -> {
+                request.uuidCompletable.accept("8667ba71-b85a-4004-af54-457a9734eed7"); //fallback to steve
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,10 +77,11 @@ public class UUIDFetcher {
         PorkBot.timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (requests.isEmpty()) {
-                    return;
+                if (!requests.isEmpty()) {
+                    UUIDFetcher.run();
+                } else {
+                    System.out.println("Requests are empty");
                 }
-                UUIDFetcher.run();
             }
         }, 5000, 1200);
     }

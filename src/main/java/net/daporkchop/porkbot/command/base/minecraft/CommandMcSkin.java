@@ -43,7 +43,7 @@ public class CommandMcSkin extends Command {
                 builder.setImage("attachment://image.png");
                 builder.setColor(Color.DARK_GRAY);
 
-                byte[] outBytes = MessageUtils.downloadImage("https://crafatar.com/renders/body/" + uuid + "?overlay&default=MHF_Steve");
+                byte[] outBytes = MessageUtils.downloadImage("https://crafatar.com/renders/body/" + uuid + "?overlay");
 
                 builder.addField(args[1] + "'s skin", "", false);
 
@@ -63,4 +63,9 @@ public class CommandMcSkin extends Command {
     public String getUsageExample() {
         return "..mcskin Notch";
     }
+
+    /*public static void main(String... args) {
+        UUIDFetcher.init();
+        UUIDFetcher.enqueueRequest("DaPorkchop_", System.out::println);
+    }*/
 }
