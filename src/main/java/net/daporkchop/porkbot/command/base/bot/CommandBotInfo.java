@@ -14,29 +14,53 @@
  *
  */
 
-package net.daporkchop.porkbot.command.base;
+package net.daporkchop.porkbot.command.base.bot;
 
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
+import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 
-public class CommandPing extends Command {
+public class CommandBotInfo extends Command {
 
-    public CommandPing() {
-        super("ping");
+    public CommandBotInfo() {
+        super("botinfo");
     }
 
     @Override
     public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
-        builder.setTitle("PorkBot ping...", "http://www.daporkchop.net/porkbot");
+        builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");
 
-        builder.addField("**Pong:**", thisShardJDA.getPing() + "ms", false);
+        builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
+
+        builder.addField("Name:", "PorkBot#" + thisShardJDA.getSelfUser().getDiscriminator(), true);
+
+        builder.addField("Total servers:", String.valueOf(ShardUtils.getGuildCount()), true);
+
+        builder.addField("Total users:", String.valueOf(ShardUtils.getUserCount()), true);
+
+        builder.addField("ID:", thisShardJDA.getSelfUser().getId(), true);
+
+        builder.addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true);
+
+        builder.addField("Commands all time:", String.valueOf(CommandRegistry.COMMAND_COUNT_TOTAL), true);
+
+        builder.addField("Used RAM:", ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB", false);
+
+        builder.addField("", "**SHARD INFO**", false);
+
+        builder.addField("Shard #:", String.valueOf(thisShardJDA.getShardInfo().getShardId()), true);
+        builder.addField("Shard servers:", String.valueOf(thisShardJDA.getGuilds().size()), true);
+
+        builder.addField("Shard users:", String.valueOf(thisShardJDA.getUsers().size()), true);
+
         MessageUtils.sendMessage(builder, evt.getTextChannel());
     }
 

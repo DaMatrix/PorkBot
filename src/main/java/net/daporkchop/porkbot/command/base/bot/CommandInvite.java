@@ -14,43 +14,33 @@
  *
  */
 
-package net.daporkchop.porkbot.command.base;
+package net.daporkchop.porkbot.command.base.bot;
 
 import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
-public class CommandCommandInfo extends Command {
+public class CommandInvite extends Command {
 
-    public CommandCommandInfo() {
-        super("commandinfo");
+    public CommandInvite() {
+        super("invite");
     }
 
     @Override
     public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
-        if (args.length < 2 || args[1].isEmpty()) {
-            sendErrorMessage(evt.getTextChannel(), "You need to have at least one argument!");
-            return;
-        }
-
-        Command command = CommandRegistry.COMMANDS.getOrDefault(args[1], null);
-        if (command == null) {
-            MessageUtils.sendMessage("No such command: `" + args[1] + "`", evt.getTextChannel());
-            return;
-        }
-
-        MessageUtils.sendMessage("Statistics of command: `" + command.prefix + "`\n\nUses: `" + command.uses + "`", evt.getTextChannel());
+        MessageUtils.sendMessage("***Invite link is on bot site:***\nhttp://www.daporkchop.net/porkbot", evt.getTextChannel());
     }
 
     @Override
     public String getUsage() {
-        return "..commandinfo <commandName>";
+        return "..invite";
     }
 
     @Override
     public String getUsageExample() {
-        return "..commandinfo mcping";
+        return "..invite";
     }
 }
+
+

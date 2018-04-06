@@ -17,14 +17,14 @@
 package net.daporkchop.porkbot;
 
 import net.daporkchop.porkbot.audio.AudioUtils;
-import net.daporkchop.porkbot.command.CommandHelp;
-import net.daporkchop.porkbot.command.CommandInvite;
 import net.daporkchop.porkbot.command.CommandRegistry;
-import net.daporkchop.porkbot.command.base.CommandBotInfo;
-import net.daporkchop.porkbot.command.base.CommandCommandInfo;
-import net.daporkchop.porkbot.command.base.CommandPing;
-import net.daporkchop.porkbot.command.base.CommandSay;
-import net.daporkchop.porkbot.command.base.CommandTest;
+import net.daporkchop.porkbot.command.base.bot.CommandBotInfo;
+import net.daporkchop.porkbot.command.base.bot.CommandCommandInfo;
+import net.daporkchop.porkbot.command.base.bot.CommandHelp;
+import net.daporkchop.porkbot.command.base.bot.CommandInvite;
+import net.daporkchop.porkbot.command.base.bot.CommandPing;
+import net.daporkchop.porkbot.command.base.bot.CommandSay;
+import net.daporkchop.porkbot.command.base.bot.CommandTest;
 import net.daporkchop.porkbot.command.base.minecraft.CommandMcAvatar;
 import net.daporkchop.porkbot.command.base.minecraft.CommandMcCount;
 import net.daporkchop.porkbot.command.base.minecraft.CommandMcHead;
@@ -51,6 +51,7 @@ import net.daporkchop.porkbot.command.base.misc.CommandInterject;
 import net.daporkchop.porkbot.command.base.misc.CommandShutdown;
 import net.daporkchop.porkbot.command.base.misc.CommandThonk;
 import net.daporkchop.porkbot.command.base.music.CommandPlay;
+import net.daporkchop.porkbot.command.base.music.CommandPlayAll;
 import net.daporkchop.porkbot.command.base.music.CommandQueue;
 import net.daporkchop.porkbot.command.base.music.CommandShuffle;
 import net.daporkchop.porkbot.command.base.music.CommandSkip;
@@ -139,6 +140,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandInterject());
         CommandRegistry.registerCommand(new CommandCommandInfo());
         CommandRegistry.registerCommand(new CommandPlay());
+        CommandRegistry.registerCommand(new CommandPlayAll());
         CommandRegistry.registerCommand(new CommandShuffle());
         CommandRegistry.registerCommand(new CommandQueue());
         CommandRegistry.registerCommand(new CommandStop());

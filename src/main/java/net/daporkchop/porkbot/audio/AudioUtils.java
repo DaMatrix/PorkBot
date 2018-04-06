@@ -103,12 +103,16 @@ public class AudioUtils {
     }
 
     public static void loadAndPlay(final TextChannel channel, final String trackUrl, final Member user) {
+        loadAndPlay(channel, trackUrl, user, true);
+    }
+
+    public static void loadAndPlay(final TextChannel channel, final String trackUrl, final Member user, final boolean notify) {
         GuildAudioInfo musicManager = getGuildAudioPlayer(channel.getGuild(), true);
 
         playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                channel.sendMessage("Adding to queue: " + track.getInfo().title).queue();
+                if (notify) channel.sendMessage("Adding to queue: " + track.getInfo().title).queue();
 
                 play(channel.getGuild(), musicManager, track, user, channel);
             }
@@ -121,7 +125,8 @@ public class AudioUtils {
                     channel.sendMessage("Empty or invalid playlist, not loading");
                 }
 
-                channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
+                if (notify)
+                    channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
 
                 playList(channel.getGuild(), musicManager, tracks, user, channel);
             }
@@ -201,7 +206,7 @@ public class AudioUtils {
     public static void init() {
         youTube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), new HttpRequestInitializer() {
             @Override
-            public void initialize(HttpRequest request) throws IOException {
+            public void initialize(HttpRequest request) {
             }
         }).setApplicationName("youtube-cmdline-search-sample").build();
         devKey = KeyGetter.getDevKey();

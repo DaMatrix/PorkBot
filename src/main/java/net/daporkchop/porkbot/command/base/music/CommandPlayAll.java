@@ -14,30 +14,55 @@
  *
  */
 
-package net.daporkchop.porkbot.command.base;
+package net.daporkchop.porkbot.command.base.music;
 
+import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import org.apache.commons.validator.routines.UrlValidator;
 
-public class CommandTest extends Command {
-    public CommandTest() {
-        super("test");
+/**
+ * @author DaPorkchop_
+ */
+public class CommandPlayAll extends Command {
+    private static UrlValidator validator = new UrlValidator();
+
+    public CommandPlayAll() {
+        super("playall");
     }
 
-    @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
-        MessageUtils.sendMessage("Don't use this! It doesn't do anything!!!", evt.getTextChannel());
+    public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
+        if (split.length < 2) {
+            sendErrorMessage(evt.getTextChannel(), "Not enough arguments!");
+            return;
+        }
+        if (validator.isValid(split[1])) {
+            try {
+                String[] data = HTTPUtils.performGetRequest(HTTPUtils.constantURL(split[1]), 16000).trim().split("\n");
+                int i = 0;
+                for (String s : data) {
+                    if (validator.isValid(s)) {
+                        AudioUtils.loadAndPlay(evt.getTextChannel(), s, evt.getMember(), false);
+                        i++;
+                    }
+                }
+                MessageUtils.sendMessage("Loaded " + i + " tracks!", evt.getTextChannel());
+            } catch (Exception e) {
+                MessageUtils.sendException(e, evt);
+            }
+        } else {
+            MessageUtils.sendMessage("Invalid URL: " + split[1], evt.getTextChannel());
+        }
     }
 
-    @Override
     public String getUsage() {
-        return "..say <stuff you want to say>";
+        return "..play <http://url.to/list/of/audio/files.txt>";
     }
 
-    @Override
     public String getUsageExample() {
-        return "..say Hello World!";
+        return "..play https://pastebin.com/raw/eLU4atCw";
     }
 }

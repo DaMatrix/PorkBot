@@ -25,7 +25,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import java.util.concurrent.ExecutionException;
 
 public class CommandPlay extends Command {
-    private UrlValidator validator = new UrlValidator();
+    private static UrlValidator validator = new UrlValidator();
 
     public CommandPlay() {
         super("play");

@@ -14,32 +14,36 @@
  *
  */
 
-package net.daporkchop.porkbot.command;
+package net.daporkchop.porkbot.command.base.bot;
 
+import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
-public class CommandInvite extends Command {
+public class CommandSay extends Command {
 
-    public CommandInvite() {
-        super("invite");
+    public CommandSay() {
+        super("say");
     }
 
     @Override
     public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
-        MessageUtils.sendMessage("***Invite link is on bot site:***\nhttp://www.daporkchop.net/porkbot", evt.getTextChannel());
+        if (args.length < 2 || args[1].isEmpty()) {
+            sendErrorMessage(evt.getTextChannel(), "Add a message!");
+            return;
+        }
+
+        MessageUtils.sendMessage(evt.getAuthor().getName() + ": " + message.substring(6), evt.getTextChannel());
     }
 
     @Override
     public String getUsage() {
-        return "..invite";
+        return "..say <stuff you want to say>";
     }
 
     @Override
     public String getUsageExample() {
-        return "..invite";
+        return "..say Hello World!";
     }
 }
-
-

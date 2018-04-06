@@ -16,25 +16,20 @@
 
 package net.daporkchop.porkbot.util;
 
-import org.apache.commons.codec.Charsets;
+import com.google.common.base.Charsets;
+import lombok.NonNull;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Map;
 
 @SuppressWarnings("deprecation")
 public class HTTPUtils {
-
-    public static HttpURLConnection createUrlConnection(final URL url) throws IOException {
-        Validate.notNull(url);
+    private static HttpURLConnection createUrlConnection(@NonNull URL url) throws IOException {
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(15000);
         connection.setReadTimeout(15000);
@@ -55,10 +50,7 @@ public class HTTPUtils {
      * @return Raw text response from the server
      * @throws IOException The request was not successful
      */
-    public static String performPostRequest(final URL url, final String post, final String contentType) throws IOException {
-        Validate.notNull(url);
-        Validate.notNull(post);
-        Validate.notNull(contentType);
+    public static String performPostRequest(@NonNull URL url, @NonNull String post, @NonNull String contentType) throws IOException {
         final HttpURLConnection connection = createUrlConnection(url);
         final byte[] postAsBytes = post.getBytes(Charsets.UTF_8);
 
@@ -74,24 +66,7 @@ public class HTTPUtils {
             IOUtils.closeQuietly(outputStream);
         }
 
-        InputStream inputStream = null;
-        try {
-            inputStream = connection.getInputStream();
-            final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
-            return result;
-        } catch (final IOException e) {
-            IOUtils.closeQuietly(inputStream);
-            inputStream = connection.getErrorStream();
-
-            if (inputStream != null) {
-                final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
-                return result;
-            } else {
-                throw e;
-            }
-        } finally {
-            IOUtils.closeQuietly(inputStream);
-        }
+        return sendRequest(connection);
     }
 
     /**
@@ -107,10 +82,7 @@ public class HTTPUtils {
      * @return Raw text response from the server
      * @throws IOException The request was not successful
      */
-    public static String performPostRequestWithAuth(final URL url, final String post, final String contentType, final String auth) throws IOException {
-        Validate.notNull(url);
-        Validate.notNull(post);
-        Validate.notNull(contentType);
+    public static String performPostRequestWithAuth(@NonNull URL url, @NonNull String post, @NonNull String contentType, @NonNull String auth) throws IOException {
         final HttpURLConnection connection = createUrlConnection(url);
         final byte[] postAsBytes = post.getBytes(Charsets.UTF_8);
 
@@ -127,24 +99,7 @@ public class HTTPUtils {
             IOUtils.closeQuietly(outputStream);
         }
 
-        InputStream inputStream = null;
-        try {
-            inputStream = connection.getInputStream();
-            final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
-            return result;
-        } catch (final IOException e) {
-            IOUtils.closeQuietly(inputStream);
-            inputStream = connection.getErrorStream();
-
-            if (inputStream != null) {
-                final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
-                return result;
-            } else {
-                throw e;
-            }
-        } finally {
-            IOUtils.closeQuietly(inputStream);
-        }
+        return sendRequest(connection);
     }
 
     /**
@@ -158,28 +113,12 @@ public class HTTPUtils {
      * @return Raw text response from the server
      * @throws IOException The request was not successful
      */
-    public static String performGetRequest(final URL url) throws IOException {
-        Validate.notNull(url);
+    public static String performGetRequest(@NonNull URL url, int max) throws IOException {
         final HttpURLConnection connection = createUrlConnection(url);
-
-        InputStream inputStream = null;
-        try {
-            inputStream = connection.getInputStream();
-            final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
-            return result;
-        } catch (final IOException e) {
-            IOUtils.closeQuietly(inputStream);
-            inputStream = connection.getErrorStream();
-
-            if (inputStream != null) {
-                final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
-                return result;
-            } else {
-                throw e;
-            }
-        } finally {
-            IOUtils.closeQuietly(inputStream);
+        if (connection.getContentLength() > max) {
+            throw new IOException("Content too big!");
         }
+        return sendRequest(connection);
     }
 
     /**
@@ -198,56 +137,24 @@ public class HTTPUtils {
         }
     }
 
-    /**
-     * Turns the specified Map into an encoded & escaped query
-     *
-     * @param query Map to convert into a text based query
-     * @return Resulting query.
-     */
-    public static String buildQuery(final Map<String, Object> query) {
-        if (query == null) {
-            return "";
-        }
-        final StringBuilder builder = new StringBuilder();
-
-        for (final Map.Entry<String, Object> entry : query.entrySet()) {
-            if (builder.length() > 0) {
-                builder.append('&');
-            }
-
-            try {
-                builder.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
-            }
-
-            if (entry.getValue() != null) {
-                builder.append('=');
-                try {
-                    builder.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
-                } catch (final UnsupportedEncodingException e) {
-                }
-            }
-        }
-
-        return builder.toString();
-    }
-
-    /**
-     * Concatenates the given {@link java.net.URL} and query.
-     *
-     * @param url   URL to base off
-     * @param query Query to append to URL
-     * @return URL constructed
-     */
-    public static URL concatenateURL(final URL url, final String query) {
+    private static String sendRequest(HttpURLConnection connection) throws IOException {
+        InputStream inputStream = null;
         try {
-            if (url.getQuery() != null && url.getQuery().length() > 0) {
-                return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile() + "&" + query);
+            inputStream = connection.getInputStream();
+            final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
+            return result;
+        } catch (final IOException e) {
+            IOUtils.closeQuietly(inputStream);
+            inputStream = connection.getErrorStream();
+
+            if (inputStream != null) {
+                final String result = IOUtils.toString(inputStream, Charsets.UTF_8);
+                return result;
             } else {
-                return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile() + "?" + query);
+                throw e;
             }
-        } catch (final MalformedURLException ex) {
-            throw new IllegalArgumentException("Could not concatenate given URL with GET arguments!", ex);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
     }
 }
