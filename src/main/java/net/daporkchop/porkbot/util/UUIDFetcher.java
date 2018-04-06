@@ -68,7 +68,7 @@ public class UUIDFetcher {
             for (UUIDRequest request : temp) {
                 UUIDRequest[] uuidRequest = getRequestByName(request.name);
                 for (UUIDRequest uuidRequest1 : uuidRequest) {
-                    uuidRequest1.uuidCompletable.accept("11111111-1111-1111-1111-111111111111");
+                    uuidRequest1.uuidCompletable.accept(null);
                 }
             }
         } catch (Exception e) {

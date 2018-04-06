@@ -40,7 +40,7 @@ public class CommandMcStatus extends Command {
     public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
         String s;
         try {
-            s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/mcstatus"));
+            s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/mcstatus"), Integer.MAX_VALUE);
         } catch (IOException e) {
             e.printStackTrace();
             MessageUtils.sendMessage("Error getting server info: `java.io.IOException`", evt.getTextChannel());
