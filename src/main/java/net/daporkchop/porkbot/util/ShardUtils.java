@@ -81,6 +81,13 @@ public class ShardUtils {
     public static void shutdown() {
         CommandRegistry.save();
         manager.shutdown();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            System.exit(0);
+        }
     }
 
     /**
