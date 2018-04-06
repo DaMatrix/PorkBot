@@ -83,13 +83,17 @@ public class AudioUtils {
         return toReturn;
     }
 
-    public static synchronized GuildAudioInfo getGuildAudioPlayer(Guild guild, boolean createIfNotExists) {
+    public static synchronized GuildAudioInfo getGuildAudioPlayer(Guild guild, boolean create, Object... params) {
         long guildId = guild.getIdLong();
         GuildAudioInfo info = musicManagers.get(guildId);
-        if (createIfNotExists && info == null) {
+        if (create && info == null) {
             info = new GuildAudioInfo(new GuildAudioManager(playerManager));
             musicManagers.put(guildId, info);
             guild.getAudioManager().setSendingHandler(info.manager.getSendHandler());
+            if (!guild.getAudioManager().isConnected()) {
+                info.channel = connectToFirstVoiceChannel(guild.getAudioManager(), (Member) params[0], (TextChannel) params[1]);
+            }
+            System.out.println("Creating new info for guild " + guildId);
         }
         return info;
     }
@@ -99,7 +103,7 @@ public class AudioUtils {
     }
 
     public static void loadAndPlay(final TextChannel channel, final String trackUrl, final Member user, final boolean notify) {
-        GuildAudioInfo musicManager = getGuildAudioPlayer(channel.getGuild(), true);
+        GuildAudioInfo musicManager = getGuildAudioPlayer(channel.getGuild(), true, user, channel);
 
         playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
@@ -107,6 +111,10 @@ public class AudioUtils {
                 if (notify) channel.sendMessage("Adding to queue: " + track.getInfo().title).queue();
 
                 play(channel.getGuild(), musicManager, track, user, channel);
+
+                synchronized (trackUrl) {
+                    trackUrl.notifyAll();
+                }
             }
 
             @Override
@@ -121,6 +129,10 @@ public class AudioUtils {
                     channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
 
                 playList(channel.getGuild(), musicManager, tracks, user, channel);
+
+                synchronized (trackUrl) {
+                    trackUrl.notifyAll();
+                }
             }
 
             @Override
@@ -136,29 +148,27 @@ public class AudioUtils {
     }
 
     public static boolean play(Guild guild, GuildAudioInfo musicManager, AudioTrack track, Member user, TextChannel channel) {
-        if (!guild.getAudioManager().isConnected()) {
-            musicManager.channel = connectToFirstVoiceChannel(guild.getAudioManager(), user, channel);
-        }
-        if (musicManager.channel != null) {
-            musicManager.textChannel = channel;
+        synchronized (guild) {
+            if (musicManager.channel != null) {
+                musicManager.textChannel = channel;
 
-            musicManager.manager.scheduler.queue(track);
-        }
+                musicManager.manager.scheduler.queue(track);
+            }
 
-        return musicManager.channel != null;
+            return musicManager.channel != null;
+        }
     }
 
     public static boolean playList(Guild guild, GuildAudioInfo musicManager, List<AudioTrack> tracks, Member user, TextChannel channel) {
-        if (!guild.getAudioManager().isConnected()) {
-            musicManager.channel = connectToFirstVoiceChannel(guild.getAudioManager(), user, channel);
-        }
-        musicManager.textChannel = channel;
+        synchronized (guild) {
+            musicManager.textChannel = channel;
 
-        for (AudioTrack track : tracks) {
-            musicManager.manager.scheduler.queue(track);
-        }
+            for (AudioTrack track : tracks) {
+                musicManager.manager.scheduler.queue(track);
+            }
 
-        return musicManager.channel != null;
+            return musicManager.channel != null;
+        }
     }
 
     public static void skipTrack(TextChannel channel) {
@@ -217,12 +227,14 @@ public class AudioUtils {
                     A:
                     {
                         if (value.channel == null) {
+                            //System.out.println("Removing guild because: missing channel");
                             toRemove.add(key);
                             break A;
                         }
                         if (value.created + 10000 < now
                                 && (value.channel.getMembers().size() < 2
                                 || (value.manager.scheduler.queue.size() == 0 && value.manager.player.getPlayingTrack() == null))) { //nobody's in the channel
+                            //System.out.println("Removing guild because: empty");
                             value.manager.player.destroy();
                             value.channel.getGuild().getAudioManager().closeAudioConnection();
                             toRemove.add(key);

@@ -25,11 +25,6 @@ public class GuildAudioInfo {
     public TextChannel textChannel;
     public final long created = System.currentTimeMillis();
 
-    public GuildAudioInfo(GuildAudioManager manager, VoiceChannel channel) {
-        this.manager = manager;
-        this.channel = channel;
-    }
-
     public GuildAudioInfo(GuildAudioManager manager) {
         this.manager = manager;
     }

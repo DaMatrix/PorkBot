@@ -43,8 +43,16 @@ public class CommandPlayAll extends Command {
                 String[] data = HTTPUtils.performGetRequest(HTTPUtils.constantURL(split[1]), 16000).trim().split("\n");
                 int i = 0;
                 for (String s : data) {
+                    s = s.trim();
                     if (validator.isValid(s)) {
                         AudioUtils.loadAndPlay(evt.getTextChannel(), s, evt.getMember(), false);
+                        try {
+                            synchronized (s) {
+                                s.wait();
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         i++;
                     }
                 }
