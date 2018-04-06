@@ -18,7 +18,6 @@ package net.daporkchop.porkbot.command.base.music;
 
 import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.command.Command;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.apache.commons.validator.routines.UrlValidator;
 
@@ -31,7 +30,7 @@ public class CommandPlay extends Command {
         super("play");
     }
 
-    public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
         if (split.length < 2) {
             sendErrorMessage(evt.getTextChannel(), "Not enough arguments!");
             return;

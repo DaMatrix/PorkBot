@@ -17,7 +17,6 @@
 package net.daporkchop.porkbot.command;
 
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -34,9 +33,8 @@ public abstract class Command {
      * Does command logic!
      *
      * @param evt          The MessageReceivedEvent to be parsed
-     * @param thisShardJDA
      */
-    public abstract void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA);
+    public abstract void execute(MessageReceivedEvent evt, String[] split, String rawContent);
 
     /**
      * Gets the command's usage

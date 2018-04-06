@@ -18,7 +18,6 @@ package net.daporkchop.porkbot;
 
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.ShardUtils;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
@@ -27,12 +26,6 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class PorkListener extends ListenerAdapter {
-    public JDA shard;
-
-    public PorkListener(JDA jda) {
-        shard = jda;
-    }
-
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) {
@@ -42,7 +35,7 @@ public class PorkListener extends ListenerAdapter {
         String message = event.getMessage().getContentRaw();
 
         if (message.startsWith("..")) {
-            CommandRegistry.runCommand(event, message, shard);
+            CommandRegistry.runCommand(event, message);
         } else if (event.getChannelType().ordinal() == ChannelType.PRIVATE.ordinal()) {
             if (event.getAuthor().getIdLong() == 226975061880471552L) {
                 switch (message) {

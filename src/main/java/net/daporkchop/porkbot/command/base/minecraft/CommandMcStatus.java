@@ -23,7 +23,6 @@ import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -37,7 +36,7 @@ public class CommandMcStatus extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         String s;
         try {
             s = HTTPUtils.performGetRequest(HTTPUtils.constantURL("https://mcapi.ca/mcstatus"), Integer.MAX_VALUE);

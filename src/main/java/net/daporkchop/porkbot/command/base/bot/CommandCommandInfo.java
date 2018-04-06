@@ -19,7 +19,6 @@ package net.daporkchop.porkbot.command.base.bot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class CommandCommandInfo extends Command {
@@ -29,7 +28,7 @@ public class CommandCommandInfo extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "You need to have at least one argument!");
             return;

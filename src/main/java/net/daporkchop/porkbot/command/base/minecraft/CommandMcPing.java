@@ -21,7 +21,6 @@ import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import sun.misc.BASE64Decoder;
 
@@ -35,7 +34,7 @@ public class CommandMcPing extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         try {
             if (args.length < 2 || args[1].isEmpty()) {
                 sendErrorMessage(evt.getTextChannel(), "IP isn't given!");

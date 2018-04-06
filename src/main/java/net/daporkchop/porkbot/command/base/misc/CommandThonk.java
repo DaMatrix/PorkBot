@@ -18,7 +18,6 @@ package net.daporkchop.porkbot.command.base.misc;
 
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 public class CommandThonk extends Command {
@@ -26,7 +25,7 @@ public class CommandThonk extends Command {
         super("thonk");
     }
 
-    public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
         MessageUtils.sendMessage("<:thonk:324070259265110016>", evt.getTextChannel());
     }
 }

@@ -20,7 +20,6 @@ import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -31,7 +30,7 @@ public class CommandPeVersion extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;

@@ -21,7 +21,6 @@ import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -33,20 +32,20 @@ public class CommandBotInfo extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
         builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");
 
         builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
 
-        builder.addField("Name:", "PorkBot#" + thisShardJDA.getSelfUser().getDiscriminator(), true);
+        builder.addField("Name:", "PorkBot#" + evt.getJDA().getSelfUser().getDiscriminator(), true);
 
         builder.addField("Total servers:", String.valueOf(ShardUtils.getGuildCount()), true);
 
         builder.addField("Total users:", String.valueOf(ShardUtils.getUserCount()), true);
 
-        builder.addField("ID:", thisShardJDA.getSelfUser().getId(), true);
+        builder.addField("ID:", evt.getJDA().getSelfUser().getId(), true);
 
         builder.addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true);
 
@@ -56,10 +55,10 @@ public class CommandBotInfo extends Command {
 
         builder.addField("", "**SHARD INFO**", false);
 
-        builder.addField("Shard #:", String.valueOf(thisShardJDA.getShardInfo().getShardId()), true);
-        builder.addField("Shard servers:", String.valueOf(thisShardJDA.getGuilds().size()), true);
+        builder.addField("Shard #:", String.valueOf(evt.getJDA().getShardInfo().getShardId()), true);
+        builder.addField("Shard servers:", String.valueOf(evt.getJDA().getGuilds().size()), true);
 
-        builder.addField("Shard users:", String.valueOf(thisShardJDA.getUsers().size()), true);
+        builder.addField("Shard users:", String.valueOf(evt.getJDA().getUsers().size()), true);
 
         MessageUtils.sendMessage(builder, evt.getTextChannel());
     }

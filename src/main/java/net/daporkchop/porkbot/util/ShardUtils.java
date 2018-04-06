@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ShardUtils {
-    public static volatile int guildCount = 0;
     private static ShardManager manager;
 
     static {
@@ -40,10 +39,9 @@ public class ShardUtils {
             DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder();
             builder.setToken(KeyGetter.getToken());
             builder.setShardsTotal(-1);
+            builder.addEventListeners(new PorkListener());
+            builder.setGame(Game.of(Game.GameType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
             manager = builder.build();
-            manager.getShards().forEach(jda -> jda.addEventListener(new PorkListener(jda)));
-            manager.setGame(Game.of(Game.GameType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
-            guildCount = manager.getGuilds().size();
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);
@@ -60,7 +58,7 @@ public class ShardUtils {
     }
 
     public static int getGuildCount() {
-        return guildCount;
+        return (int) manager.getGuildCache().size();
     }
 
     public static int getUserCount() {

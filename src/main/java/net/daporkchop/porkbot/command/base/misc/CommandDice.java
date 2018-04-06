@@ -18,7 +18,6 @@ package net.daporkchop.porkbot.command.base.misc;
 
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,7 +27,7 @@ public class CommandDice extends Command {
         super("dice");
     }
 
-    public void execute(MessageReceivedEvent evt, String[] split, String rawContent, JDA thisShardJDA) {
+    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
         MessageUtils.sendMessage(":game_die: | I rolled a **" + (ThreadLocalRandom.current().nextInt(6) + 1) + "**!", evt.getTextChannel());
     }
 }

@@ -16,9 +16,8 @@
 
 package net.daporkchop.porkbot.command;
 
-import net.daporkchop.porkbot.util.DataTag;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.JDA;
+import net.daporkchop.porkbot.util.ObjectDB;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.File;
@@ -41,10 +40,10 @@ public abstract class CommandRegistry {
      */
     public static long COMMAND_COUNT_TOTAL;
 
-    private static DataTag command_save;
+    private static ObjectDB command_save;
 
     static {
-        command_save = new DataTag(new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"));
+        command_save = new ObjectDB(new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"));
         COMMAND_COUNT_TOTAL = command_save.getLong("totalCommands", 0L);
     }
 
@@ -64,9 +63,8 @@ public abstract class CommandRegistry {
      * Runs a command
      *
      * @param evt
-     * @param thisShardJDA
      */
-    public static void runCommand(MessageReceivedEvent evt, String rawContent, JDA thisShardJDA) {
+    public static void runCommand(MessageReceivedEvent evt, String rawContent) {
         try {
             try {
                 if (evt.getTextChannel() == null) {
@@ -81,7 +79,7 @@ public abstract class CommandRegistry {
                     new Thread() {
                         @Override
                         public void run() {
-                            cmd.execute(evt, split, rawContent, thisShardJDA);
+                            cmd.execute(evt, split, rawContent);
                             COMMAND_COUNT++;
                             COMMAND_COUNT_TOTAL++;
                             cmd.uses++;
