@@ -19,8 +19,6 @@ package net.daporkchop.porkbot;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -61,15 +59,5 @@ public class PorkListener extends ListenerAdapter {
                 }
             }
         }
-    }
-
-    @Override
-    public void onGuildJoin(GuildJoinEvent event) {
-        ShardUtils.guildCount++;
-    }
-
-    @Override
-    public void onGuildLeave(GuildLeaveEvent event) {
-        ShardUtils.guildCount--;
     }
 }
