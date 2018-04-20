@@ -20,6 +20,7 @@ import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.MessageUtils;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import org.apache.commons.validator.routines.UrlValidator;
 
@@ -42,6 +43,7 @@ public class CommandPlayAll extends Command {
             try {
                 String[] data = HTTPUtils.performGetRequest(HTTPUtils.constantURL(split[1]), 16000).trim().split("\n");
                 int i = 0;
+                Message message = evt.getChannel().sendMessage("Loading " + data.length + " tracks... (this might take a while)").complete();
                 for (String s : data) {
                     s = s.trim();
                     if (validator.isValid(s)) {
@@ -56,7 +58,7 @@ public class CommandPlayAll extends Command {
                         i++;
                     }
                 }
-                MessageUtils.sendMessage("Loaded " + i + " tracks!", evt.getTextChannel());
+                message.editMessage("Loaded " + i + " tracks! (Out of " + data.length + ")").queue();
             } catch (Exception e) {
                 MessageUtils.sendException(e, evt);
             }

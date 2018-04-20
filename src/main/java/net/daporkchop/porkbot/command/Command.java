@@ -32,7 +32,7 @@ public abstract class Command {
     /**
      * Does command logic!
      *
-     * @param evt          The MessageReceivedEvent to be parsed
+     * @param evt The MessageReceivedEvent to be parsed
      */
     public abstract void execute(MessageReceivedEvent evt, String[] split, String rawContent);
 

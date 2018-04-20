@@ -20,10 +20,10 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 
 public class GuildAudioInfo {
+    public final long created = System.currentTimeMillis();
     public GuildAudioManager manager;
     public VoiceChannel channel;
     public TextChannel textChannel;
-    public final long created = System.currentTimeMillis();
 
     public GuildAudioInfo(GuildAudioManager manager) {
         this.manager = manager;

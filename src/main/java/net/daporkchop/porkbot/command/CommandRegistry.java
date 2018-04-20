@@ -22,6 +22,8 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class CommandRegistry {
 
@@ -29,17 +31,15 @@ public abstract class CommandRegistry {
      * A HashMap containing all the commands and their prefix
      */
     public static final HashMap<String, Command> COMMANDS = new HashMap<>();
-
+    private static final ExecutorService executor = Executors.newFixedThreadPool(2);
     /**
      * Counts all commands run this session
      */
     public static long COMMAND_COUNT = 0L;
-
     /**
      * Counts all commands run
      */
     public static long COMMAND_COUNT_TOTAL;
-
     private static ObjectDB command_save;
 
     static {
@@ -74,16 +74,13 @@ public abstract class CommandRegistry {
                 String[] split = rawContent.split(" ");
                 Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
                 if (cmd != null) {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            evt.getTextChannel().sendTyping().complete();
-                            cmd.execute(evt, split, rawContent);
-                            COMMAND_COUNT++;
-                            COMMAND_COUNT_TOTAL++;
-                            cmd.uses++;
-                        }
-                    }.start();
+                    executor.submit(() -> {
+                        evt.getTextChannel().sendTyping().complete();
+                        cmd.execute(evt, split, rawContent);
+                        COMMAND_COUNT++;
+                        COMMAND_COUNT_TOTAL++;
+                        cmd.uses++;
+                    });
                 }
             } catch (Throwable e) {
                 e.printStackTrace();

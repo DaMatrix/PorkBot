@@ -41,7 +41,7 @@ public class CommandQueue extends Command {
             for (int i = 0; i < 5 && i < tracks.size(); i++) {
                 AudioTrack track = tracks.get(i);
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(track.getInfo().length);
-                long seconds = TimeUnit.MILLISECONDS.toSeconds(track.getInfo().length);
+                long seconds = TimeUnit.MILLISECONDS.toSeconds(track.getInfo().length) - (minutes * 60L);
                 msg += (i + 1) + ": " + tracks.get(i).getInfo().title + "(`" + minutes + ":" + seconds + "`)\n";
             }
             MessageUtils.sendMessage(msg, evt.getTextChannel());
