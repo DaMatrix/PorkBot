@@ -54,7 +54,7 @@ public abstract class MCPing {
             }
 
             if (identifier != null) {
-                if (!MinecraftIdentifier.isMCPEIdentifier(identifier)) {
+                if (!MinecraftIdentifier.isMinecraftIdentifier(identifier)) {
                     return new PePing(true, true, null, null, null, null, 0, false, null);
                 }
                 MinecraftIdentifier mcpeIdentifier = new MinecraftIdentifier(identifier);
