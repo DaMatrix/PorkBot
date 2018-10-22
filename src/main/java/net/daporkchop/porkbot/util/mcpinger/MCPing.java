@@ -16,11 +16,13 @@
 
 package net.daporkchop.porkbot.util.mcpinger;
 
+import com.google.gson.JsonObject;
 import net.daporkchop.lib.minecraft.api.PingData;
 import net.daporkchop.lib.minecraft.util.ping.BedrockPing;
 import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPing;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPingReply;
+import net.daporkchop.porkbot.util.mcpinger.query.Query;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -48,7 +50,7 @@ public abstract class MCPing {
             PingData data = BedrockPing.ping(new InetSocketAddress(ip, port));
 
             if (data != null) {
-                return new PePing(true, false, data.getMotd(), String.format("%d/%d", data.getOnlinePlayers(), data.getMaxPlayers()), String.format("%d ms", data.getPing()), data.getVersion(), data.getProtocol(), false, null);
+                return new PePing(true, false, TextFormat.clean(data.getMotd()), String.format("%d/%d", data.getOnlinePlayers(), data.getMaxPlayers()), String.format("%d ms", data.getPing()), data.getVersion(), data.getProtocol(), false, null);
             } else {
                 return new PePing(false, false, null, null, null, null, 0, false, null);
             }
@@ -128,15 +130,26 @@ public abstract class MCPing {
      * @return a filled McPing
      */
     public static McPing pingPc(String ip, int port) {
+        {
+            InetSocketAddress address = net.daporkchop.porkbot.util.mcpinger.query.Query.getAddress(new InetSocketAddress(ip, port));
+            ip = address.getHostString();
+            port = address.getPort();
+        }
         try {
-            MinecraftPingReply reply = MinecraftPing.getPing(ip, port);
+            JsonObject reply = MinecraftPing.getPing(ip, port);
 
             if (reply != null) {
-                return new McPing(true, reply.getDescription().getText(), reply.getPlayers().getOnline() + "/" + reply.getPlayers().getMax(), reply.getVersion().getProtocol(), reply.getVersion().getName(), "0 ms", reply.getFavicon() == null ? fallbackFavicon : reply.getFavicon(), false, null);
+                String motd = TextFormat.clean(reply.getAsJsonObject("description").get("text").getAsString());
+                String online = String.format("%d/%d", reply.getAsJsonObject("players").get("online").getAsInt(), reply.getAsJsonObject("players").get("max").getAsInt());
+                int protocol = reply.getAsJsonObject("version").get("protocol").getAsInt();
+                String version = reply.getAsJsonObject("version").get("name").getAsString();
+                String favicon = reply.has("favicon") && !reply.get("favicon").getAsString().isEmpty() ? reply.get("favicon").getAsString() : fallbackFavicon;
+                return new McPing(true, motd, online, protocol, version, String.format("%d ms", reply.get("ping").getAsLong()), favicon, false, null);
             } else {
                 return new McPing(false, null, null, 0, null, null, null, false, null);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return new McPing(false, null, null, 0, null, null, null, true, e);
         }
     }

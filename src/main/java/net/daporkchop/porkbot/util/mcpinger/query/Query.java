@@ -147,6 +147,7 @@ public class Query {
      * @see Query#sendQueryRequest()
      */
     public void sendQuery() throws IOException {
+        pingServer();
         sendQueryRequest();
     }
 
@@ -165,7 +166,7 @@ public class Query {
                     SRVRecord srv = (SRVRecord) record;
                     String hostname = srv.getTarget().toString();
                     int port = srv.getPort();
-                    System.out.println(hostname + ":" + port);
+                    //System.out.println(hostname + ":" + port);
                     address = new InetSocketAddress(hostname, port);
                     queryAddress = new InetSocketAddress(hostname, port);
                 }
@@ -180,6 +181,30 @@ public class Query {
         } catch (IOException e) {
         }
         return false;
+    }
+
+    /**
+     * Try pinging the server
+     *
+     * @return <code>true</code> if the server can be reached within 1.5 second
+     */
+    public static InetSocketAddress getAddress(InetSocketAddress address) {
+        // try pinging the given server
+        String service = "_minecraft._tcp." + address.getHostName();
+        try {
+            Record[] records = new Lookup(service, Type.SRV).run();
+            if (records != null)
+                for (Record record : records) {
+                    SRVRecord srv = (SRVRecord) record;
+                    String hostname = srv.getTarget().toString();
+                    int port = srv.getPort();
+                    //System.out.println(hostname + ":" + port);
+                    return new InetSocketAddress(hostname, port);
+                }
+        } catch (TextParseException e1) {
+            e1.printStackTrace();
+        }
+        return address;
     }
 
     /**

@@ -16,6 +16,9 @@
 package net.daporkchop.porkbot.util.mcpinger.pcping;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import net.daporkchop.toobeetooteebot.util.ChatUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -25,6 +28,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class MinecraftPing {
+    private static final JsonParser parser = new JsonParser();
+    private static final Gson gson = new Gson();
 
     /**
      * Fetches a {@link MinecraftPingReply} for the supplied hostname.
@@ -34,7 +39,7 @@ public class MinecraftPing {
      * @return {@link MinecraftPingReply}
      * @throws IOException
      */
-    public static MinecraftPingReply getPing(final String hostname, final int pork) throws IOException {
+    public static JsonObject getPing(final String hostname, final int pork) throws IOException {
         return getPing(new MinecraftPingOptions().setHostname(hostname).setPort(pork));
     }
 
@@ -45,7 +50,7 @@ public class MinecraftPing {
      * @return {@link MinecraftPingReply}
      * @throws IOException
      */
-    public static MinecraftPingReply getPing(final MinecraftPingOptions options) throws IOException {
+    public static JsonObject getPing(final MinecraftPingOptions options) throws IOException {
         MinecraftPingUtil.validate(options.getHostname(), "Hostname cannot be null.");
         MinecraftPingUtil.validate(options.getPort(), "Port cannot be null.");
 
@@ -74,11 +79,13 @@ public class MinecraftPing {
 
         out.writeByte(0x01); // Size of packet
         out.writeByte(MinecraftPingUtil.PACKET_STATUSREQUEST);
+        long start = System.currentTimeMillis();
 
         //< Status response
 
         MinecraftPingUtil.readVarInt(in); // Size
         int id = MinecraftPingUtil.readVarInt(in);
+        long ping = (System.currentTimeMillis() - start) >> 1L;
 
         MinecraftPingUtil.io(id == -1, "Server prematurely ended stream.");
         MinecraftPingUtil.io(id != MinecraftPingUtil.PACKET_STATUSREQUEST, "Server returned invalid packet.");
@@ -90,6 +97,8 @@ public class MinecraftPing {
         byte[] data = new byte[length];
         in.readFully(data);
         String json = new String(data, options.getCharset());
+
+        //System.out.println(json);
 
         //> Ping
 
@@ -112,7 +121,24 @@ public class MinecraftPing {
         in.close();
         socket.close();
 
-        return new Gson().fromJson(json, MinecraftPingReply.class);
+        //return gson.fromJson(json, MinecraftPingReply.class);
+        JsonObject object = parser.parse(json).getAsJsonObject();
+        object.addProperty("ping", ping);
+        if (object.get("description").isJsonObject()) {
+            if (object.getAsJsonObject("description").has("extra")) {
+                String extra = gson.toJson(object.getAsJsonObject("description").get("extra"));
+                //System.out.println("Parsing " + extra);
+                String text = ChatUtils.getOldText(extra);
+                //System.out.println("Real: " + text);
+                object.getAsJsonObject("description").addProperty("text", text);
+            } else {
+                //System.out.println("no extra motd");
+            }
+        } else {
+            JsonObject o = new JsonObject();
+            o.addProperty("text", object.get("description").getAsString());
+            object.add("description", o);
+        }
+        return object;
     }
-
 }
