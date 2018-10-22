@@ -27,6 +27,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 public class MessageUtils {
     /**
@@ -52,6 +54,7 @@ public class MessageUtils {
      */
     public static void sendMessage(EmbedBuilder builder, TextChannel channel) {
         try {
+            builder.setTimestamp(Instant.now());
             Thread.sleep(500);
             channel.sendMessage(builder.build()).queue();
         } catch (PermissionException e) {
@@ -74,6 +77,7 @@ public class MessageUtils {
      */
     public static void sendImage(EmbedBuilder builder, byte[] image, String name, TextChannel channel) {
         try {
+            builder.setTimestamp(Instant.now());
             channel.sendFile(image, name, new MessageBuilder().setEmbed(builder.build()).build()).queue();
         } catch (PermissionException e) {
             //we can't do anything about it
@@ -107,7 +111,7 @@ public class MessageUtils {
         try {
             url = new URL(address);
             is = url.openStream();
-            byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
+            byte[] byteChunk = new byte[4096];
             int n;
 
             while ((n = is.read(byteChunk)) > 0) {
@@ -116,7 +120,6 @@ public class MessageUtils {
         } catch (IOException e) {
             System.err.printf("Failed while reading bytes from %s: %s", url.toExternalForm(), e.getMessage());
             e.printStackTrace();
-            // Perform any other exception handling that's appropriate.
         } finally {
             try {
                 if (is != null) {

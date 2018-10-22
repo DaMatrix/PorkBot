@@ -37,7 +37,7 @@ public class CommandBotInfo extends Command {
         builder.setColor(Color.BLUE);
         builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");
 
-        builder.setThumbnail("https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif?size=256");
+        builder.setThumbnail("https://www.daporkchop.net/toembed/profilepic-512p.gif");
 
         builder.addField("Name:", "PorkBot#" + evt.getJDA().getSelfUser().getDiscriminator(), true);
 

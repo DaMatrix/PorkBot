@@ -77,8 +77,6 @@ public class CommandMcPing extends Command {
                 builder.addField("Players:", ping.players, false);
                 builder.addField("MOTD:", TextFormat.clean(ping.motd), false);
 
-                builder.setAuthor("PorkBot", "http://www.daporkchop.net/porkbot", "https://cdn.discordapp.com/avatars/226975061880471552/a_195cf606ffbe9bd5bf1e8764c711253c.gif");
-
                 MessageUtils.sendImage(builder, imageByte, "image.png", evt.getTextChannel());
                 return;
             } else {

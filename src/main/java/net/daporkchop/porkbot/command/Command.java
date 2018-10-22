@@ -59,6 +59,7 @@ public abstract class Command {
     }
 
     public void sendErrorMessage(TextChannel channel, String message) {
-        MessageUtils.sendMessage((message == null ? "" : message + "\n") + "Usage: `" + getUsage() + "`\nExample: `" + getUsageExample() + "`", channel);
+        MessageUtils.sendMessage(String.format("%sUsage: `%s`\nExample: `%s`", message == null ? "" : String.format("%s\n", message), this.getUsage(), this.getUsageExample()), channel);
+        //MessageUtils.sendMessage((message == null ? "" : message + "\n") + "Usage: `" + getUsage() + "`\nExample: `" + getUsageExample() + "`", channel);
     }
 }
