@@ -41,12 +41,12 @@ public class CommandPlayAll extends Command {
         }
         if (validator.isValid(split[1])) {
             try {
-                String[] data = HTTPUtils.performGetRequest(HTTPUtils.constantURL(split[1]), 16000).trim().split("\n");
+                String[] data = HTTPUtils.performGetRequest(HTTPUtils.constantURL(split[1]), 32000).trim().split("\n");
                 int i = 0;
                 Message message = evt.getChannel().sendMessage("Loading " + data.length + " tracks... (this might take a while)").complete();
                 for (String s : data) {
                     s = s.trim();
-                    if (validator.isValid(s)) {
+                    if (!s.contains("~") && validator.isValid(s)) {
                         AudioUtils.loadAndPlay(evt.getTextChannel(), s, evt.getMember(), false);
                         try {
                             synchronized (s) {
