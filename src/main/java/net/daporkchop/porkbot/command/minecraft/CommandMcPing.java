@@ -44,10 +44,10 @@ public class CommandMcPing extends Command {
             MCPing.McPing ping = null;
             String[] ipPort = args[1].split(":");
             if (ipPort.length == 1) {
-                ping = MCPing.pingPc(ipPort[0], 25565, true);
+                ping = MCPing.pingPc(ipPort[0], 25565);
             } else if (ipPort.length == 2) {
                 try {
-                    ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]), true);
+                    ping = MCPing.pingPc(ipPort[0], Integer.parseInt(ipPort[1]));
                 } catch (NumberFormatException e) {
                     MessageUtils.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                     return;

@@ -16,15 +16,14 @@
 
 package net.daporkchop.porkbot.util.mcpinger;
 
-import com.whirvis.jraknet.identifier.Identifier;
-import com.whirvis.jraknet.identifier.MinecraftIdentifier;
-import com.whirvis.jraknet.util.RakNetUtils;
+import net.daporkchop.lib.minecraft.api.PingData;
+import net.daporkchop.lib.minecraft.util.ping.BedrockPing;
 import net.daporkchop.porkbot.util.TextFormat;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPing;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPingReply;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
 import java.util.GregorianCalendar;
 
 /**
@@ -43,22 +42,13 @@ public abstract class MCPing {
      * @param port the server's port
      * @return a filled PePing
      */
-    public static PePing pingPe(String ip, int port, boolean measurePing) {
+    @SuppressWarnings("unchecked")
+    public static PePing pingPe(String ip, int port) {
         try {
-            Identifier identifier;
+            PingData data = BedrockPing.ping(new InetSocketAddress(ip, port));
 
-            try {
-                identifier = RakNetUtils.getServerIdentifier(ip, port);
-            } catch (UnknownHostException e) {
-                identifier = null;
-            }
-
-            if (identifier != null) {
-                if (!MinecraftIdentifier.isMinecraftIdentifier(identifier)) {
-                    return new PePing(true, true, null, null, null, null, 0, false, null);
-                }
-                MinecraftIdentifier mcpeIdentifier = new MinecraftIdentifier(identifier);
-                return new PePing(true, false, identifier.build().split(";")[1], mcpeIdentifier.getOnlinePlayerCount() + "/" + mcpeIdentifier.getMaxPlayerCount(), measurePing ? getPingToIP(ip) : "0 ms", mcpeIdentifier.getVersionTag(), mcpeIdentifier.getServerProtocol(), false, null);
+            if (data != null) {
+                return new PePing(true, false, data.getMotd(), String.format("%d/%d", data.getOnlinePlayers(), data.getMaxPlayers()), String.format("%d ms", data.getPing()), data.getVersion(), data.getProtocol(), false, null);
             } else {
                 return new PePing(false, false, null, null, null, null, 0, false, null);
             }
@@ -75,10 +65,10 @@ public abstract class MCPing {
      * @param pe   whether or not the server is a Pocket Edition server
      * @return a filled Query
      */
-    public static Query query(String ip, int port, boolean pe, boolean getLatency) {
+    public static Query query(String ip, int port, boolean pe) {
         try {
             if (pe) {
-                PePing ping = pingPe(ip, port, getLatency);
+                PePing ping = pingPe(ip, port);
                 if (ping.status) {
                     try {
                         net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
@@ -92,7 +82,7 @@ public abstract class MCPing {
                                 playerNames += ", " + response.onlineUsernames[i];
                             }
                         }
-                        return new Query(true, false, response.getMOTD(), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), getLatency ? ping.ping : "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), null);
+                        return new Query(true, false, response.getMOTD(), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), null);
                     } catch (Exception e) {
                         //no query, as server is online
                         return new Query(true, true, null, null, null, null, 0, null, null, false, null, null, null, null);
@@ -101,7 +91,7 @@ public abstract class MCPing {
                     return new Query(false, false, null, null, null, null, 0, null, null, false, null, null, null, null);
                 }
             } else {
-                McPing ping = pingPc(ip, port, getLatency);
+                McPing ping = pingPc(ip, port);
                 if (ping.status) {
                     try {
                         net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
@@ -115,7 +105,7 @@ public abstract class MCPing {
                                 playerNames += ", " + response.onlineUsernames[i];
                             }
                         }
-                        return new Query(true, false, TextFormat.clean(response.getMOTD()), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), getLatency ? ping.ping : "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), ping.favicon);
+                        return new Query(true, false, TextFormat.clean(response.getMOTD()), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), ping.favicon);
                     } catch (Exception e) {
                         e.printStackTrace();
                         //no query, as the server is online
@@ -137,44 +127,18 @@ public abstract class MCPing {
      * @param port the server's port
      * @return a filled McPing
      */
-    public static McPing pingPc(String ip, int port, boolean measureping) {
+    public static McPing pingPc(String ip, int port) {
         try {
             MinecraftPingReply reply = MinecraftPing.getPing(ip, port);
 
             if (reply != null) {
-                return new McPing(true, reply.getDescription().getText(), reply.getPlayers().getOnline() + "/" + reply.getPlayers().getMax(), reply.getVersion().getProtocol(), reply.getVersion().getName(), measureping ? getPingToIP(ip) : "0 ms", reply.getFavicon() == null ? fallbackFavicon : reply.getFavicon(), false, null);
+                return new McPing(true, reply.getDescription().getText(), reply.getPlayers().getOnline() + "/" + reply.getPlayers().getMax(), reply.getVersion().getProtocol(), reply.getVersion().getName(), "0 ms", reply.getFavicon() == null ? fallbackFavicon : reply.getFavicon(), false, null);
             } else {
                 return new McPing(false, null, null, 0, null, null, null, false, null);
             }
         } catch (Exception e) {
             return new McPing(false, null, null, 0, null, null, null, true, e);
         }
-    }
-
-    /**
-     * pings an ip address
-     *
-     * @param ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee idk lol
-     * @return the ping
-     */
-    public static String getPingToIP(String ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee) {
-        try {
-            InetAddress inet = InetAddress.getByName(ipToPingNowPleaseGiveThisWhyIsThisFieldDescriptorSoLongLolEksDee);
-
-            long finish = 0;
-            long start = new GregorianCalendar().getTimeInMillis();
-
-            if (inet.isReachable(2500)) {
-                finish = new GregorianCalendar().getTimeInMillis();
-                return finish - start + " ms";
-            } else {
-                return "-1 ms";
-            }
-        } catch (Exception e) {
-            System.out.println("Exception:" + e.getMessage());
-        }
-
-        return "-1 ms";
     }
 
     /**

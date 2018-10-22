@@ -40,10 +40,10 @@ public class CommandPeCount extends Command {
         String[] ipPort = args[1].split(":");
 
         if (ipPort.length == 1) {
-            ping = MCPing.pingPe(ipPort[0], 19132, false);
+            ping = MCPing.pingPe(ipPort[0], 19132);
         } else if (ipPort.length == 2) {
             try {
-                ping = MCPing.pingPe(ipPort[0], Integer.parseInt(ipPort[1]), false);
+                ping = MCPing.pingPe(ipPort[0], Integer.parseInt(ipPort[1]));
             } catch (NumberFormatException e) {
                 MessageUtils.sendMessage("Unable to interpret port number!", evt.getTextChannel());
                 return;

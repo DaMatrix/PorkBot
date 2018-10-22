@@ -1,12 +1,5 @@
-
-\.idea/
-
-*.iml
-
-discordtoken\.txt
-authtoken\.txt
-
-porkbot-1\.0-SNAPSHOT\.jar
+/discordtoken.txt
+/authtoken.txt
 
 .settings
 .classpath
@@ -17,3 +10,9 @@ target/
 command_info\.dat
 
 devkey\.txt
+
+*.class
+*.jar
+*.ipr
+*.iml
+.idea/

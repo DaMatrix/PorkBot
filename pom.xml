@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>PorkBot</name>
-    <groupId>tk.daporkchop</groupId>
+    <groupId>net.daporkchop</groupId>
     <artifactId>porkbot</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -37,12 +37,16 @@
             <url>http://jcenter.bintray.com</url>
         </repository>
         <repository>
-            <id>JRakNet</id>
-            <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
+            <id>nukkitx-repo-snapshot</id>
+            <url>https://repo.nukkitx.com/snapshot/</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>DaPorkchop_</id>
+            <url>https://maven.daporkchop.net/</url>
         </repository>
     </repositories>
 
@@ -60,7 +64,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>3.6.0_354</version>
+            <version>3.8.1_439</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -73,9 +77,16 @@
             <version>2.5</version>
         </dependency>
         <dependency>
-            <groupId>com.whirvis</groupId>
+            <groupId>com.nukkitx.network</groupId>
+            <artifactId>query</artifactId>
+            <version>1.2.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gomint</groupId>
             <artifactId>jraknet</artifactId>
-            <version>2.9.8</version>
+            <version>6.0.2-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>dnsjava</groupId>
@@ -85,7 +96,7 @@
         <dependency>
             <groupId>com.sedmelluq</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>1.2.62</version>
+            <version>1.3.9</version>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>

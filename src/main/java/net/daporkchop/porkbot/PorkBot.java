@@ -87,12 +87,12 @@ public class PorkBot {
         UUIDFetcher.init();
         AudioUtils.init();
 
-        final String authToken = KeyGetter.getAuthtoken();
+        //final String authToken = KeyGetter.getAuthtoken();
 
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                ShardUtils.forEachShard(jda -> {
+                /*ShardUtils.forEachShard(jda -> {
                     try {
                         HTTPUtils.performPostRequestWithAuth(HTTPUtils.constantURL("https://bots.discord.pw/api/bots/287894637165936640/stats"),
                                 "{" +
@@ -104,7 +104,7 @@ public class PorkBot {
                                 authToken);
                     } catch (IOException e) {
                     }
-                });
+                });*/
                 CommandRegistry.save();
             }
         }, 1000, 120000);

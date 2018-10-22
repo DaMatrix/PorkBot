@@ -42,12 +42,12 @@ public class CommandPeQuery extends Command {
         String[] ipPort = args[1].split(":");
 
         if (ipPort.length == 1) {
-            query = MCPing.query(ipPort[0], 19132, true, true);
+            query = MCPing.query(ipPort[0], 19132, true);
         } else if (ipPort.length == 2) {
             try {
                 int port = Integer.parseInt(ipPort[1]);
 
-                query = MCPing.query(ipPort[0], port, true, true);
+                query = MCPing.query(ipPort[0], port, true);
             } catch (NumberFormatException e) {
                 MessageUtils.sendMessage("Error getting server info: `java.lang.NumberFormatException`", evt.getTextChannel());
                 return;

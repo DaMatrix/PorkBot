@@ -80,7 +80,7 @@ public class UUIDFetcher {
                 if (!requests.isEmpty()) {
                     UUIDFetcher.run();
                 } else {
-                    System.out.println("Requests are empty");
+                    //System.out.println("Requests are empty");
                 }
             }
         }, 5000, 1200);
