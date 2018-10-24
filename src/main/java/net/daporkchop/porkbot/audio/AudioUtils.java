@@ -29,6 +29,12 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -90,12 +96,24 @@ public class AudioUtils {
             info = new GuildAudioInfo(new GuildAudioManager(playerManager));
             musicManagers.put(guildId, info);
             guild.getAudioManager().setSendingHandler(info.manager.getSendHandler());
+            if (false) {
+                if (!guild.getAudioManager().isConnected()) {
+                    info.channel = connectToFirstVoiceChannel(guild.getAudioManager(), (Member) params[0], (TextChannel) params[1]);
+                }
+                System.out.println("Creating new info for guild " + guildId);
+            }
+        }
+        return info;
+    }
+
+    public static synchronized void tryConnectToVoice(Guild guild, GuildAudioInfo info, Object... params)    {
+        if (info != null && !info.started)  {
+            info.started = true;
             if (!guild.getAudioManager().isConnected()) {
                 info.channel = connectToFirstVoiceChannel(guild.getAudioManager(), (Member) params[0], (TextChannel) params[1]);
             }
-            System.out.println("Creating new info for guild " + guildId);
+            System.out.println("Creating new info for guild " + guild.getIdLong());
         }
-        return info;
     }
 
     public static void loadAndPlay(final TextChannel channel, final String trackUrl, final Member user) {
@@ -103,6 +121,11 @@ public class AudioUtils {
     }
 
     public static void loadAndPlay(final TextChannel channel, final String trackUrl, final Member user, final boolean notify) {
+        if (!user.getVoiceState().inVoiceChannel()) {
+            MessageUtils.sendMessage("You're not in a voice channel! REEEEEEEE", channel);
+            return;
+        }
+
         GuildAudioInfo musicManager = getGuildAudioPlayer(channel.getGuild(), true, user, channel);
 
         playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
@@ -112,9 +135,11 @@ public class AudioUtils {
 
                 play(channel.getGuild(), musicManager, track, user, channel);
 
-                synchronized (trackUrl) {
+                /*synchronized (trackUrl) {
                     trackUrl.notifyAll();
-                }
+                }*/
+
+                tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
             }
 
             @Override
@@ -122,17 +147,20 @@ public class AudioUtils {
                 List<AudioTrack> tracks = playlist.getTracks();
 
                 if (tracks == null || tracks.size() == 0) {
-                    channel.sendMessage("Empty or invalid playlist, not loading");
+                    channel.sendMessage("Empty or invalid playlist, not loading").queue();
                 }
 
-                if (notify)
+                if (notify){
                     channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
+                }
 
                 playList(channel.getGuild(), musicManager, tracks, user, channel);
 
-                synchronized (trackUrl) {
+                /*synchronized (trackUrl) {
                     trackUrl.notifyAll();
-                }
+                }*/
+
+                tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
             }
 
             @Override
@@ -215,8 +243,18 @@ public class AudioUtils {
 
         musicManagers = new TSynchronizedLongObjectMap<>(new TLongObjectHashMap<>());
         playerManager = new DefaultAudioPlayerManager();
-        AudioSourceManagers.registerRemoteSources(playerManager);
-        AudioSourceManagers.registerLocalSource(playerManager);
+        if (false) {
+            AudioSourceManagers.registerRemoteSources(playerManager);
+            AudioSourceManagers.registerLocalSource(playerManager);
+        } else {
+            playerManager.registerSourceManager(new YoutubeAudioSourceManager(false));
+            playerManager.registerSourceManager(new SoundCloudAudioSourceManager());
+            playerManager.registerSourceManager(new BandcampAudioSourceManager());
+            playerManager.registerSourceManager(new VimeoAudioSourceManager());
+            playerManager.registerSourceManager(new TwitchStreamAudioSourceManager());
+            playerManager.registerSourceManager(new BeamAudioSourceManager());
+            playerManager.registerSourceManager(new BetterHttpSourceManager());
+        }
 
         PorkBot.timer.schedule(new TimerTask() {
             @Override
@@ -224,6 +262,9 @@ public class AudioUtils {
                 TLongSet toRemove = new TLongHashSet();
                 long now = System.currentTimeMillis();
                 musicManagers.forEachEntry((key, value) -> {
+                    if (!value.started) {
+                        return true;
+                    }
                     A:
                     {
                         if (value.channel == null) {
@@ -238,7 +279,7 @@ public class AudioUtils {
                             value.manager.player.destroy();
                             value.channel.getGuild().getAudioManager().closeAudioConnection();
                             toRemove.add(key);
-                            break A;
+                            //break A;
                         }
                     }
                     return true;

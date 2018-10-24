@@ -140,7 +140,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandInterject());
         CommandRegistry.registerCommand(new CommandCommandInfo());
         CommandRegistry.registerCommand(new CommandPlay());
-        CommandRegistry.registerCommand(new CommandPlayAll());
+        //CommandRegistry.registerCommand(new CommandPlayAll());
         CommandRegistry.registerCommand(new CommandShuffle());
         CommandRegistry.registerCommand(new CommandQueue());
         CommandRegistry.registerCommand(new CommandStop());

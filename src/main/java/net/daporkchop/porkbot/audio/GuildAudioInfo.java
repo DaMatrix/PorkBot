@@ -24,6 +24,7 @@ public class GuildAudioInfo {
     public GuildAudioManager manager;
     public VoiceChannel channel;
     public TextChannel textChannel;
+    public boolean started = false;
 
     public GuildAudioInfo(GuildAudioManager manager) {
         this.manager = manager;
