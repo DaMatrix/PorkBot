@@ -131,15 +131,17 @@ public class AudioUtils {
         playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                if (notify) channel.sendMessage("Adding to queue: " + track.getInfo().title).queue();
+                tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
+
+                if (notify) {
+                    channel.sendMessage("Adding to queue: " + track.getInfo().title).queue();
+                }
 
                 play(channel.getGuild(), musicManager, track, user, channel);
 
                 /*synchronized (trackUrl) {
                     trackUrl.notifyAll();
                 }*/
-
-                tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
             }
 
             @Override
@@ -149,6 +151,7 @@ public class AudioUtils {
                 if (tracks == null || tracks.size() == 0) {
                     channel.sendMessage("Empty or invalid playlist, not loading").queue();
                 }
+                tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
 
                 if (notify){
                     channel.sendMessage("Adding " + tracks.size() + " tracks from playlist " + playlist.getName() + " to queue").queue();
@@ -160,7 +163,7 @@ public class AudioUtils {
                     trackUrl.notifyAll();
                 }*/
 
-                tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
+                //tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
             }
 
             @Override
@@ -247,7 +250,7 @@ public class AudioUtils {
             AudioSourceManagers.registerRemoteSources(playerManager);
             AudioSourceManagers.registerLocalSource(playerManager);
         } else {
-            playerManager.registerSourceManager(new YoutubeAudioSourceManager(false));
+            playerManager.registerSourceManager(new YoutubeAudioSourceManager(true));
             playerManager.registerSourceManager(new SoundCloudAudioSourceManager());
             playerManager.registerSourceManager(new BandcampAudioSourceManager());
             playerManager.registerSourceManager(new VimeoAudioSourceManager());
