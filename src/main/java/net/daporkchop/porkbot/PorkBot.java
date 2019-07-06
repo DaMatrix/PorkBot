@@ -99,7 +99,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandTest());
 
         //minecraft
-        /*CommandRegistry.registerCommand(new CommandMcUUID());
+        CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandMcPing());
         CommandRegistry.registerCommand(new CommandPeQuery());
         CommandRegistry.registerCommand(new CommandMcSkin());
@@ -118,7 +118,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandPeLatency());
         CommandRegistry.registerCommand(new CommandPeMOTD());
         CommandRegistry.registerCommand(new CommandPeVersion());
-        CommandRegistry.registerCommand(new CommandSkinSteal());*/
+        CommandRegistry.registerCommand(new CommandSkinSteal());
 
         //misc
         CommandRegistry.registerCommand(new CommandDice());

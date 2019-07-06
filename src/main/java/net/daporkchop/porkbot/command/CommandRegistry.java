@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -30,12 +30,12 @@ public abstract class CommandRegistry {
     /**
      * A HashMap containing all the commands and their prefix
      */
-    public static final HashMap<String, Command> COMMANDS = new HashMap<>();
-    private static final ExecutorService executor = Executors.newFixedThreadPool(2);
+    public static final HashMap<String, Command> COMMANDS      = new HashMap<>();
+    private static final ExecutorService         EXECUTOR      = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     /**
      * Counts all commands run this session
      */
-    public static long COMMAND_COUNT = 0L;
+    public static long                           COMMAND_COUNT = 0L;
     /**
      * Counts all commands run
      */
@@ -65,6 +65,10 @@ public abstract class CommandRegistry {
      * @param evt
      */
     public static void runCommand(MessageReceivedEvent evt, String rawContent) {
+        EXECUTOR.submit(() -> doRunCommand(evt, rawContent));
+    }
+
+    private static void doRunCommand(MessageReceivedEvent evt, String rawContent) {
         try {
             try {
                 if (evt.getTextChannel() == null) {
@@ -74,13 +78,11 @@ public abstract class CommandRegistry {
                 String[] split = rawContent.split(" ");
                 Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
                 if (cmd != null) {
-                    executor.submit(() -> {
-                        evt.getTextChannel().sendTyping().complete();
+                        evt.getTextChannel().sendTyping().complete(); //TODO: i don't want to have to wait for this to complete!
                         cmd.execute(evt, split, rawContent);
                         COMMAND_COUNT++;
                         COMMAND_COUNT_TOTAL++;
                         cmd.uses++;
-                    });
                 }
             } catch (Throwable e) {
                 e.printStackTrace();

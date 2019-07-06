@@ -18,6 +18,7 @@ package net.daporkchop.porkbot.util.mcpinger.pcping;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.NonNull;
 import net.daporkchop.lib.minecraft.text.parser.JsonTextParser;
 
 import java.io.ByteArrayOutputStream;
@@ -26,36 +27,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class MinecraftPing {
-    private static final JsonParser parser = new JsonParser();
-    private static final Gson gson = new Gson();
+    private static final JsonParser PARSER = new JsonParser();
+    private static final Gson       GSON   = new Gson();
 
-    /**
-     * Fetches a {@link MinecraftPingReply} for the supplied hostname.
-     * <b>Assumed timeout of 2s and port of 25565.</b>
-     *
-     * @param hostname - a valid String hostname
-     * @return {@link MinecraftPingReply}
-     * @throws IOException
-     */
-    public static JsonObject getPing(final String hostname, final int pork) throws IOException {
-        return getPing(new MinecraftPingOptions().setHostname(hostname).setPort(pork));
-    }
-
-    /**
-     * Fetches a {@link MinecraftPingReply} for the supplied options.
-     *
-     * @param options - a filled instance of {@link MinecraftPingOptions}
-     * @return {@link MinecraftPingReply}
-     * @throws IOException
-     */
-    public static JsonObject getPing(final MinecraftPingOptions options) throws IOException {
-        MinecraftPingUtil.validate(options.getHostname(), "Hostname cannot be null.");
-        MinecraftPingUtil.validate(options.getPort(), "Port cannot be null.");
-
+    public static JsonObject getPing(@NonNull InetSocketAddress address) throws IOException {
         final Socket socket = new Socket();
-        socket.connect(new InetSocketAddress(options.getHostname(), options.getPort()), options.getTimeout());
+        socket.connect(address, 5000);
 
         final DataInputStream in = new DataInputStream(socket.getInputStream());
         final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -67,9 +47,9 @@ public class MinecraftPing {
 
         handshake.writeByte(MinecraftPingUtil.PACKET_HANDSHAKE);
         MinecraftPingUtil.writeVarInt(handshake, MinecraftPingUtil.PROTOCOL_VERSION);
-        MinecraftPingUtil.writeVarInt(handshake, options.getHostname().length());
-        handshake.writeBytes(options.getHostname());
-        handshake.writeShort(options.getPort());
+        MinecraftPingUtil.writeVarInt(handshake, address.getHostName().length());
+        handshake.writeBytes(address.getHostName());
+        handshake.writeShort(address.getPort());
         MinecraftPingUtil.writeVarInt(handshake, MinecraftPingUtil.STATUS_HANDSHAKE);
 
         MinecraftPingUtil.writeVarInt(out, handshake_bytes.size());
@@ -96,7 +76,7 @@ public class MinecraftPing {
 
         byte[] data = new byte[length];
         in.readFully(data);
-        String json = new String(data, options.getCharset());
+        String json = new String(data, StandardCharsets.UTF_8);
 
         //System.out.println(json);
 
@@ -121,12 +101,12 @@ public class MinecraftPing {
         in.close();
         socket.close();
 
-        //return gson.fromJson(json, MinecraftPingReply.class);
-        JsonObject object = parser.parse(json).getAsJsonObject();
+        //return GSON.fromJson(json, MinecraftPingReply.class);
+        JsonObject object = PARSER.parse(json).getAsJsonObject();
         object.addProperty("ping", ping);
         if (object.get("description").isJsonObject()) {
             if (object.getAsJsonObject("description").has("extra")) {
-                String extra = gson.toJson(object.getAsJsonObject("description").get("extra"));
+                String extra = GSON.toJson(object.getAsJsonObject("description").get("extra"));
                 //System.out.println("Parsing " + extra);
                 String text = JsonTextParser.parse(extra).toRawString();
                 //System.out.println("Real: " + text);

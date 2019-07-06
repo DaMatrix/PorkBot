@@ -16,6 +16,7 @@
 
 package net.daporkchop.porkbot.util.mcpinger;
 
+import com.google.gson.JsonObject;
 import com.nukkitx.network.raknet.RakNetClient;
 import com.nukkitx.network.raknet.RakNetPong;
 import lombok.AccessLevel;
@@ -23,10 +24,20 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import net.daporkchop.porkbot.util.TextFormat;
+import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPing;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,30 +50,44 @@ public abstract class MCPing {
     private static final RakNetClient RAKNET_CLIENT       = new RakNetClient(new InetSocketAddress(0));
     private static final Pattern      MCPE_MOTD_PARSER    = Pattern.compile("MCPE;([^;]+);([0-9]+);([^;]+);([0-9]+);([0-9]+)");
 
+    private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(
+            0, Runtime.getRuntime().availableProcessors() << 4,
+            30L, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(512),
+            r -> {
+                Thread t = new Thread(r);
+                t.setDaemon(true);
+                return t;
+            }
+    );
+
     static {
         RAKNET_CLIENT.bind();
+        Runtime.getRuntime().addShutdownHook(new Thread(RAKNET_CLIENT::close));
     }
 
     public static void main(String... args) throws Exception {
         pingPe("play.2p2e.net", 19132).whenComplete((pe, e) -> System.out.println(pe));
+        pingPc("mc.pepsi.team", 25565).whenComplete((java, e) -> System.out.println(java));
+        query("2b2t.org", 25565).whenComplete((query, e) -> System.out.println(query));
 
         Thread.sleep(5000L);
     }
-    
-    private static PE parsePE(@NonNull RakNetPong pong)   {
+
+    private static PE parsePE(@NonNull RakNetPong pong) {
         Matcher matcher = MCPE_MOTD_PARSER.matcher(new String(pong.getUserData(), StandardCharsets.UTF_8));
-        if (!matcher.find())    {
+        if (!matcher.find()) {
             throw new IllegalArgumentException("Invalid response!");
         }
         try {
             return new PE()
-                    .motd(matcher.group(1))
+                    .motd(TextFormat.clean(matcher.group(1)))
                     .onlinePlayers(Integer.parseInt(matcher.group(4)))
                     .maxPlayers(Integer.parseInt(matcher.group(5)))
                     .version(matcher.group(3))
                     .protocol(Integer.parseInt(matcher.group(2)))
                     .latency(pong.getPongTime() - pong.getPingTime());
-        } catch (Exception e)    {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Invalid response!");
         }
     }
@@ -85,86 +110,82 @@ public abstract class MCPing {
         return future;
     }
 
-    public static Query query(String ip, int port, boolean pe) {
-        /*try {
-            if (pe) {
-                PE ping = pingPe(ip, port);
-                if (ping.status) {
-                    try {
-                        net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
-                        response.sendQuery();
-                        if (response.values == null) {
-                            throw new IllegalStateException("Somehow or other there was no error while pinging, so we'll throw one now to make stuff do things!");
-                        }
-                        String playerNames = response.onlineUsernames.length > 0 ? response.onlineUsernames[0] : null;
-                        if (playerNames != null) {
-                            for (int i = 1; i < response.onlineUsernames.length; i++) {
-                                playerNames += ", " + response.onlineUsernames[i];
-                            }
-                        }
-                        return new Query(true, false, response.getMOTD(), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), null);
-                    } catch (Exception e) {
-                        //no query, as server is online
-                        return new Query(true, true, null, null, null, null, 0, null, null, false, null, null, null, null);
-                    }
-                } else {
-                    return new Query(false, false, null, null, null, null, 0, null, null, false, null, null, null, null);
+    public static CompletableFuture<Query> query(String ip, int port) {
+        CompletableFuture<Query> future = new CompletableFuture<>();
+
+        EXECUTOR.submit(() -> {
+            try {
+                InetSocketAddress address = checkAddressForSRV(new InetSocketAddress(ip, port));
+                try {
+                    MCQuery query = new MCQuery(address);
+
+                    future.complete(new Query()
+                            .motd(TextFormat.clean(query.getMOTD()))
+                            .onlinePlayers(query.getOnlinePlayers())
+                            .maxPlayers(query.getMaxPlayers())
+                            .version(query.values.getOrDefault("version", "Unknown"))
+                            .protocol(-1)
+                            .latency(-1L)
+                            .playerSample(query.onlineUsernames)
+                            .plugins(query.getPlugins())
+                            .mapName(query.getMapName())
+                            .gamemode(query.getGameMode()));
+                } catch (Exception e) {
+                    future.complete(null);
                 }
-            } else {
-                Java ping = pingPc(ip, port);
-                if (ping.status) {
-                    try {
-                        net.daporkchop.porkbot.util.mcpinger.query.Query response = new net.daporkchop.porkbot.util.mcpinger.query.Query(ip, port, 0);
-                        response.sendQuery();
-                        if (response.values == null) {
-                            throw new IllegalStateException("Somehow or other there was no error while pinging, so we'll throw one now to make stuff do things!");
-                        }
-                        String playerNames = response.onlineUsernames.length > 0 ? response.onlineUsernames[0] : null;
-                        if (playerNames != null) {
-                            for (int i = 1; i < response.onlineUsernames.length; i++) {
-                                playerNames += ", " + response.onlineUsernames[i];
-                            }
-                        }
-                        return new Query(true, false, TextFormat.clean(response.getMOTD()), response.getOnlinePlayers() + "/" + response.getMaxPlayers(), "0 ms", ping.version, ping.protocol, playerNames, response.getPlugins(), false, null, response.getMapName(), response.getGameMode(), ping.favicon);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        //no query, as the server is online
-                        return new Query(false, true, null, null, null, null, 0, null, null, false, null, null, null, null);
-                    }
-                } else {
-                    return new Query(false, false, null, null, null, null, 0, null, null, false, null, null, null, null);
-                }
+            } catch (Exception e) {
+                future.completeExceptionally(e);
             }
-        } catch (Exception e) {
-            return new Query(false, false, null, null, null, null, 0, null, null, true, e, null, null, null);
-        }*/
-        throw new UnsupportedOperationException();
+        });
+
+        return future;
     }
 
-    public static Java pingPc(String ip, int port) {
-        /*{
-            InetSocketAddress address = net.daporkchop.porkbot.util.mcpinger.query.Query.getAddress(new InetSocketAddress(ip, port));
-            ip = address.getHostString();
-            port = address.getPort();
-        }
-        try {
-            JsonObject reply = MinecraftPing.getPing(ip, port);
+    public static CompletableFuture<Java> pingPc(String ip, int port) {
+        CompletableFuture<Java> future = new CompletableFuture<>();
 
-            if (reply != null) {
-                String motd = TextFormat.clean(reply.getAsJsonObject("description").get("text").getAsString());
-                String online = String.format("%d/%d", reply.getAsJsonObject("players").get("online").getAsInt(), reply.getAsJsonObject("players").get("max").getAsInt());
-                int protocol = reply.getAsJsonObject("version").get("protocol").getAsInt();
-                String version = reply.getAsJsonObject("version").get("name").getAsString();
-                String favicon = reply.has("favicon") && !reply.get("favicon").getAsString().isEmpty() ? reply.get("favicon").getAsString() : FALLBACK_PC_FAVICON;
-                return new Java(true, motd, online, protocol, version, String.format("%d ms", reply.get("ping").getAsLong()), favicon, false, null);
-            } else {
-                return new Java(false, null, null, 0, null, null, null, false, null);
+        EXECUTOR.submit(() -> {
+            try {
+                InetSocketAddress address = checkAddressForSRV(new InetSocketAddress(ip, port));
+
+                JsonObject reply = MinecraftPing.getPing(address);
+
+                if (reply != null) {
+                    future.complete(new Java()
+                            .motd(TextFormat.clean(reply.getAsJsonObject("description").get("text").getAsString()))
+                            .onlinePlayers(reply.getAsJsonObject("players").get("online").getAsInt())
+                            .maxPlayers(reply.getAsJsonObject("players").get("max").getAsInt())
+                            .version(reply.getAsJsonObject("version").get("name").getAsString())
+                            .protocol(reply.getAsJsonObject("version").get("protocol").getAsInt())
+                            .latency(reply.get("ping").getAsLong())
+                            .favicon(reply.has("favicon") && !reply.get("favicon").getAsString().isEmpty() ? reply.get("favicon").getAsString() : FALLBACK_PC_FAVICON));
+                } else {
+                    throw new RuntimeException("No response!");
+                }
+            } catch (Exception e) {
+                future.completeExceptionally(e);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new Java(false, null, null, 0, null, null, null, true, e);
-        }*/
-        throw new UnsupportedOperationException();
+        });
+
+        return future;
+    }
+
+    public static InetSocketAddress checkAddressForSRV(InetSocketAddress address) {
+        try {
+            Record[] records = new Lookup(String.format("_minecraft._tcp.%s", address.getHostName()), Type.SRV).run();
+            if (records != null) {
+                //TODO: actually use the SRV balancing stuff
+                /*for (Record record : records) {
+                    SRVRecord srv = (SRVRecord) record;
+                    return new InetSocketAddress(srv.getTarget().toString(), srv.getPort());
+                }*/
+                SRVRecord srv = (SRVRecord) records[0];
+                return new InetSocketAddress(srv.getTarget().toString(), srv.getPort());
+            }
+        } catch (TextParseException e1) {
+            e1.printStackTrace();
+        }
+        return address;
     }
 
     /**
@@ -174,12 +195,12 @@ public abstract class MCPing {
     @ToString
     protected static abstract class Ping<P extends Ping<P>> {
         public String motd;
-        public int onlinePlayers;
-        public int maxPlayers;
-        
+        public int    onlinePlayers;
+        public int    maxPlayers;
+
         public String version;
-        public int protocol;
-        
+        public int    protocol;
+
         public long latency;
 
         P motd(@NonNull String motd) {
@@ -239,11 +260,9 @@ public abstract class MCPing {
     @Setter(AccessLevel.PACKAGE)
     @Accessors(fluent = true, chain = true)
     public static final class Query extends Ping<Query> {
-        public boolean noQuery;
-        public String playerSample;
-        public String plugins;
-        public String mapName;
-        public String gamemode;
-        public String favicon;
+        public String[] playerSample;
+        public String   plugins;
+        public String   mapName;
+        public String   gamemode;
     }
 }
