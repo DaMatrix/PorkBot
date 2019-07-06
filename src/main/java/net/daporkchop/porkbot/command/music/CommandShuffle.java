@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -31,7 +31,7 @@ public class CommandShuffle extends Command {
         super("shuffle");
     }
 
-    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
+    public void execute(MessageReceivedEvent evt, String[] args, String rawContent) {
         evt.getTextChannel().sendMessage("Shuffling queue...").queue(message -> {
             GuildAudioInfo info = AudioUtils.getGuildAudioPlayer(evt.getGuild(), false);
             if (info == null) {

@@ -25,6 +25,16 @@ import net.daporkchop.porkbot.command.bot.CommandInvite;
 import net.daporkchop.porkbot.command.bot.CommandPing;
 import net.daporkchop.porkbot.command.bot.CommandSay;
 import net.daporkchop.porkbot.command.bot.CommandTest;
+import net.daporkchop.porkbot.command.minecraft.CommandMcAvatar;
+import net.daporkchop.porkbot.command.minecraft.CommandMcHead;
+import net.daporkchop.porkbot.command.minecraft.CommandMcQuery;
+import net.daporkchop.porkbot.command.minecraft.CommandMcSkin;
+import net.daporkchop.porkbot.command.minecraft.CommandMcStatus;
+import net.daporkchop.porkbot.command.minecraft.CommandMcUUID;
+import net.daporkchop.porkbot.command.minecraft.CommandOfflineUUID;
+import net.daporkchop.porkbot.command.minecraft.CommandSkinSteal;
+import net.daporkchop.porkbot.command.minecraft.JavaPing;
+import net.daporkchop.porkbot.command.minecraft.PEPing;
 import net.daporkchop.porkbot.command.misc.CommandDice;
 import net.daporkchop.porkbot.command.misc.CommandEmojiID;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
@@ -47,7 +57,6 @@ import java.util.TimerTask;
 import java.util.logging.Logger;
 
 public class PorkBot {
-
     public static PorkBot INSTANCE;
     public static Logger logger;
     public static Timer timer = new Timer();
@@ -99,26 +108,27 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandTest());
 
         //minecraft
-        CommandRegistry.registerCommand(new CommandMcUUID());
-        CommandRegistry.registerCommand(new CommandMcPing());
-        CommandRegistry.registerCommand(new CommandPeQuery());
-        CommandRegistry.registerCommand(new CommandMcSkin());
         CommandRegistry.registerCommand(new CommandMcAvatar());
         CommandRegistry.registerCommand(new CommandMcHead());
-        CommandRegistry.registerCommand(new CommandMcStatus());
-        CommandRegistry.registerCommand(new CommandMcMOTD());
-        CommandRegistry.registerCommand(new CommandMcCount());
-        CommandRegistry.registerCommand(new CommandMcIcon());
         CommandRegistry.registerCommand(new CommandMcQuery());
-        CommandRegistry.registerCommand(new CommandPePing());
+        CommandRegistry.registerCommand(new CommandMcSkin());
+        CommandRegistry.registerCommand(new CommandMcStatus());
+        CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
-        CommandRegistry.registerCommand(new CommandMcLatency());
-        CommandRegistry.registerCommand(new CommandMcVersion());
-        CommandRegistry.registerCommand(new CommandPeCount());
-        CommandRegistry.registerCommand(new CommandPeLatency());
-        CommandRegistry.registerCommand(new CommandPeMOTD());
-        CommandRegistry.registerCommand(new CommandPeVersion());
         CommandRegistry.registerCommand(new CommandSkinSteal());
+
+        CommandRegistry.registerCommand(new JavaPing("mcping", JavaPing.FLAG_ALL));
+        CommandRegistry.registerCommand(new JavaPing("mcmotd", JavaPing.FLAG_MOTD));
+        CommandRegistry.registerCommand(new JavaPing("mccount", JavaPing.FLAG_COUNT));
+        CommandRegistry.registerCommand(new JavaPing("mcversion", JavaPing.FLAG_VERSION));
+        CommandRegistry.registerCommand(new JavaPing("mclatency", JavaPing.FLAG_LATENCY));
+        CommandRegistry.registerCommand(new JavaPing("mcicon", JavaPing.FLAG_FAVICON));
+
+        CommandRegistry.registerCommand(new PEPing("peping", PEPing.FLAG_ALL));
+        CommandRegistry.registerCommand(new PEPing("pemotd", PEPing.FLAG_MOTD));
+        CommandRegistry.registerCommand(new PEPing("pecount", PEPing.FLAG_COUNT));
+        CommandRegistry.registerCommand(new PEPing("peversion", PEPing.FLAG_VERSION));
+        CommandRegistry.registerCommand(new PEPing("pelatency", PEPing.FLAG_LATENCY));
 
         //misc
         CommandRegistry.registerCommand(new CommandDice());

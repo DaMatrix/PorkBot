@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -38,48 +38,6 @@ public class KeyGetter {
                 token = s.nextLine();
                 writer.println(token);
                 PorkBot.logger.info("Successful. Starting...");
-
-                s.close();
-                writer.close();
-            } catch (FileNotFoundException e) {
-                PorkBot.logger.severe("impossible error kek");
-                e.printStackTrace();
-                System.exit(0);
-            } catch (UnsupportedEncodingException e) {
-                PorkBot.logger.severe("File encoding not supported!");
-                e.printStackTrace();
-                System.exit(0);
-            }
-        } else {
-            try {
-                Scanner s = new Scanner(f);
-
-                token = s.nextLine();
-
-                s.close();
-            } catch (FileNotFoundException e) {
-                PorkBot.logger.severe("impossible error kek");
-                e.printStackTrace();
-                System.exit(0);
-            }
-        }
-
-        return token.trim();
-    }
-
-    public static String getAuthtoken() {
-        File f = new File(System.getProperty("user.dir") + "/authtoken.txt");
-        String token = "";
-
-        if (!f.exists()) {
-            try {
-                PrintWriter writer = new PrintWriter(f.getAbsolutePath(), "UTF-8");
-                Scanner s = new Scanner(System.in);
-
-                PorkBot.logger.info("Please enter your auth token for bots.discord.pw");
-                token = s.nextLine();
-                writer.println(token);
-                PorkBot.logger.info("Successful. connecting...");
 
                 s.close();
                 writer.close();

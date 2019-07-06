@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -34,14 +34,14 @@ public class CommandPlayAll extends Command {
         super("playall");
     }
 
-    public void execute(MessageReceivedEvent evt, String[] split, String rawContent) {
-        if (split.length < 2) {
+    public void execute(MessageReceivedEvent evt, String[] args, String rawContent) {
+        if (args.length < 2) {
             sendErrorMessage(evt.getTextChannel(), "Not enough arguments!");
             return;
         }
-        if (validator.isValid(split[1])) {
+        if (validator.isValid(args[1])) {
             try {
-                String[] data = HTTPUtils.performGetRequest(HTTPUtils.constantURL(split[1]), 32000).trim().split("\n");
+                String[] data = HTTPUtils.performGetRequest(HTTPUtils.constantURL(args[1]), 32000).trim().split("\n");
                 int i = 0;
                 Message message = evt.getChannel().sendMessage("Loading " + data.length + " tracks... (this might take a while)").complete();
                 for (String s : data) {
@@ -63,7 +63,7 @@ public class CommandPlayAll extends Command {
                 MessageUtils.sendException(e, evt);
             }
         } else {
-            MessageUtils.sendMessage("Invalid URL: " + split[1], evt.getTextChannel());
+            MessageUtils.sendMessage("Invalid URL: " + args[1], evt.getTextChannel());
         }
     }
 
