@@ -36,7 +36,7 @@ public class CommandMcCount extends Command {
             return;
         }
 
-        MCPing.McPing ping = null;
+        MCPing.Java ping = null;
         String[] ipPort = args[1].split(":");
         if (ipPort.length == 1) {
             ping = MCPing.pingPc(ipPort[0], 25565);

@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -25,26 +25,6 @@ import net.daporkchop.porkbot.command.bot.CommandInvite;
 import net.daporkchop.porkbot.command.bot.CommandPing;
 import net.daporkchop.porkbot.command.bot.CommandSay;
 import net.daporkchop.porkbot.command.bot.CommandTest;
-import net.daporkchop.porkbot.command.minecraft.CommandMcAvatar;
-import net.daporkchop.porkbot.command.minecraft.CommandMcCount;
-import net.daporkchop.porkbot.command.minecraft.CommandMcHead;
-import net.daporkchop.porkbot.command.minecraft.CommandMcIcon;
-import net.daporkchop.porkbot.command.minecraft.CommandMcLatency;
-import net.daporkchop.porkbot.command.minecraft.CommandMcMOTD;
-import net.daporkchop.porkbot.command.minecraft.CommandMcPing;
-import net.daporkchop.porkbot.command.minecraft.CommandMcQuery;
-import net.daporkchop.porkbot.command.minecraft.CommandMcSkin;
-import net.daporkchop.porkbot.command.minecraft.CommandMcStatus;
-import net.daporkchop.porkbot.command.minecraft.CommandMcUUID;
-import net.daporkchop.porkbot.command.minecraft.CommandMcVersion;
-import net.daporkchop.porkbot.command.minecraft.CommandOfflineUUID;
-import net.daporkchop.porkbot.command.minecraft.CommandPeCount;
-import net.daporkchop.porkbot.command.minecraft.CommandPeLatency;
-import net.daporkchop.porkbot.command.minecraft.CommandPeMOTD;
-import net.daporkchop.porkbot.command.minecraft.CommandPePing;
-import net.daporkchop.porkbot.command.minecraft.CommandPeQuery;
-import net.daporkchop.porkbot.command.minecraft.CommandPeVersion;
-import net.daporkchop.porkbot.command.minecraft.CommandSkinSteal;
 import net.daporkchop.porkbot.command.misc.CommandDice;
 import net.daporkchop.porkbot.command.misc.CommandEmojiID;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
@@ -109,43 +89,50 @@ public class PorkBot {
             }
         }, 1000, 120000);
 
+        //bot
+        CommandRegistry.registerCommand(new CommandBotInfo());
+        CommandRegistry.registerCommand(new CommandCommandInfo());
         CommandRegistry.registerCommand(new CommandHelp());
         CommandRegistry.registerCommand(new CommandInvite());
-        CommandRegistry.registerCommand(new CommandMcUUID());
+        CommandRegistry.registerCommand(new CommandPing());
         CommandRegistry.registerCommand(new CommandSay());
+        CommandRegistry.registerCommand(new CommandTest());
+
+        //minecraft
+        /*CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandMcPing());
         CommandRegistry.registerCommand(new CommandPeQuery());
         CommandRegistry.registerCommand(new CommandMcSkin());
         CommandRegistry.registerCommand(new CommandMcAvatar());
         CommandRegistry.registerCommand(new CommandMcHead());
         CommandRegistry.registerCommand(new CommandMcStatus());
-        CommandRegistry.registerCommand(new CommandPing());
         CommandRegistry.registerCommand(new CommandMcMOTD());
         CommandRegistry.registerCommand(new CommandMcCount());
         CommandRegistry.registerCommand(new CommandMcIcon());
         CommandRegistry.registerCommand(new CommandMcQuery());
         CommandRegistry.registerCommand(new CommandPePing());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
-        CommandRegistry.registerCommand(new CommandBotInfo());
-        CommandRegistry.registerCommand(new CommandTest());
         CommandRegistry.registerCommand(new CommandMcLatency());
         CommandRegistry.registerCommand(new CommandMcVersion());
         CommandRegistry.registerCommand(new CommandPeCount());
         CommandRegistry.registerCommand(new CommandPeLatency());
         CommandRegistry.registerCommand(new CommandPeMOTD());
         CommandRegistry.registerCommand(new CommandPeVersion());
+        CommandRegistry.registerCommand(new CommandSkinSteal());*/
+
+        //misc
         CommandRegistry.registerCommand(new CommandDice());
         CommandRegistry.registerCommand(new CommandEmojiID());
-        CommandRegistry.registerCommand(new CommandThonk());
         CommandRegistry.registerCommand(new CommandInterject());
-        CommandRegistry.registerCommand(new CommandCommandInfo());
+        CommandRegistry.registerCommand(new CommandShutdown());
+        CommandRegistry.registerCommand(new CommandThonk());
+
+        //music
         CommandRegistry.registerCommand(new CommandPlay());
         //CommandRegistry.registerCommand(new CommandPlayAll());
-        CommandRegistry.registerCommand(new CommandShuffle());
         CommandRegistry.registerCommand(new CommandQueue());
-        CommandRegistry.registerCommand(new CommandStop());
+        CommandRegistry.registerCommand(new CommandShuffle());
         CommandRegistry.registerCommand(new CommandSkip());
-        CommandRegistry.registerCommand(new CommandSkinSteal());
-        CommandRegistry.registerCommand(new CommandShutdown());
+        CommandRegistry.registerCommand(new CommandStop());
     }
 }

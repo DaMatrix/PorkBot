@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -18,7 +18,7 @@ package net.daporkchop.porkbot.util.mcpinger.pcping;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.daporkchop.toobeetooteebot.util.ChatUtils;
+import net.daporkchop.lib.minecraft.text.parser.JsonTextParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -128,7 +128,7 @@ public class MinecraftPing {
             if (object.getAsJsonObject("description").has("extra")) {
                 String extra = gson.toJson(object.getAsJsonObject("description").get("extra"));
                 //System.out.println("Parsing " + extra);
-                String text = ChatUtils.getOldText(extra);
+                String text = JsonTextParser.parse(extra).toRawString();
                 //System.out.println("Real: " + text);
                 object.getAsJsonObject("description").addProperty("text", text);
             } else {

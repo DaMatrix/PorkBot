@@ -36,7 +36,7 @@ public class CommandPeVersion extends Command {
             return;
         }
 
-        MCPing.PePing ping = null;
+        MCPing.PE ping = null;
         String[] ipPort = args[1].split(":");
 
         if (ipPort.length == 1) {

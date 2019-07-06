@@ -1,3 +1,19 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2019 DaPorkchop_
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from DaPorkchop_.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: DaPorkchop_), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
 package net.daporkchop.porkbot.audio;
 
 import com.sedmelluq.discord.lavaplayer.container.*;
@@ -19,6 +35,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -37,6 +55,7 @@ import static com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools.getHeade
  */
 public class BetterHttpSourceManager extends HttpAudioSourceManager {
     private static final Field audioTrackInfo_title;
+    private static final Method httpAudioSourceManager_detectContainer;
 
     static {
         Field f = null;
@@ -50,7 +69,17 @@ public class BetterHttpSourceManager extends HttpAudioSourceManager {
         }
     }
 
-    private static UrlValidator validator = new UrlValidator();
+    static {
+        Method m = null;
+        try {
+            m = HttpAudioSourceManager.class.getDeclaredMethod("detectContainer", AudioReference.class);
+            m.setAccessible(true);
+        } catch (NoSuchMethodException e)   {
+            throw new RuntimeException(e);
+        } finally {
+            httpAudioSourceManager_detectContainer = m;
+        }
+    }
 
     @Override
     public String getSourceName() {
@@ -72,7 +101,7 @@ public class BetterHttpSourceManager extends HttpAudioSourceManager {
             try {
                 List<AudioTrack> items = Arrays.stream(HTTPUtils.performGetRequest(HTTPUtils.constantURL(httpReference.identifier), 32000).trim().split("\n"))
                         .map(String::trim)
-                        .filter(s -> !s.isEmpty() && !s.contains("~") && validator.isValid(s))
+                        .filter(s -> !s.isEmpty() && !s.contains("~"))
                         .distinct()
                         .map(s -> new AudioReference(s, null))
                         .map(ref -> this.loadItem(manager, ref, false))
@@ -96,47 +125,10 @@ public class BetterHttpSourceManager extends HttpAudioSourceManager {
             }
         }
 
-        return handleLoadResult(detectContainer(httpReference));
-    }
-
-    private AudioReference getAsHttpReference(AudioReference reference) {
-        if (reference.identifier.startsWith("https://") || reference.identifier.startsWith("http://")) {
-            return reference;
-        } else if (reference.identifier.startsWith("icy://")) {
-            return new AudioReference("http://" + reference.identifier.substring(6), reference.title);
-        }
-        return null;
-    }
-
-    private MediaContainerDetectionResult detectContainer(AudioReference reference) {
-        MediaContainerDetectionResult result;
-
-        try (HttpInterface httpInterface = getHttpInterface()) {
-            result = detectContainerWithClient(httpInterface, reference);
-        } catch (IOException e) {
-            throw new FriendlyException("Connecting to the URL failed.", SUSPICIOUS, e);
-        }
-
-        return result;
-    }
-
-    private MediaContainerDetectionResult detectContainerWithClient(HttpInterface httpInterface, AudioReference reference) throws IOException {
-        try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(reference.identifier), Long.MAX_VALUE)) {
-            int statusCode = inputStream.checkStatusCode();
-            String redirectUrl = HttpClientTools.getRedirectLocation(reference.identifier, inputStream.getCurrentResponse());
-
-            if (redirectUrl != null) {
-                return new MediaContainerDetectionResult(null, new AudioReference(redirectUrl, null));
-            } else if (statusCode == HttpStatus.SC_NOT_FOUND) {
-                return null;
-            } else if (!HttpClientTools.isSuccessWithContent(statusCode)) {
-                throw new FriendlyException("That URL is not playable.", COMMON, new IllegalStateException("Status code " + statusCode));
-            }
-
-            MediaContainerHints hints = MediaContainerHints.from(getHeaderValue(inputStream.getCurrentResponse(), "Content-Type"), null);
-            return MediaContainerDetection.detectContainer(reference, inputStream, hints);
-        } catch (URISyntaxException e) {
-            throw new FriendlyException("Not a valid URL.", COMMON, e);
+        try {
+            return handleLoadResult((MediaContainerDetectionResult) httpAudioSourceManager_detectContainer.invoke(this, httpReference));
+        } catch (InvocationTargetException | IllegalAccessException e)   {
+            throw new RuntimeException(e);
         }
     }
 }
