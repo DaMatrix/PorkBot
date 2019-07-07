@@ -46,7 +46,7 @@ public class CommandMcAvatar extends Command {
                     builder.setImage("attachment://image.png");
                     builder.setColor(Color.DARK_GRAY);
 
-                    byte[] outBytes = MessageUtils.downloadImage("https://crafatar.com/avatars/" + uuid + "?size=128&overlay");
+                    byte[] outBytes = MessageUtils.downloadImage("https://crafatar.daporkchop.net/avatars/" + uuid + "?size=128&overlay");
 
                     builder.addField(args[1] + "'s skin", "", false);
 

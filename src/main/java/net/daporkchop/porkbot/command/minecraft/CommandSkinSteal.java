@@ -46,7 +46,7 @@ public class CommandSkinSteal extends Command {
                     builder.setImage("attachment://image.png");
                     builder.setColor(Color.DARK_GRAY);
 
-                    byte[] outBytes = MessageUtils.downloadImage("https://crafatar.com/skins/" + uuid);
+                    byte[] outBytes = MessageUtils.downloadImage("https://crafatar.daporkchop.net/skins/" + uuid);
 
                     builder.addField(args[1] + "'s skin", "", false);
 
