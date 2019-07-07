@@ -34,19 +34,19 @@ public class KeyGetter {
                 PrintWriter writer = new PrintWriter(f.getAbsolutePath(), "UTF-8");
                 Scanner s = new Scanner(System.in);
 
-                PorkBot.logger.info("Please enter your discord bot token");
+                PorkBot.LOGGER.info("Please enter your discord bot token");
                 token = s.nextLine();
                 writer.println(token);
-                PorkBot.logger.info("Successful. Starting...");
+                PorkBot.LOGGER.info("Successful. Starting...");
 
                 s.close();
                 writer.close();
             } catch (FileNotFoundException e) {
-                PorkBot.logger.severe("impossible error kek");
+                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             } catch (UnsupportedEncodingException e) {
-                PorkBot.logger.severe("File encoding not supported!");
+                PorkBot.LOGGER.severe("File encoding not supported!");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -58,7 +58,7 @@ public class KeyGetter {
 
                 s.close();
             } catch (FileNotFoundException e) {
-                PorkBot.logger.severe("impossible error kek");
+                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -76,19 +76,19 @@ public class KeyGetter {
                 PrintWriter writer = new PrintWriter(f.getAbsolutePath(), "UTF-8");
                 Scanner s = new Scanner(System.in);
 
-                PorkBot.logger.info("Please enter your google API key");
+                PorkBot.LOGGER.info("Please enter your google API key");
                 token = s.nextLine();
                 writer.println(token);
-                PorkBot.logger.info("Successful. connecting...");
+                PorkBot.LOGGER.info("Successful. connecting...");
 
                 s.close();
                 writer.close();
             } catch (FileNotFoundException e) {
-                PorkBot.logger.severe("impossible error kek");
+                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             } catch (UnsupportedEncodingException e) {
-                PorkBot.logger.severe("File encoding not supported!");
+                PorkBot.LOGGER.severe("File encoding not supported!");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -100,7 +100,7 @@ public class KeyGetter {
 
                 s.close();
             } catch (FileNotFoundException e) {
-                PorkBot.logger.severe("impossible error kek");
+                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             }

@@ -51,6 +51,6 @@ public class CommandPlay extends Command {
     }
 
     public String getUsageExample() {
-        return "..play https://www.youtube.com/watch?v=IvUU8joBb1Q` or `..play the floppotron the final countdown";
+        return "..play https://www.youtube.com/watch?v=IvUU8joBb1Q` or `..play a-ha take on me";
     }
 }

@@ -39,7 +39,6 @@ import net.daporkchop.porkbot.command.misc.CommandDice;
 import net.daporkchop.porkbot.command.misc.CommandEmojiID;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
-import net.daporkchop.porkbot.command.misc.CommandThonk;
 import net.daporkchop.porkbot.command.music.CommandPlay;
 import net.daporkchop.porkbot.command.music.CommandQueue;
 import net.daporkchop.porkbot.command.music.CommandShuffle;
@@ -54,16 +53,16 @@ import java.util.logging.Logger;
 
 public class PorkBot {
     public static PorkBot INSTANCE;
-    public static Logger logger;
-    public static Timer timer = new Timer();
+    public static Logger  LOGGER;
+    public static Timer TIMER = new Timer();
 
     public PorkBot() {
-        logger.info("Starting PorkBot...");
+        LOGGER.info("Starting PorkBot...");
         ShardUtils.loadClass();
     }
 
     public static void main(String[] args) {
-        logger = Logger.getLogger("PorkBot");
+        LOGGER = Logger.getLogger("PorkBot");
         INSTANCE = new PorkBot();
         INSTANCE.start();
     }
@@ -74,7 +73,7 @@ public class PorkBot {
 
         //final String authToken = KeyGetter.getAuthtoken();
 
-        timer.schedule(new TimerTask() {
+        TIMER.schedule(new TimerTask() {
             @Override
             public void run() {
                 /*ShardUtils.forEachShard(jda -> {
@@ -107,7 +106,6 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcAvatar());
         CommandRegistry.registerCommand(new CommandMcHead());
         CommandRegistry.registerCommand(new CommandMcSkin());
-        CommandRegistry.registerCommand(new CommandMcStatus());
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
         CommandRegistry.registerCommand(new CommandSkinSteal());
@@ -133,7 +131,6 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandEmojiID());
         CommandRegistry.registerCommand(new CommandInterject());
         CommandRegistry.registerCommand(new CommandShutdown());
-        CommandRegistry.registerCommand(new CommandThonk());
 
         //music
         CommandRegistry.registerCommand(new CommandPlay());

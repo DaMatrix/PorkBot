@@ -80,11 +80,13 @@ public final class JavaPEQuery extends Command {
                         query.protocol == -1 ? query.version : String.format("%s (Protocol %d)", query.version, query.protocol),
                         true
                 );
-                builder.addField(
-                        "Plugins:",
-                        query.plugins,
-                        true
-                );
+                if (!query.plugins.isEmpty()) {
+                    builder.addField(
+                            "Plugins:",
+                            query.plugins,
+                            true
+                    );
+                }
                 if (query.playerSample.length > 0) {
                     builder.addField(
                             "Player sample:",
