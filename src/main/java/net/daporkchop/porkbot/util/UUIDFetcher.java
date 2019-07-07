@@ -100,7 +100,11 @@ public class UUIDFetcher extends Thread {
                                      String uuid = obj.get("id").getAsString();
                                      CACHE.put(name, uuid);
                                      for (Consumer<String> callback : PENDING.remove(name))    {
-                                         callback.accept(uuid);
+                                         try {
+                                             callback.accept(uuid);
+                                         } catch (Exception e)  {
+                                             e.printStackTrace();
+                                         }
                                      }
                                  });
                     for (String name : nameBuf) {
@@ -115,7 +119,6 @@ public class UUIDFetcher extends Thread {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
             }
         }
     }

@@ -39,6 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -99,7 +100,7 @@ public class BetterHttpSourceManager extends HttpAudioSourceManager {
 
         if (allowPlaylist && httpReference.identifier.endsWith(".txt"))  {
             try {
-                List<AudioTrack> items = Arrays.stream(HTTPUtils.performGetRequest(HTTPUtils.constantURL(httpReference.identifier), 32000).trim().split("\n"))
+                List<AudioTrack> items = Arrays.stream(new String(HTTPUtils.get(httpReference.identifier, 32768), StandardCharsets.UTF_8).trim().split("\n"))
                         .map(String::trim)
                         .filter(s -> !s.isEmpty() && !s.contains("~"))
                         .distinct()

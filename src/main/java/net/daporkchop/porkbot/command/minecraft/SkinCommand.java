@@ -17,17 +17,26 @@
 package net.daporkchop.porkbot.command.minecraft;
 
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
-import java.awt.*;
+import java.awt.Color;
 
-public class CommandSkinSteal extends Command {
+/**
+ * @author DaPorkchop_
+ */
+public final class SkinCommand extends Command {
+    protected static final String BASE_URL = "https://crafatar.daporkchop.net";
 
-    public CommandSkinSteal() {
-        super("skinsteal");
+    protected final String format;
+
+    public SkinCommand(String prefix, String format) {
+        super(prefix);
+
+        this.format = format;
     }
 
     @Override
@@ -46,7 +55,7 @@ public class CommandSkinSteal extends Command {
                     builder.setImage("attachment://image.png");
                     builder.setColor(Color.DARK_GRAY);
 
-                    byte[] outBytes = MessageUtils.downloadImage("https://crafatar.daporkchop.net/skins/" + uuid);
+                    byte[] outBytes = HTTPUtils.getUnchecked(String.format(this.format, BASE_URL, uuid), 0);
 
                     builder.addField(args[1] + "'s skin", "", false);
 
@@ -60,11 +69,11 @@ public class CommandSkinSteal extends Command {
 
     @Override
     public String getUsage() {
-        return "..skinsteal <name>";
+        return String.format("..%s <name>", this.prefix);
     }
 
     @Override
     public String getUsageExample() {
-        return "..skinsteal Notch";
+        return String.format("..%s Notch", this.prefix);
     }
 }

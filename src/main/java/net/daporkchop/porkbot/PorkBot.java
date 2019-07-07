@@ -25,16 +25,12 @@ import net.daporkchop.porkbot.command.bot.CommandInvite;
 import net.daporkchop.porkbot.command.bot.CommandPing;
 import net.daporkchop.porkbot.command.bot.CommandSay;
 import net.daporkchop.porkbot.command.bot.CommandTest;
-import net.daporkchop.porkbot.command.minecraft.CommandMcAvatar;
-import net.daporkchop.porkbot.command.minecraft.CommandMcHead;
 import net.daporkchop.porkbot.command.minecraft.JavaPEQuery;
-import net.daporkchop.porkbot.command.minecraft.CommandMcSkin;
-import net.daporkchop.porkbot.command.minecraft.CommandMcStatus;
 import net.daporkchop.porkbot.command.minecraft.CommandMcUUID;
 import net.daporkchop.porkbot.command.minecraft.CommandOfflineUUID;
-import net.daporkchop.porkbot.command.minecraft.CommandSkinSteal;
 import net.daporkchop.porkbot.command.minecraft.JavaPing;
 import net.daporkchop.porkbot.command.minecraft.PEPing;
+import net.daporkchop.porkbot.command.minecraft.SkinCommand;
 import net.daporkchop.porkbot.command.misc.CommandDice;
 import net.daporkchop.porkbot.command.misc.CommandEmojiID;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
@@ -76,19 +72,6 @@ public class PorkBot {
         TIMER.schedule(new TimerTask() {
             @Override
             public void run() {
-                /*ShardUtils.forEachShard(jda -> {
-                    try {
-                        HTTPUtils.performPostRequestWithAuth(HTTPUtils.constantURL("https://bots.discord.pw/api/bots/287894637165936640/stats"),
-                                "{" +
-                                        "\"server_count\": " + jda.getGuilds().size() + "," +
-                                        "\"shard_id\": " + jda.getShardInfo().getShardId() + "," +
-                                        "\"shard_count\": " + ShardUtils.getShardCount() +
-                                        "}",
-                                "application/json",
-                                authToken);
-                    } catch (IOException e) {
-                    }
-                });*/
                 CommandRegistry.save();
             }
         }, 1000, 120000);
@@ -103,12 +86,13 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandTest());
 
         //minecraft
-        CommandRegistry.registerCommand(new CommandMcAvatar());
-        CommandRegistry.registerCommand(new CommandMcHead());
-        CommandRegistry.registerCommand(new CommandMcSkin());
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
-        CommandRegistry.registerCommand(new CommandSkinSteal());
+
+        CommandRegistry.registerCommand(new SkinCommand("mcavatar", "%s/avatars/%s?size=128&overlay"));
+        CommandRegistry.registerCommand(new SkinCommand("mchead", "%s/renders/head/%s?size=128&overlay"));
+        CommandRegistry.registerCommand(new SkinCommand("mcskin", "%s/renders/body/%s?overlay"));
+        CommandRegistry.registerCommand(new SkinCommand("skinsteal", "%s/skins/%s"));
 
         CommandRegistry.registerCommand(new JavaPing("mcping", JavaPing.FLAG_ALL));
         CommandRegistry.registerCommand(new JavaPing("mcmotd", JavaPing.FLAG_MOTD));

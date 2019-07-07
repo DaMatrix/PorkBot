@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -98,38 +98,4 @@ public class MessageUtils {
         sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`: " + e.getMessage(), evt.getTextChannel());
     }
 
-    /**
-     * Downloads an image
-     *
-     * @param address
-     * @return
-     */
-    public static byte[] downloadImage(String address) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        InputStream is = null;
-        URL url = null;
-        try {
-            url = new URL(address);
-            is = url.openStream();
-            byte[] byteChunk = new byte[4096];
-            int n;
-
-            while ((n = is.read(byteChunk)) > 0) {
-                baos.write(byteChunk, 0, n);
-            }
-        } catch (IOException e) {
-            System.err.printf("Failed while reading bytes from %s: %s", url.toExternalForm(), e.getMessage());
-            e.printStackTrace();
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-
-            }
-        }
-
-        return baos.toByteArray();
-    }
 }

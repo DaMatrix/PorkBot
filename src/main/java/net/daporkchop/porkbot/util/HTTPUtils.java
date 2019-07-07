@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -17,18 +17,29 @@
 package net.daporkchop.porkbot.util;
 
 import com.google.common.base.Charsets;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.NonNull;
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("deprecation")
 public class HTTPUtils {
+    private static final Cache<String, byte[]> GET_CACHE = CacheBuilder.newBuilder()
+            .<String, byte[]>weigher((k, v) -> v.length)
+            .maximumWeight(16777216L)
+            .expireAfterWrite(1L, TimeUnit.HOURS)
+            .build();
+
     private static HttpURLConnection createUrlConnection(@NonNull URL url) throws IOException {
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(15000);
@@ -155,6 +166,45 @@ public class HTTPUtils {
             }
         } finally {
             IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    public static byte[] getUnchecked(String address, int maxSize) {
+        try {
+            return get(address, maxSize);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static byte[] get(String address, int maxSize) throws IOException {
+        try {
+            return GET_CACHE.get(address, () -> {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(maxSize <= 0 ? 2048 : maxSize);
+                try (InputStream in = new URL(address).openStream()) {
+                    int i;
+                    if (maxSize > 0) {
+                        while ((i = in.read()) != -1) {
+                            baos.write(i);
+                            if (baos.size() >= maxSize) {
+                                throw new IOException("Too much data!");
+                            }
+                        }
+                    } else {
+                        while ((i = in.read()) != -1)   {
+                            baos.write(i);
+                        }
+                    }
+                }
+                return baos.toByteArray();
+            });
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            } else {
+                throw new RuntimeException(e.getCause());
+            }
         }
     }
 }
