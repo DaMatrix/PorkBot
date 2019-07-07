@@ -23,30 +23,21 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.Color;
-import java.util.Base64;
+import java.util.Arrays;
+import java.util.StringJoiner;
+import java.util.stream.Stream;
 
-/**
- * @author DaPorkchop_
- */
-public final class JavaPing extends Command {
-    public static final int FLAG_MOTD    = 1 << 0;
-    public static final int FLAG_COUNT   = 1 << 1;
-    public static final int FLAG_VERSION = 1 << 2;
-    public static final int FLAG_LATENCY = 1 << 3;
-    public static final int FLAG_FAVICON = 1 << 4;
+public final class JavaPEQuery extends Command {
+    protected final int defaultPort;
 
-    public static final int FLAG_ALL = FLAG_MOTD | FLAG_COUNT | FLAG_VERSION | FLAG_LATENCY | FLAG_FAVICON;
-
-    protected final int flags;
-
-    public JavaPing(String prefix, int flags) {
+    public JavaPEQuery(String prefix, int defaultPort) {
         super(prefix);
 
-        this.flags = flags;
+        this.defaultPort = defaultPort;
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String rawContent) {
+    public void execute(MessageReceivedEvent evt, String[] args, String message) {
         if (args.length < 2 || args[1].isEmpty()) {
             sendErrorMessage(evt.getTextChannel(), "IP isn't given!");
             return;
@@ -54,7 +45,7 @@ public final class JavaPing extends Command {
 
         String[] ipPort = args[1].split(":");
 
-        MCPing.pingPc(ipPort[0], ipPort.length == 1 ? 25565 : Integer.parseInt(ipPort[1])).whenComplete((java, ex) -> {
+        MCPing.query(ipPort[0], ipPort.length == 1 ? this.defaultPort : Integer.parseInt(ipPort[1])).whenComplete((query, ex) -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle(String.format("**%s%s%s**", ipPort[0], ipPort.length > 1 ? ":" : "", ipPort.length > 1 ? ipPort[1] : ""));
 
@@ -62,39 +53,50 @@ public final class JavaPing extends Command {
                 //server's online
                 builder.setColor(Color.GREEN);
 
-                if ((this.flags & FLAG_COUNT) != 0)   {
-                    builder.addField(
-                            "Player count:",
-                            String.format("%d/%d", java.onlinePlayers, java.maxPlayers),
-                            true
-                    );
-                }
-                if ((this.flags & FLAG_LATENCY) != 0)   {
+                builder.addField(
+                        "Player count:",
+                        String.format("%d/%d", query.onlinePlayers, query.maxPlayers),
+                        true
+                );
+                if (query.latency != -1) {
                     builder.addField(
                             "Latency:",
-                            String.format("%d ms", java.latency),
+                            String.format("%d ms", query.latency),
                             true
                     );
                 }
-                if ((this.flags & FLAG_VERSION) != 0)   {
+                builder.addField(
+                        "Map name:",
+                        query.mapName,
+                        true
+                );
+                builder.addField(
+                        "Gamemode:",
+                        query.gamemode,
+                        true
+                );
+                builder.addField(
+                        "Version:",
+                        query.protocol == -1 ? query.version : String.format("%s (Protocol %d)", query.version, query.protocol),
+                        true
+                );
+                builder.addField(
+                        "Plugins:",
+                        query.plugins,
+                        true
+                );
+                if (query.playerSample.length > 0) {
                     builder.addField(
-                            "Version:",
-                            String.format("%s (Protocol %d)", java.version, java.protocol),
+                            "Player sample:",
+                            Stream.of(query.playerSample).collect(() -> new StringJoiner(", "), StringJoiner::add, StringJoiner::merge).toString(),
                             true
                     );
                 }
-                if ((this.flags & FLAG_MOTD) != 0)   {
-                    builder.addField(
-                            "MOTD:",
-                            java.motd,
-                            true
-                    );
-                }
-                if ((this.flags & FLAG_FAVICON) != 0)   {
-                    builder.setThumbnail("attachment://favicon.png");
-                    MessageUtils.sendImage(builder, Base64.getDecoder().decode(java.favicon), "favicon.png", evt.getTextChannel());
-                    return;
-                }
+                builder.addField(
+                        "MOTD:",
+                        query.motd,
+                        true
+                );
             } else {
                 //server's offline
                 builder.setColor(Color.RED);
@@ -115,6 +117,6 @@ public final class JavaPing extends Command {
 
     @Override
     public String getUsageExample() {
-        return String.format("..%s 2b2t.org", this.prefix);
+        return String.format("..%s vps1.daporkchop.net", this.prefix);
     }
 }

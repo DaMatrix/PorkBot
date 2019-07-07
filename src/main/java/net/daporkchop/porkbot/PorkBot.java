@@ -27,7 +27,7 @@ import net.daporkchop.porkbot.command.bot.CommandSay;
 import net.daporkchop.porkbot.command.bot.CommandTest;
 import net.daporkchop.porkbot.command.minecraft.CommandMcAvatar;
 import net.daporkchop.porkbot.command.minecraft.CommandMcHead;
-import net.daporkchop.porkbot.command.minecraft.CommandMcQuery;
+import net.daporkchop.porkbot.command.minecraft.JavaPEQuery;
 import net.daporkchop.porkbot.command.minecraft.CommandMcSkin;
 import net.daporkchop.porkbot.command.minecraft.CommandMcStatus;
 import net.daporkchop.porkbot.command.minecraft.CommandMcUUID;
@@ -41,17 +41,13 @@ import net.daporkchop.porkbot.command.misc.CommandInterject;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
 import net.daporkchop.porkbot.command.misc.CommandThonk;
 import net.daporkchop.porkbot.command.music.CommandPlay;
-import net.daporkchop.porkbot.command.music.CommandPlayAll;
 import net.daporkchop.porkbot.command.music.CommandQueue;
 import net.daporkchop.porkbot.command.music.CommandShuffle;
 import net.daporkchop.porkbot.command.music.CommandSkip;
 import net.daporkchop.porkbot.command.music.CommandStop;
-import net.daporkchop.porkbot.util.HTTPUtils;
-import net.daporkchop.porkbot.util.KeyGetter;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -110,7 +106,6 @@ public class PorkBot {
         //minecraft
         CommandRegistry.registerCommand(new CommandMcAvatar());
         CommandRegistry.registerCommand(new CommandMcHead());
-        CommandRegistry.registerCommand(new CommandMcQuery());
         CommandRegistry.registerCommand(new CommandMcSkin());
         CommandRegistry.registerCommand(new CommandMcStatus());
         CommandRegistry.registerCommand(new CommandMcUUID());
@@ -129,6 +124,9 @@ public class PorkBot {
         CommandRegistry.registerCommand(new PEPing("pecount", PEPing.FLAG_COUNT));
         CommandRegistry.registerCommand(new PEPing("peversion", PEPing.FLAG_VERSION));
         CommandRegistry.registerCommand(new PEPing("pelatency", PEPing.FLAG_LATENCY));
+
+        CommandRegistry.registerCommand(new JavaPEQuery("mcquery", 25565));
+        CommandRegistry.registerCommand(new JavaPEQuery("pequery", 19132));
 
         //misc
         CommandRegistry.registerCommand(new CommandDice());

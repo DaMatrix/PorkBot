@@ -61,32 +61,32 @@ public final class PEPing extends Command {
                 //server's online
                 builder.setColor(Color.GREEN);
 
-                if ((this.flags & FLAG_MOTD) != 0)   {
-                    builder.addField(
-                            "MOTD:",
-                            pe.motd,
-                            false
-                    );
-                }
                 if ((this.flags & FLAG_COUNT) != 0)   {
                     builder.addField(
                             "Player count:",
                             String.format("%d/%d", pe.onlinePlayers, pe.maxPlayers),
-                            false
-                    );
-                }
-                if ((this.flags & FLAG_VERSION) != 0)   {
-                    builder.addField(
-                            "Version:",
-                            String.format("%s (Protocol %d)", pe.version, pe.protocol),
-                            false
+                            true
                     );
                 }
                 if ((this.flags & FLAG_LATENCY) != 0)   {
                     builder.addField(
                             "Latency:",
                             String.format("%d ms", pe.latency),
-                            false
+                            true
+                    );
+                }
+                if ((this.flags & FLAG_VERSION) != 0)   {
+                    builder.addField(
+                            "Version:",
+                            String.format("%s (Protocol %d)", pe.version, pe.protocol),
+                            true
+                    );
+                }
+                if ((this.flags & FLAG_MOTD) != 0)   {
+                    builder.addField(
+                            "MOTD:",
+                            pe.motd,
+                            true
                     );
                 }
             } else {
