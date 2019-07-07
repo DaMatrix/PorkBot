@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -15,99 +15,108 @@
  */
 package net.daporkchop.porkbot.util;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.daporkchop.porkbot.PorkBot;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.TimerTask;
+import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
+import java.util.stream.StreamSupport;
 
-public class UUIDFetcher {
-    private static final double PROFILES_PER_REQUEST = 100;
-    private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
-    private static final JsonParser jsonParser = new JsonParser();
-    private static final Gson gson = new Gson();
-    private static Queue<UUIDRequest> requests = new ConcurrentLinkedQueue<>();
+public class UUIDFetcher extends Thread {
+    private static final int                                    PROFILES_PER_REQUEST = 100;
+    private static final URL                                       PROFILE_URL          = HTTPUtils.constantURL("https://api.mojang.com/profiles/minecraft");
+    private static final JsonParser                                jsonParser           = new JsonParser();
+    private static final Gson                                      gson                 = new Gson();
+    private static final Cache<String, String>                     CACHE                = CacheBuilder.newBuilder()
+                                                                                                      .maximumSize(5000L)
+                                                                                                      .expireAfterAccess(1L, TimeUnit.DAYS)
+                                                                                                      .build();
+    private static final Map<String, Collection<Consumer<String>>> PENDING              = new HashMap<>();
+    private static final String EMPTY_UUID = "8667ba71b85a4004af54457a9734eed7";
 
     public static UUID getUUID(String id) {
         return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32));
     }
 
-    private static void run() {
-        try {
-            System.out.println("Checking " + requests.size() + " UUIDs");
-            Map<String, UUIDRequest> temp = new Hashtable<>();
-            ArrayList<String> jsonArray = new ArrayList<>();
-            {
-                UUIDRequest request;
-                int i = 0;
-                while (++i < PROFILES_PER_REQUEST && (request = requests.poll()) != null) {
-                    jsonArray.add(request.name);
-                    temp.put(request.name, request);
-                }
+    public static void enqueueRequest(String name, Consumer<String> callback) {
+        String uuid;
+        synchronized (PENDING) {
+            uuid = CACHE.getIfPresent(name);
+            if (uuid == null) {
+                PENDING.computeIfAbsent(name, s -> new LinkedList<>()).add(callback);
+                return;
             }
-
-            String json = HTTPUtils.performPostRequest(new URL(PROFILE_URL), gson.toJson(jsonArray), "application/json");
-            JsonArray array = jsonParser.parse(json).getAsJsonArray();
-            for (Object profile : array) {
-                JsonObject jsonProfile = (JsonObject) profile;
-                String id = jsonProfile.get("id").getAsString();
-                String name = jsonProfile.get("name").getAsString();
-                temp.get(name).uuidCompletable.accept(id);
-                temp.remove(name);
-            }
-            temp.values().forEach(request -> {
-                request.uuidCompletable.accept("8667ba71-b85a-4004-af54-457a9734eed7"); //fallback to steve
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        callback.accept(uuid == EMPTY_UUID ? null : uuid);
     }
 
     public static void init() {
-        PorkBot.timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (!requests.isEmpty()) {
-                    UUIDFetcher.run();
-                } else {
-                    //System.out.println("Requests are empty");
+        new UUIDFetcher();
+    }
+
+    private UUIDFetcher() {
+        this.setDaemon(true);
+        this.start();
+    }
+
+    @Override
+    public void run() {
+        List<String> nameBuf = new ArrayList<>(PROFILES_PER_REQUEST);
+        while (true) {
+            try {
+                Thread.sleep(1000L);
+                synchronized (PENDING) {
+                    if (PENDING.isEmpty()) {
+                        continue;
+                    }
+                    for (Iterator<String> i = PENDING.keySet().iterator(); i.hasNext() && nameBuf.size() < PROFILES_PER_REQUEST; ) {
+                        nameBuf.add(i.next());
+                    }
+                    StreamSupport.stream(jsonParser.parse(HTTPUtils.performPostRequest(
+                            PROFILE_URL,
+                            nameBuf.stream().collect(Collector.of(() -> new StringJoiner("\",\"", "[\"", "\"]"), StringJoiner::add, StringJoiner::merge, StringJoiner::toString)),
+                            "application/json"
+                    )).getAsJsonArray().spliterator(), false)
+                                 .map(JsonElement::getAsJsonObject)
+                                 .forEach(obj -> {
+                                     String name = obj.get("name").getAsString();
+                                     String uuid = obj.get("id").getAsString();
+                                     CACHE.put(name, uuid);
+                                     for (Consumer<String> callback : PENDING.remove(name))    {
+                                         callback.accept(uuid);
+                                     }
+                                 });
+                    for (String name : nameBuf) {
+                        if (PENDING.containsKey(name))  {
+                            CACHE.put(name, EMPTY_UUID); //fallback to steve
+                            for (Consumer<String> callback : PENDING.remove(name))    {
+                                callback.accept(null); //fallback to steve
+                            }
+                        }
+                    }
+                    nameBuf.clear();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
             }
-        }, 5000, 1200);
-    }
-
-    public static void enqueueRequest(String name, Consumer<String> callback) {
-        requests.add(new UUIDRequest(name, callback));
-    }
-
-    private static UUIDRequest[] getRequestByName(String name) {
-        ArrayList<UUIDRequest> arrayList = new ArrayList<>();
-        for (UUIDRequest request : requests) {
-            if (request.name.equals(name)) {
-                arrayList.add(request);
-            }
-        }
-
-        return arrayList.toArray(new UUIDRequest[arrayList.size()]);
-    }
-
-    public static class UUIDRequest {
-        public String name;
-        public Consumer<String> uuidCompletable;
-
-        public UUIDRequest(String a, Consumer<String> b) {
-            name = a;
-            uuidCompletable = b;
         }
     }
 }
