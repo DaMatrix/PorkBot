@@ -99,11 +99,16 @@ public class UUIDFetcher extends Thread {
                                      String name = obj.get("name").getAsString();
                                      String uuid = obj.get("id").getAsString();
                                      CACHE.put(name, uuid);
-                                     for (Consumer<String> callback : PENDING.remove(name))    {
-                                         try {
-                                             callback.accept(uuid);
-                                         } catch (Exception e)  {
-                                             e.printStackTrace();
+                                     Collection<Consumer<String>> callbacks = PENDING.remove(name);
+                                     if (callbacks == null) {
+                                         System.out.printf("Warning: Duplicate callback for name: \"%s\"\n", name);
+                                     } else {
+                                         for (Consumer<String> callback : callbacks) {
+                                             try {
+                                                 callback.accept(uuid);
+                                             } catch (Exception e) {
+                                                 e.printStackTrace();
+                                             }
                                          }
                                      }
                                  });
