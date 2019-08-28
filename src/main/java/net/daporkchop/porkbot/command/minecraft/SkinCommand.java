@@ -49,7 +49,7 @@ public final class SkinCommand extends Command {
 
             UUIDFetcher.enqueueRequest(args[1], uuid -> {
                 if (uuid == null) {
-                    MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?", evt.getTextChannel());
+                    MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a paid Java Edition user?", evt.getTextChannel());
                 } else {
                     EmbedBuilder builder = new EmbedBuilder();
                     builder.setImage("attachment://image.png");
