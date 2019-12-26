@@ -16,12 +16,12 @@
 
 package net.daporkchop.porkbot.util;
 
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.exceptions.PermissionException;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -78,7 +78,9 @@ public class MessageUtils {
     public static void sendImage(EmbedBuilder builder, byte[] image, String name, TextChannel channel) {
         try {
             builder.setTimestamp(Instant.now());
-            channel.sendFile(image, name, new MessageBuilder().setEmbed(builder.build()).build()).queue();
+            channel.sendFile(image, name)
+                    .embed(builder.build())
+                    .queue();
         } catch (PermissionException e) {
             //we can't do anything about it
             if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {

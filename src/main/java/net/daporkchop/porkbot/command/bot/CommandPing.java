@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2019 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -18,8 +18,8 @@ package net.daporkchop.porkbot.command.bot;
 
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 
@@ -35,7 +35,7 @@ public class CommandPing extends Command {
         builder.setColor(Color.BLUE);
         builder.setTitle("PorkBot ping...", "http://www.daporkchop.net/porkbot");
 
-        builder.addField("**Pong:**", evt.getJDA().getPing() + "ms", false);
+        builder.addField("**Pong:**", evt.getJDA().getGatewayPing() + "ms", false);
         MessageUtils.sendMessage(builder, evt.getTextChannel());
     }
 

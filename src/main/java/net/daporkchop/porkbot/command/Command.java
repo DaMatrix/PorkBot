@@ -17,8 +17,8 @@
 package net.daporkchop.porkbot.command;
 
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public abstract class Command {
 

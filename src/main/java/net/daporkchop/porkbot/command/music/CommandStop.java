@@ -16,10 +16,11 @@
 
 package net.daporkchop.porkbot.command.music;
 
+/*
 import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.audio.GuildAudioInfo;
 import net.daporkchop.porkbot.command.Command;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CommandStop extends Command {
     public CommandStop() {
@@ -36,4 +37,4 @@ public class CommandStop extends Command {
             evt.getTextChannel().sendMessage("Stopped!").queue();
         }
     }
-}
+}*/

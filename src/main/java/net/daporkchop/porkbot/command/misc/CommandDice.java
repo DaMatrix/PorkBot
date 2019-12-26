@@ -16,10 +16,9 @@
 
 package net.daporkchop.porkbot.command.misc;
 
-import net.daporkchop.lib.math.arrays.PArrays;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.Arrays;
 import java.util.StringJoiner;

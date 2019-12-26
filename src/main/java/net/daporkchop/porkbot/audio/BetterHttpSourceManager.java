@@ -16,6 +16,7 @@
 
 package net.daporkchop.porkbot.audio;
 
+/*
 import com.sedmelluq.discord.lavaplayer.container.*;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.ProbingAudioSourceManager;
@@ -25,7 +26,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.io.*;
 import com.sedmelluq.discord.lavaplayer.track.*;
 import net.daporkchop.porkbot.util.HTTPUtils;
-import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.api.entities.Message;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -51,9 +52,6 @@ import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.SUSPICIOUS;
 import static com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools.getHeaderValue;
 
-/**
- * @author DaPorkchop_
- */
 public class BetterHttpSourceManager extends HttpAudioSourceManager {
     private static final Field audioTrackInfo_title;
     private static final Method httpAudioSourceManager_detectContainer;
@@ -132,4 +130,4 @@ public class BetterHttpSourceManager extends HttpAudioSourceManager {
             throw new RuntimeException(e);
         }
     }
-}
+}*/

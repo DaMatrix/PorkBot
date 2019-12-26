@@ -16,6 +16,7 @@
 
 package net.daporkchop.porkbot.audio;
 
+/*
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -47,11 +48,11 @@ import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.util.KeyGetter;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ShardUtils;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.managers.AudioManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -139,9 +140,9 @@ public class AudioUtils {
 
                 play(channel.getGuild(), musicManager, track, user, channel);
 
-                /*synchronized (trackUrl) {
-                    trackUrl.notifyAll();
-                }*/
+                //synchronized (trackUrl) {
+                //  trackUrl.notifyAll();
+                //}
             }
 
             @Override
@@ -159,9 +160,9 @@ public class AudioUtils {
 
                 playList(channel.getGuild(), musicManager, tracks, user, channel);
 
-                /*synchronized (trackUrl) {
-                    trackUrl.notifyAll();
-                }*/
+                //synchronized (trackUrl) {
+                //  trackUrl.notifyAll();
+                //}
 
                 //tryConnectToVoice(channel.getGuild(), musicManager, user, channel);
             }
@@ -302,4 +303,4 @@ public class AudioUtils {
             }
         }, 10000, 5000);
     }
-}
+}*/

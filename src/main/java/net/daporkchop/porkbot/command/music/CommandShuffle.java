@@ -16,11 +16,12 @@
 
 package net.daporkchop.porkbot.command.music;
 
+/*
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.audio.GuildAudioInfo;
 import net.daporkchop.porkbot.command.Command;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,4 +47,4 @@ public class CommandShuffle extends Command {
             }
         });
     }
-}
+}*/

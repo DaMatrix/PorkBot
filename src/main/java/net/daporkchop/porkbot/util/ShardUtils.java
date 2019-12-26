@@ -19,12 +19,12 @@ package net.daporkchop.porkbot.util;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.PorkListener;
 import net.daporkchop.porkbot.command.CommandRegistry;
-import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
-import net.dv8tion.jda.bot.sharding.ShardManager;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.sharding.ShardManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class ShardUtils {
             builder.setToken(KeyGetter.getToken());
             builder.setShardsTotal(-1);
             builder.addEventListeners(new PorkListener());
-            builder.setGame(Game.of(Game.GameType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
+            builder.setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
             manager = builder.build();
         } catch (Throwable t) {
             t.printStackTrace();

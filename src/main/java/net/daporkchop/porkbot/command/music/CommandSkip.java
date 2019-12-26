@@ -16,9 +16,10 @@
 
 package net.daporkchop.porkbot.command.music;
 
+/*
 import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.command.Command;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CommandSkip extends Command {
     public CommandSkip() {
@@ -28,4 +29,4 @@ public class CommandSkip extends Command {
     public void execute(MessageReceivedEvent evt, String[] args, String rawContent) {
         AudioUtils.skipTrack(evt.getTextChannel());
     }
-}
+}*/

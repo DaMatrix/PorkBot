@@ -18,7 +18,7 @@ package net.daporkchop.porkbot.command;
 
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ObjectDB;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.io.File;
 import java.util.HashMap;

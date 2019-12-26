@@ -16,7 +16,6 @@
 
 package net.daporkchop.porkbot;
 
-import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.bot.CommandBotInfo;
 import net.daporkchop.porkbot.command.bot.CommandCommandInfo;
@@ -35,11 +34,6 @@ import net.daporkchop.porkbot.command.misc.CommandDice;
 import net.daporkchop.porkbot.command.misc.CommandEmojiID;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
-import net.daporkchop.porkbot.command.music.CommandPlay;
-import net.daporkchop.porkbot.command.music.CommandQueue;
-import net.daporkchop.porkbot.command.music.CommandShuffle;
-import net.daporkchop.porkbot.command.music.CommandSkip;
-import net.daporkchop.porkbot.command.music.CommandStop;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 
@@ -65,7 +59,7 @@ public class PorkBot {
 
     public void start() {
         UUIDFetcher.init();
-        AudioUtils.init();
+        //AudioUtils.init();
 
         //final String authToken = KeyGetter.getAuthtoken();
 
@@ -117,11 +111,11 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandShutdown());
 
         //music
-        CommandRegistry.registerCommand(new CommandPlay());
+        //CommandRegistry.registerCommand(new CommandPlay());
         //CommandRegistry.registerCommand(new CommandPlayAll());
-        CommandRegistry.registerCommand(new CommandQueue());
-        CommandRegistry.registerCommand(new CommandShuffle());
-        CommandRegistry.registerCommand(new CommandSkip());
-        CommandRegistry.registerCommand(new CommandStop());
+        //CommandRegistry.registerCommand(new CommandQueue());
+        //CommandRegistry.registerCommand(new CommandShuffle());
+        //CommandRegistry.registerCommand(new CommandSkip());
+        //CommandRegistry.registerCommand(new CommandStop());
     }
 }

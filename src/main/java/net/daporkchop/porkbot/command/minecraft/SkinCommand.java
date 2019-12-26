@@ -20,8 +20,8 @@ import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.HTTPUtils;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.Color;
 
@@ -29,7 +29,8 @@ import java.awt.Color;
  * @author DaPorkchop_
  */
 public final class SkinCommand extends Command {
-    protected static final String BASE_URL = "https://crafatar.daporkchop.net";
+    //protected static final String BASE_URL = "https://crafatar.daporkchop.net";
+    protected static final String BASE_URL = "https://crafatar.com";
 
     protected final String format;
 

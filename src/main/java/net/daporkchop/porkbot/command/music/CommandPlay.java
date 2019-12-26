@@ -16,9 +16,10 @@
 
 package net.daporkchop.porkbot.command.music;
 
+/*
 import net.daporkchop.porkbot.audio.AudioUtils;
 import net.daporkchop.porkbot.command.Command;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import java.util.concurrent.ExecutionException;
@@ -53,4 +54,4 @@ public class CommandPlay extends Command {
     public String getUsageExample() {
         return "..play https://www.youtube.com/watch?v=IvUU8joBb1Q` or `..play a-ha take on me";
     }
-}
+}*/
