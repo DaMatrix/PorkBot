@@ -18,16 +18,13 @@ package net.daporkchop.porkbot.util;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,16 +37,16 @@ import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
 public class UUIDFetcher extends Thread {
-    private static final int                                    PROFILES_PER_REQUEST = 10;
+    private static final int                                       PROFILES_PER_REQUEST = 10;
     private static final URL                                       PROFILE_URL          = HTTPUtils.constantURL("https://api.mojang.com/profiles/minecraft");
     private static final JsonParser                                jsonParser           = new JsonParser();
     private static final Gson                                      gson                 = new Gson();
     private static final Cache<String, String>                     CACHE                = CacheBuilder.newBuilder()
-                                                                                                      .maximumSize(5000L)
-                                                                                                      .expireAfterAccess(1L, TimeUnit.DAYS)
-                                                                                                      .build();
+            .maximumSize(5000L)
+            .expireAfterAccess(1L, TimeUnit.DAYS)
+            .build();
     private static final Map<String, Collection<Consumer<String>>> PENDING              = new HashMap<>();
-    private static final String EMPTY_UUID = "8667ba71b85a4004af54457a9734eed7";
+    private static final String                                    EMPTY_UUID           = "8667ba71b85a4004af54457a9734eed7";
 
     public static UUID getUUID(String id) {
         return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32));
@@ -94,36 +91,37 @@ public class UUIDFetcher extends Thread {
                             nameBuf.stream().collect(Collector.of(() -> new StringJoiner("\",\"", "[\"", "\"]"), StringJoiner::add, StringJoiner::merge, StringJoiner::toString)),
                             "application/json"
                     )).getAsJsonArray().spliterator(), false)
-                                 .map(JsonElement::getAsJsonObject)
-                                 .forEach(obj -> {
-                                     String name = obj.get("name").getAsString();
-                                     String uuid = obj.get("id").getAsString();
-                                     CACHE.put(name, uuid);
-                                     Collection<Consumer<String>> callbacks = PENDING.remove(name);
-                                     if (callbacks == null) {
-                                         System.out.printf("Warning: Duplicate callback for name: \"%s\"\n", name);
-                                     } else {
-                                         for (Consumer<String> callback : callbacks) {
-                                             try {
-                                                 callback.accept(uuid);
-                                             } catch (Exception e) {
-                                                 e.printStackTrace();
-                                             }
-                                         }
-                                     }
-                                 });
-                    for (String name : nameBuf) {
-                        if (PENDING.containsKey(name))  {
-                            CACHE.put(name, EMPTY_UUID); //fallback to steve
-                            for (Consumer<String> callback : PENDING.remove(name))    {
-                                callback.accept(null); //fallback to steve
-                            }
-                        }
-                    }
-                    nameBuf.clear();
+                            .map(JsonElement::getAsJsonObject)
+                            .forEach(obj -> {
+                                String name = obj.get("name").getAsString();
+                                String uuid = obj.get("id").getAsString();
+                                CACHE.put(name, uuid);
+                                Collection<Consumer<String>> callbacks = PENDING.remove(name);
+                                if (callbacks == null) {
+                                    System.out.printf("Warning: Duplicate callback for name: \"%s\"\n", name);
+                                } else {
+                                    for (Consumer<String> callback : callbacks) {
+                                        try {
+                                            callback.accept(uuid);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                for (String name : nameBuf) {
+                    if (PENDING.containsKey(name)) {
+                        CACHE.put(name, EMPTY_UUID); //fallback to steve
+                        for (Consumer<String> callback : PENDING.remove(name)) {
+                            callback.accept(null); //fallback to steve
+                        }
+                    }
+                }
+                nameBuf.clear();
             }
         }
     }
