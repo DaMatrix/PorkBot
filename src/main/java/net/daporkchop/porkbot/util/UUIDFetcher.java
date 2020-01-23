@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -40,7 +40,7 @@ import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
 public class UUIDFetcher extends Thread {
-    private static final int                                    PROFILES_PER_REQUEST = 100;
+    private static final int                                    PROFILES_PER_REQUEST = 10;
     private static final URL                                       PROFILE_URL          = HTTPUtils.constantURL("https://api.mojang.com/profiles/minecraft");
     private static final JsonParser                                jsonParser           = new JsonParser();
     private static final Gson                                      gson                 = new Gson();
@@ -81,7 +81,7 @@ public class UUIDFetcher extends Thread {
         List<String> nameBuf = new ArrayList<>(PROFILES_PER_REQUEST);
         while (true) {
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(1250L);
                 synchronized (PENDING) {
                     if (PENDING.isEmpty()) {
                         continue;
