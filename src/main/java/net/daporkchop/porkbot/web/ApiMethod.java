@@ -14,40 +14,16 @@
  *
  */
 
-package net.daporkchop.porkbot.command.minecraft;
+package net.daporkchop.porkbot.web;
 
-import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import lombok.NonNull;
+import lombok.experimental.UtilityClass;
+import net.daporkchop.lib.http.server.ResponseBuilder;
 
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-
-public class CommandOfflineUUID extends Command {
-    public CommandOfflineUUID() {
-        super("offlineuuid");
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
-        if (args.length < 2 || args[1].isEmpty()) {
-            sendErrorMessage(evt.getChannel(), "Name isn't given!");
-            return;
-        }
-
-        String msg = args[1] + "'s offline UUID:\n```\n" + UUID.nameUUIDFromBytes(("OfflinePlayer:" + args[1]).getBytes(StandardCharsets.UTF_8)).toString() + "\n```";
-
-        MessageUtils.sendMessage(msg, evt.getChannel());
-    }
-
-    @Override
-    public String getUsage() {
-        return "..offlineuuid <name>";
-    }
-
-    @Override
-    public String getUsageExample() {
-        return "..offlineuuid Notch";
-    }
+/**
+ * @author DaPorkchop_
+ */
+@FunctionalInterface
+public interface ApiMethod {
+    void handle(@NonNull String path, @NonNull ResponseBuilder response) throws Exception;
 }

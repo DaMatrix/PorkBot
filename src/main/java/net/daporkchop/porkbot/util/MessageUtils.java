@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -20,7 +20,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.io.ByteArrayOutputStream;
@@ -90,14 +90,14 @@ public class MessageUtils {
     }
 
     /**
-     * Sends an excepion using the given MessageReceivedEvent's channel
+     * Sends an excepion using the given GuildMessageReceivedEvent's channel
      *
      * @param e   the exception to print
      * @param evt the channel from this event is used to send the message
      */
-    public static void sendException(Exception e, MessageReceivedEvent evt) {
+    public static void sendException(Exception e, GuildMessageReceivedEvent evt) {
         e.printStackTrace();
-        sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`: " + e.getMessage(), evt.getTextChannel());
+        sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`: " + e.getMessage(), evt.getChannel());
     }
 
 }

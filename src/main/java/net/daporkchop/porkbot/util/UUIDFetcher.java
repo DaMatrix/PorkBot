@@ -40,7 +40,6 @@ public class UUIDFetcher extends Thread {
     private static final int                                       PROFILES_PER_REQUEST = 10;
     private static final URL                                       PROFILE_URL          = HTTPUtils.constantURL("https://api.mojang.com/profiles/minecraft");
     private static final JsonParser                                jsonParser           = new JsonParser();
-    private static final Gson                                      gson                 = new Gson();
     private static final Cache<String, String>                     CACHE                = CacheBuilder.newBuilder()
             .maximumSize(5000L)
             .expireAfterAccess(1L, TimeUnit.DAYS)

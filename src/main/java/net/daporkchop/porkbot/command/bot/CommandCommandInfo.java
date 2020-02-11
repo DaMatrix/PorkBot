@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -19,7 +19,7 @@ package net.daporkchop.porkbot.command.bot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandCommandInfo extends Command {
 
@@ -28,19 +28,19 @@ public class CommandCommandInfo extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
         if (args.length < 2 || args[1].isEmpty()) {
-            sendErrorMessage(evt.getTextChannel(), "You need to have at least one argument!");
+            sendErrorMessage(evt.getChannel(), "You need to have at least one argument!");
             return;
         }
 
         Command command = CommandRegistry.COMMANDS.getOrDefault(args[1], null);
         if (command == null) {
-            MessageUtils.sendMessage("No such command: `" + args[1] + "`", evt.getTextChannel());
+            MessageUtils.sendMessage("No such command: `" + args[1] + "`", evt.getChannel());
             return;
         }
 
-        MessageUtils.sendMessage("Statistics of command: `" + command.prefix + "`\n\nUses: `" + command.uses + "`", evt.getTextChannel());
+        MessageUtils.sendMessage("Statistics of command: `" + command.prefix + "`\n\nUses: `" + command.uses + "`", evt.getChannel());
     }
 
     @Override

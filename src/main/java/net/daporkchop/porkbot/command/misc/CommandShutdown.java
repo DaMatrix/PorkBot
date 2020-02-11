@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -16,10 +16,11 @@
 
 package net.daporkchop.porkbot.command.misc;
 
+import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ShardUtils;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandShutdown extends Command {
     public CommandShutdown() {
@@ -27,24 +28,24 @@ public class CommandShutdown extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
         if (evt.getAuthor().getIdLong() == 226975061880471552L) {
             evt.getChannel().sendMessage("Rebooting...").queue(msg -> {
                 System.out.println("Rebooting...");
-                ShardUtils.shutdown();
+                PorkBot.INSTANCE.shutdown();
             });
         } else {
-            MessageUtils.sendMessage("Don't use this! It doesn't do anything!!!", evt.getTextChannel());
+            MessageUtils.sendMessage("Don't use this! It doesn't do anything!!!", evt.getChannel());
         }
     }
 
     @Override
     public String getUsage() {
-        return "..say <stuff you want to say>";
+        return "..shutdown";
     }
 
     @Override
     public String getUsageExample() {
-        return "..say Hello World!";
+        return "..shutdown";
     }
 }

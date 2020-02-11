@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -19,7 +19,7 @@ package net.daporkchop.porkbot.command.minecraft;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandMcUUID extends Command {
 
@@ -28,17 +28,17 @@ public class CommandMcUUID extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
         if (args.length < 2 || args[1].isEmpty()) {
-            sendErrorMessage(evt.getTextChannel(), "Name isn't long enough or isn't given!");
+            sendErrorMessage(evt.getChannel(), "Name isn't long enough or isn't given!");
             return;
         }
 
         UUIDFetcher.enqueueRequest(args[1], uuid -> {
             if (uuid == null) {
-                MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?", evt.getTextChannel());
+                MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a payed PC user?", evt.getChannel());
             } else {
-                MessageUtils.sendMessage(args[1] + "'s UUID:\n```\n" + UUIDFetcher.getUUID(uuid).toString() + "\n```", evt.getTextChannel());
+                MessageUtils.sendMessage(args[1] + "'s UUID:\n```\n" + UUIDFetcher.getUUID(uuid).toString() + "\n```", evt.getChannel());
             }
         });
     }

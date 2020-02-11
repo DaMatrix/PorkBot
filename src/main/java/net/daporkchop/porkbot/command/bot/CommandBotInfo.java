@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -21,7 +21,7 @@ import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.awt.*;
 
@@ -32,7 +32,7 @@ public class CommandBotInfo extends Command {
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
         builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");
@@ -60,7 +60,7 @@ public class CommandBotInfo extends Command {
 
         builder.addField("Shard users:", String.valueOf(evt.getJDA().getUsers().size()), true);
 
-        MessageUtils.sendMessage(builder, evt.getTextChannel());
+        MessageUtils.sendMessage(builder, evt.getChannel());
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -24,7 +24,10 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import net.daporkchop.porkbot.util.TextFormat;
+import net.daporkchop.lib.minecraft.text.MCTextEncoder;
+import net.daporkchop.lib.minecraft.text.MCTextType;
+import net.daporkchop.lib.minecraft.text.parser.MinecraftFormatParser;
+import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.mcpinger.pcping.MinecraftPing;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
@@ -82,7 +85,7 @@ public abstract class MCPing {
         }
         try {
             return new PE()
-                    .motd(TextFormat.clean(matcher.group(1)))
+                    .motd(matcher.group(1))
                     .onlinePlayers(Integer.parseInt(matcher.group(4)))
                     .maxPlayers(Integer.parseInt(matcher.group(5)))
                     .version(matcher.group(3))
@@ -121,7 +124,7 @@ public abstract class MCPing {
                     MCQuery query = new MCQuery(address);
 
                     future.complete(new Query()
-                            .motd(TextFormat.clean(query.getMOTD()))
+                            .motd(query.getMOTD())
                             .onlinePlayers(query.getOnlinePlayers())
                             .maxPlayers(query.getMaxPlayers())
                             .version(query.values.getOrDefault("version", "Unknown"))
@@ -152,8 +155,16 @@ public abstract class MCPing {
                 JsonObject reply = MinecraftPing.getPing(address);
 
                 if (reply != null) {
+                    JsonObject desc = reply.getAsJsonObject("description");
+                    String text = desc.get("text").getAsString();
+                    desc.remove("text");
+                    if (desc.size() != 0)   {
+                        System.out.println(desc.toString());
+                        text = MCTextEncoder.encode(MCTextType.LEGACY, MinecraftFormatParser.getDefaultInstance().parse(Constants.GSON.toJson(desc)));
+                    }
+
                     future.complete(new Java()
-                            .motd(TextFormat.clean(reply.getAsJsonObject("description").get("text").getAsString()))
+                            .motd(text)
                             .onlinePlayers(reply.getAsJsonObject("players").get("online").getAsInt())
                             .maxPlayers(reply.getAsJsonObject("players").get("max").getAsInt())
                             .version(reply.getAsJsonObject("version").get("name").getAsString())

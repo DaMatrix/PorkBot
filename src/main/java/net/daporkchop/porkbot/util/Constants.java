@@ -14,40 +14,21 @@
  *
  */
 
-package net.daporkchop.porkbot.command.minecraft;
+package net.daporkchop.porkbot.util;
 
-import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import com.google.gson.Gson;
+import lombok.experimental.UtilityClass;
 
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
+/**
+ * @author DaPorkchop_
+ */
+@UtilityClass
+public class Constants {
+    public final boolean TEST = Boolean.valueOf(System.getProperty("porkbot.test", "false"));
 
-public class CommandOfflineUUID extends Command {
-    public CommandOfflineUUID() {
-        super("offlineuuid");
-    }
+    public final String BASE_URL = TEST ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
 
-    @Override
-    @SuppressWarnings("deprecation")
-    public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
-        if (args.length < 2 || args[1].isEmpty()) {
-            sendErrorMessage(evt.getChannel(), "Name isn't given!");
-            return;
-        }
+    public final Gson GSON = new Gson();
 
-        String msg = args[1] + "'s offline UUID:\n```\n" + UUID.nameUUIDFromBytes(("OfflinePlayer:" + args[1]).getBytes(StandardCharsets.UTF_8)).toString() + "\n```";
-
-        MessageUtils.sendMessage(msg, evt.getChannel());
-    }
-
-    @Override
-    public String getUsage() {
-        return "..offlineuuid <name>";
-    }
-
-    @Override
-    public String getUsageExample() {
-        return "..offlineuuid Notch";
-    }
+    public final String UUID_CAPTURE = "([0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12})";
 }

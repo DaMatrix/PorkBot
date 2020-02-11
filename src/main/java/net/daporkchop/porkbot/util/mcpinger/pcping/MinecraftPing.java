@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -20,6 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.NonNull;
 import net.daporkchop.lib.minecraft.text.parser.JsonTextParser;
+import net.daporkchop.porkbot.util.Constants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -31,7 +32,6 @@ import java.nio.charset.StandardCharsets;
 
 public class MinecraftPing {
     private static final JsonParser PARSER = new JsonParser();
-    private static final Gson       GSON   = new Gson();
 
     public static JsonObject getPing(@NonNull InetSocketAddress address) throws IOException {
         final Socket socket = new Socket();
@@ -106,7 +106,7 @@ public class MinecraftPing {
         object.addProperty("ping", ping);
         if (object.get("description").isJsonObject()) {
             if (object.getAsJsonObject("description").has("extra")) {
-                String extra = GSON.toJson(object.getAsJsonObject("description").get("extra"));
+                String extra = Constants.GSON.toJson(object.getAsJsonObject("description").get("extra"));
                 //System.out.println("Parsing " + extra);
                 String text = JsonTextParser.parse(extra).toRawString();
                 //System.out.println("Real: " + text);

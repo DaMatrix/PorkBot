@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -34,19 +34,17 @@ public class KeyGetter {
                 PrintWriter writer = new PrintWriter(f.getAbsolutePath(), "UTF-8");
                 Scanner s = new Scanner(System.in);
 
-                PorkBot.LOGGER.info("Please enter your discord bot token");
+                System.out.println("Please enter your discord bot token");
                 token = s.nextLine();
                 writer.println(token);
-                PorkBot.LOGGER.info("Successful. Starting...");
+                System.out.println("Successful. Starting...");
 
                 s.close();
                 writer.close();
             } catch (FileNotFoundException e) {
-                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             } catch (UnsupportedEncodingException e) {
-                PorkBot.LOGGER.severe("File encoding not supported!");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -58,7 +56,6 @@ public class KeyGetter {
 
                 s.close();
             } catch (FileNotFoundException e) {
-                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -76,19 +73,17 @@ public class KeyGetter {
                 PrintWriter writer = new PrintWriter(f.getAbsolutePath(), "UTF-8");
                 Scanner s = new Scanner(System.in);
 
-                PorkBot.LOGGER.info("Please enter your google API key");
+                System.out.println("Please enter your google API key");
                 token = s.nextLine();
                 writer.println(token);
-                PorkBot.LOGGER.info("Successful. connecting...");
+                System.out.println("Successful. connecting...");
 
                 s.close();
                 writer.close();
             } catch (FileNotFoundException e) {
-                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             } catch (UnsupportedEncodingException e) {
-                PorkBot.LOGGER.severe("File encoding not supported!");
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -100,7 +95,6 @@ public class KeyGetter {
 
                 s.close();
             } catch (FileNotFoundException e) {
-                PorkBot.LOGGER.severe("impossible error kek");
                 e.printStackTrace();
                 System.exit(0);
             }

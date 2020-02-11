@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -16,6 +16,7 @@
 
 package net.daporkchop.porkbot;
 
+import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.bot.CommandBotInfo;
 import net.daporkchop.porkbot.command.bot.CommandCommandInfo;
@@ -24,9 +25,9 @@ import net.daporkchop.porkbot.command.bot.CommandInvite;
 import net.daporkchop.porkbot.command.bot.CommandPing;
 import net.daporkchop.porkbot.command.bot.CommandSay;
 import net.daporkchop.porkbot.command.bot.CommandTest;
-import net.daporkchop.porkbot.command.minecraft.JavaPEQuery;
 import net.daporkchop.porkbot.command.minecraft.CommandMcUUID;
 import net.daporkchop.porkbot.command.minecraft.CommandOfflineUUID;
+import net.daporkchop.porkbot.command.minecraft.JavaPEQuery;
 import net.daporkchop.porkbot.command.minecraft.JavaPing;
 import net.daporkchop.porkbot.command.minecraft.PEPing;
 import net.daporkchop.porkbot.command.minecraft.SkinCommand;
@@ -36,25 +37,24 @@ import net.daporkchop.porkbot.command.misc.CommandInterject;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
+import net.daporkchop.porkbot.web.PorkBotWebServer;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Logger;
 
 public class PorkBot {
     public static PorkBot INSTANCE;
-    public static Logger  LOGGER;
-    public static Timer TIMER = new Timer();
 
-    public PorkBot() {
-        LOGGER.info("Starting PorkBot...");
-        ShardUtils.loadClass();
-    }
+    public static Timer            TIMER      = new Timer();
+    public static PorkBotWebServer WEB_SERVER = new PorkBotWebServer();
 
     public static void main(String[] args) {
-        LOGGER = Logger.getLogger("PorkBot");
         INSTANCE = new PorkBot();
         INSTANCE.start();
+    }
+
+    public PorkBot() {
+        ShardUtils.loadClass();
     }
 
     public void start() {
@@ -70,6 +70,7 @@ public class PorkBot {
             }
         }, 1000, 120000);
 
+
         //bot
         CommandRegistry.registerCommand(new CommandBotInfo());
         CommandRegistry.registerCommand(new CommandCommandInfo());
@@ -83,10 +84,14 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
 
-        CommandRegistry.registerCommand(new SkinCommand("mcavatar", "%s/avatars/%s?size=128&overlay"));
-        CommandRegistry.registerCommand(new SkinCommand("mchead", "%s/renders/head/%s?size=128&overlay"));
-        CommandRegistry.registerCommand(new SkinCommand("mcskin", "%s/renders/body/%s?overlay"));
-        CommandRegistry.registerCommand(new SkinCommand("skinsteal", "%s/skins/%s"));
+        new SkinCommand.SkinApiMethod("face", "/avatars/%s?size=256&default=MHF_Steve&overlay");
+        new SkinCommand.SkinApiMethod("head", "/renders/head/%s?scale=10&default=MHF_Steve&overlay");
+        new SkinCommand.SkinApiMethod("body", "/renders/body/%s?scale=10&default=MHF_Steve&overlay");
+        new SkinCommand.SkinApiMethod("raw", "/skins/%s?default=MHF_Steve");
+        CommandRegistry.registerCommand(new SkinCommand("mcavatar", "face"));
+        CommandRegistry.registerCommand(new SkinCommand("mchead", "head"));
+        CommandRegistry.registerCommand(new SkinCommand("mcskin", "body"));
+        CommandRegistry.registerCommand(new SkinCommand("skinsteal", "raw"));
 
         CommandRegistry.registerCommand(new JavaPing("mcping", JavaPing.FLAG_ALL));
         CommandRegistry.registerCommand(new JavaPing("mcmotd", JavaPing.FLAG_MOTD));
@@ -117,5 +122,15 @@ public class PorkBot {
         //CommandRegistry.registerCommand(new CommandShuffle());
         //CommandRegistry.registerCommand(new CommandSkip());
         //CommandRegistry.registerCommand(new CommandStop());
+    }
+
+    public void shutdown() {
+        WEB_SERVER.shutdown();
+        CommandRegistry.save();
+        ShardUtils.shutdown();
+        PorkBot.TIMER.cancel();
+        PorkBot.TIMER.purge();
+        PorkUtil.sleep(2000L);
+        System.exit(0);
     }
 }

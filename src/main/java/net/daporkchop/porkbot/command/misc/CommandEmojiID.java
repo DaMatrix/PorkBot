@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -18,19 +18,19 @@ package net.daporkchop.porkbot.command.misc;
 
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandEmojiID extends Command {
     public CommandEmojiID() {
         super("emojiid");
     }
 
-    public void execute(MessageReceivedEvent evt, String[] args, String rawContent) {
+    public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
         if (args.length != 2) {
-            this.sendErrorMessage(evt.getTextChannel(), "You need to have 2 arguments!");
+            this.sendErrorMessage(evt.getChannel(), "You need to have 2 arguments!");
             return;
         }
 
-        MessageUtils.sendMessage("Emote ID: `" + args[1] + "`", evt.getTextChannel());
+        MessageUtils.sendMessage("Emote ID: `" + args[1] + "`", evt.getChannel());
     }
 }

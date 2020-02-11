@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -16,51 +16,57 @@
 
 package net.daporkchop.porkbot.command.minecraft;
 
+import lombok.NonNull;
+import net.daporkchop.lib.http.Http;
+import net.daporkchop.lib.http.entity.content.type.ContentType;
+import net.daporkchop.lib.http.server.ResponseBuilder;
+import net.daporkchop.lib.http.util.StatusCodes;
+import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.util.HTTPUtils;
+import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
+import net.daporkchop.porkbot.web.ApiMethod;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.awt.Color;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author DaPorkchop_
  */
 public final class SkinCommand extends Command {
     //protected static final String BASE_URL = "https://crafatar.daporkchop.net";
-    protected static final String BASE_URL = "https://crafatar.com";
 
-    protected final String format;
+    protected final String target;
 
-    public SkinCommand(String prefix, String format) {
+    public SkinCommand(String prefix, String target) {
         super(prefix);
 
-        this.format = format;
+        this.target = Constants.BASE_URL + "/api/mc/skin/" + target + '/';
     }
 
     @Override
-    public void execute(MessageReceivedEvent evt, String[] args, String message) {
+    public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
         try {
             if (args.length < 2 || args[1].isEmpty()) {
-                sendErrorMessage(evt.getTextChannel(), "Name isn't given!");
+                sendErrorMessage(evt.getChannel(), "Name isn't given!");
                 return;
             }
 
             UUIDFetcher.enqueueRequest(args[1], uuid -> {
                 if (uuid == null) {
-                    MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a paid Java Edition user?", evt.getTextChannel());
+                    MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a paid Java Edition user?", evt.getChannel());
                 } else {
                     EmbedBuilder builder = new EmbedBuilder();
-                    builder.setImage("attachment://image.png");
+                    builder.setImage(this.target + uuid + ".png");
                     builder.setColor(Color.DARK_GRAY);
-
-                    byte[] outBytes = HTTPUtils.getUnchecked(String.format(this.format, BASE_URL, uuid), 0);
 
                     builder.addField(args[1] + "'s skin", "", false);
 
-                    MessageUtils.sendImage(builder, outBytes, "image.png", evt.getTextChannel());
+                    MessageUtils.sendMessage(builder, evt.getChannel());
                 }
             });
         } catch (Exception e) {
@@ -76,5 +82,31 @@ public final class SkinCommand extends Command {
     @Override
     public String getUsageExample() {
         return String.format("..%s Notch", this.prefix);
+    }
+
+    public static final class SkinApiMethod implements ApiMethod {
+        private static final String      BASE_URL = "https://crafatar.com";
+        private static final ContentType PNG_TYPE = ContentType.of("image/png");
+
+        private final Pattern pattern;
+        private final String  format;
+
+        public SkinApiMethod(@NonNull String name, @NonNull String format) {
+            this.pattern = Pattern.compile("^/api/mc/skin/" + name + '/' + Constants.UUID_CAPTURE + "\\.png$");
+            this.format = format;
+
+            PorkBot.WEB_SERVER.register("/api/mc/skin/" + name, this);
+        }
+
+        @Override
+        public void handle(@NonNull String path, @NonNull ResponseBuilder response) throws Exception {
+            Matcher matcher = this.pattern.matcher(path);
+            if (!matcher.find()) {
+                throw StatusCodes.BAD_REQUEST.exception();
+            }
+
+            response.status(StatusCodes.OK)
+                    .body(PNG_TYPE, Http.get(BASE_URL + String.format(this.format, matcher.group(1))));
+        }
     }
 }

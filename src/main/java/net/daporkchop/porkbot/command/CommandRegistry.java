@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2019 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -18,7 +18,7 @@ package net.daporkchop.porkbot.command;
 
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ObjectDB;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.io.File;
 import java.util.HashMap;
@@ -64,21 +64,21 @@ public abstract class CommandRegistry {
      *
      * @param evt
      */
-    public static void runCommand(MessageReceivedEvent evt, String rawContent) {
+    public static void runCommand(GuildMessageReceivedEvent evt, String rawContent) {
         EXECUTOR.submit(() -> doRunCommand(evt, rawContent));
     }
 
-    private static void doRunCommand(MessageReceivedEvent evt, String rawContent) {
+    private static void doRunCommand(GuildMessageReceivedEvent evt, String rawContent) {
         try {
             try {
-                if (evt.getTextChannel() == null) {
+                if (evt.getChannel() == null) {
                     return;
                 }
 
                 String[] split = rawContent.split(" ");
                 Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
                 if (cmd != null) {
-                        evt.getTextChannel().sendTyping().complete(); //TODO: i don't want to have to wait for this to complete!
+                        evt.getChannel().sendTyping().complete(); //TODO: i don't want to have to wait for this to complete!
                         cmd.execute(evt, split, rawContent);
                         COMMAND_COUNT++;
                         COMMAND_COUNT_TOTAL++;
@@ -86,10 +86,10 @@ public abstract class CommandRegistry {
                 }
             } catch (Throwable e) {
                 e.printStackTrace();
-                MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getTextChannel());
+                MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getChannel());
             }
         } catch (NullPointerException e) {
-            evt.getTextChannel().sendMessage("PorkBot is still starting up! Please wait.").queue();
+            evt.getChannel().sendMessage("PorkBot is still starting up! Please wait.").queue();
         }
     }
 

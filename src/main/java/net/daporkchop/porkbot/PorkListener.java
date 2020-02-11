@@ -19,45 +19,22 @@ package net.daporkchop.porkbot;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import javax.annotation.Nonnull;
+
 public class PorkListener extends ListenerAdapter {
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
+    public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) {
-            //bots don't matter to us!
             return;
         }
         String message = event.getMessage().getContentRaw();
 
         if (message.startsWith(",,")) {
             CommandRegistry.runCommand(event, message.replaceFirst(",,", ".."));
-        } else if (event.getChannelType().ordinal() == ChannelType.PRIVATE.ordinal()) {
-            if (event.getAuthor().getIdLong() == 226975061880471552L) {
-                switch (message) {
-                    case ",,instareboot":
-                        event.getChannel().sendMessage("Rebooting...").complete();
-                        System.out.println("Rebooting...");
-                        ShardUtils.shutdown();
-                        return;
-                }
-
-                if (message.startsWith(",,announce ")) {
-                    String toAnnouce = message.substring(11);
-
-                    ShardUtils.forEachGuild(server -> {
-                        try {
-                            if (server.getDefaultChannel() != null) {
-                                server.getDefaultChannel().sendMessage(toAnnouce).queue();
-                            }
-                        } catch (PermissionException e) {
-                            //who cares, we can't do anything about it
-                        }
-                    });
-                }
-            }
         }
     }
 }
