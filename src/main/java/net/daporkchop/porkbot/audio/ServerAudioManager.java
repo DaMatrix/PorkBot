@@ -19,9 +19,10 @@ package net.daporkchop.porkbot.audio;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
@@ -29,15 +30,19 @@ import net.dv8tion.jda.api.managers.AudioManager;
  * @author DaPorkchop_
  */
 @Getter
-@Accessors(fluent = true)
+@Accessors(fluent = true, chain = true)
 public final class ServerAudioManager {
     private final Guild          guild;
     private final AudioPlayer    player;
     private final TrackScheduler scheduler;
 
+    @Setter
+    @NonNull
+    private TextChannel lastAccessedFrom;
+
     public ServerAudioManager(@NonNull Guild guild, @NonNull AudioPlayer player) {
         this.guild = guild;
-        (this.player = player).addListener(this.scheduler = new TrackScheduler(player));
+        (this.player = player).addListener(this.scheduler = new TrackScheduler(player, this));
     }
 
     public AudioPlayerSendHandler sendHandler() {
@@ -45,14 +50,35 @@ public final class ServerAudioManager {
     }
 
     public synchronized ServerAudioManager connect(VoiceChannel dstChannel) {
-        if (dstChannel.getGuild() != this.guild)    {
+        if (dstChannel.getGuild() != this.guild) {
             throw new IllegalArgumentException();
         }
 
         AudioManager manager = this.guild.getAudioManager();
         if (!manager.isConnected() && !manager.isAttemptingToConnect()) {
+            manager.setSelfDeafened(true);
             manager.openAudioConnection(dstChannel);
         }
         return this;
+    }
+
+    synchronized void doDisconnect()   {
+        AudioManager manager = this.guild.getAudioManager();
+        if (manager.isConnected() || manager.isAttemptingToConnect()) {
+            manager.closeAudioConnection();
+        }
+    }
+
+    public synchronized void handleAllLeft()    {
+        this.scheduler.skipAll();
+        if (this.lastAccessedFrom != null)  {
+            this.lastAccessedFrom.sendMessage("All users have left the voice channel, stopping.").queue();
+        }
+    }
+
+    public VoiceChannel connectedChannel()  {
+        AudioManager manager = this.guild.getAudioManager();
+        VoiceChannel channel = manager.getQueuedAudioConnection();
+        return channel == null ? manager.getConnectedChannel() : channel;
     }
 }

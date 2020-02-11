@@ -22,6 +22,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.daporkchop.lib.common.util.PArrays;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -33,8 +34,10 @@ import java.util.Queue;
 public final class TrackScheduler extends AudioEventAdapter {
     @NonNull
     private final AudioPlayer player;
+    @NonNull
+    private final ServerAudioManager manager;
 
-    private Queue<AudioTrack> queue = new LinkedList<>();
+    private final Queue<AudioTrack> queue = new LinkedList<>();
 
     public synchronized void enqueue(@NonNull AudioTrack track)  {
         if (!this.player.startTrack(track, true))    {
@@ -42,14 +45,38 @@ public final class TrackScheduler extends AudioEventAdapter {
         }
     }
 
-    public synchronized void next() {
-        this.player.startTrack(this.queue.poll(), false);
+    public synchronized boolean next() {
+        AudioTrack next = this.queue.poll();
+        this.player.startTrack(next, false);
+        return next != null;
+    }
+
+    public synchronized void shuffle()  {
+        if (this.queue.size() <= 1) {
+            return;
+        }
+
+        AudioTrack[] tracks = this.queue.toArray(new AudioTrack[this.queue.size()]);
+        PArrays.shuffle(tracks);
+        this.queue.clear();
+        for (AudioTrack track : tracks)  {
+            this.queue.add(track);
+        }
+    }
+
+    public synchronized void skipAll()  {
+        this.queue.clear();
+        this.player.destroy();
+        this.manager.doDisconnect();
     }
 
     @Override
-    public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if (endReason.mayStartNext) {
-            this.next();
+    public synchronized void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        if (endReason.mayStartNext && this.next())    {
+            return;
         }
+
+        //shut down, we can't proceed
+        this.skipAll();
     }
 }

@@ -53,10 +53,10 @@ public class PorkAudio {
         //AudioSourceManagers.registerLocalSource(PLAYER_MANAGER);
     }
 
-    public synchronized ServerAudioManager getAudioManager(@NonNull Guild guild)    {
+    public synchronized ServerAudioManager getAudioManager(@NonNull Guild guild, boolean create)    {
         ServerAudioManager manager = SERVERS.get(guild.getIdLong());
 
-        if (manager == null)    {
+        if (manager == null && create)    {
             SERVERS.put(guild.getIdLong(), manager = new ServerAudioManager(guild, PLAYER_MANAGER.createPlayer()));
             guild.getAudioManager().setSendingHandler(manager.sendHandler());
         }
@@ -70,7 +70,7 @@ public class PorkAudio {
             msgChannel.sendMessage("You must be in a voice channel to add tracks to the play queue!").queue();
             return;
         }
-        ServerAudioManager manager = getAudioManager(guild);
+        ServerAudioManager manager = getAudioManager(guild, true).lastAccessedFrom(msgChannel);
 
         PLAYER_MANAGER.loadItemOrdered(manager, url, new AudioLoadResultHandler() {
             @Override
@@ -85,7 +85,7 @@ public class PorkAudio {
                 builder.addField("URI", String.valueOf(info.uri), false);
                 msgChannel.sendMessage(builder.build()).queue();
 
-                manager.connect(dstChannel).scheduler().enqueue(track);
+                manager.connect(dstChannel).lastAccessedFrom(msgChannel).scheduler().enqueue(track);
             }
 
             @Override

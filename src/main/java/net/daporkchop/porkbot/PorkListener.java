@@ -16,10 +16,15 @@
 
 package net.daporkchop.porkbot;
 
+import net.daporkchop.porkbot.audio.PorkAudio;
+import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -40,6 +45,18 @@ public class PorkListener extends ListenerAdapter {
             }
         } else if (message.startsWith("..")) {
             CommandRegistry.runCommand(event, message);
+        }
+    }
+
+    @Override
+    public void onGuildVoiceUpdate(@Nonnull GuildVoiceUpdateEvent event) {
+        if (event.getChannelLeft() != null) {
+            ServerAudioManager manager = PorkAudio.getAudioManager(event.getChannelLeft().getGuild(), false);
+            VoiceChannel connectedChannel = manager == null ? null : manager.connectedChannel();
+            if (connectedChannel != null && connectedChannel.getMembers().size() == 1) {
+                //we're the only one left in the channel
+                manager.handleAllLeft();
+            }
         }
     }
 }
