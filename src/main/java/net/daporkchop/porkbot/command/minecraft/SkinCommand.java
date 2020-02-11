@@ -61,10 +61,11 @@ public final class SkinCommand extends Command {
                     MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a paid Java Edition user?", evt.getChannel());
                 } else {
                     EmbedBuilder builder = new EmbedBuilder();
+                    builder.setAuthor(args[1] + "'s skin", null, Constants.BASE_URL + "/api/mc/skin/face/" + uuid + ".png");
                     builder.setImage(this.target + uuid + ".png");
                     builder.setColor(Color.DARK_GRAY);
 
-                    builder.addField(args[1] + "'s skin", "", false);
+                    //builder.addField(args[1] + "'s skin", "", false);
 
                     MessageUtils.sendMessage(builder, evt.getChannel());
                 }

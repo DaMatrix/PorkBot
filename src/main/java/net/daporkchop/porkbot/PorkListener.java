@@ -17,6 +17,7 @@
 package net.daporkchop.porkbot;
 
 import net.daporkchop.porkbot.command.CommandRegistry;
+import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -33,8 +34,12 @@ public class PorkListener extends ListenerAdapter {
         }
         String message = event.getMessage().getContentRaw();
 
-        if (message.startsWith(",,")) {
-            CommandRegistry.runCommand(event, message.replaceFirst(",,", ".."));
+        if (Constants.TEST) {
+            if (message.startsWith(",,")) {
+                CommandRegistry.runCommand(event, message.replaceFirst(",,", ".."));
+            }
+        } else if (message.startsWith("..")) {
+            CommandRegistry.runCommand(event, message);
         }
     }
 }

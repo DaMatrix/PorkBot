@@ -70,7 +70,6 @@ public class PorkBot {
             }
         }, 1000, 120000);
 
-
         //bot
         CommandRegistry.registerCommand(new CommandBotInfo());
         CommandRegistry.registerCommand(new CommandCommandInfo());
@@ -84,7 +83,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
 
-        new SkinCommand.SkinApiMethod("face", "/avatars/%s?size=256&default=MHF_Steve&overlay");
+        new SkinCommand.SkinApiMethod("face", "/avatars/%s?size=128&default=MHF_Steve&overlay");
         new SkinCommand.SkinApiMethod("head", "/renders/head/%s?scale=10&default=MHF_Steve&overlay");
         new SkinCommand.SkinApiMethod("body", "/renders/body/%s?scale=10&default=MHF_Steve&overlay");
         new SkinCommand.SkinApiMethod("raw", "/skins/%s?default=MHF_Steve");
