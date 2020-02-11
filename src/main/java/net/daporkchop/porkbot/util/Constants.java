@@ -17,6 +17,7 @@
 package net.daporkchop.porkbot.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -24,13 +25,13 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class Constants {
-    public final boolean TEST = Boolean.valueOf(System.getProperty("porkbot.test", "false"));
-
-    public final String BASE_URL = TEST ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
+    public final boolean DEV_MODE = Boolean.valueOf(System.getProperty("porkbot.dev", "false"));
 
     public final Gson GSON = new Gson();
+    public final JsonParser JSON_PARSER = new JsonParser();
 
     public final String UUID_CAPTURE = "([0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12})";
 
-    public final String COMMAND_PREFIX = TEST ? ",," : "..";
+    public final String BASE_URL              = DEV_MODE ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
+    public final String COMMAND_PREFIX        = DEV_MODE ? ",," : "..";
 }

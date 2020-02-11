@@ -16,6 +16,12 @@
 
 package net.daporkchop.porkbot.util;
 
+import lombok.experimental.UtilityClass;
+import net.daporkchop.lib.binary.oio.StreamUtil;
+import net.daporkchop.lib.binary.oio.appendable.PAppendable;
+import net.daporkchop.lib.binary.oio.writer.UTF8FileWriter;
+import net.daporkchop.lib.common.misc.file.PFiles;
+import net.daporkchop.lib.logging.Logging;
 import net.daporkchop.porkbot.PorkListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
@@ -23,60 +29,97 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Scanner;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+@UtilityClass
 public class ShardUtils {
-    private static ShardManager manager;
+    private static ShardManager MANAGER;
 
-    static {
-        System.out.println("Starting shards...");
+    public synchronized void start() {
+        if (MANAGER != null) {
+            throw new IllegalStateException("Already started!");
+        }
+
+        Logging.logger.info("Starting shards...");
         try {
-            manager = new DefaultShardManagerBuilder().setToken(KeyGetter.getToken())
+            MANAGER = new DefaultShardManagerBuilder().setToken(loadToken())
                     .setShardsTotal(-1)
                     .addEventListeners(new PorkListener())
                     .setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"))
                     .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE))
                     .build();
-        } catch (Throwable t) {
-            t.printStackTrace();
-            System.exit(1);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to start ShardManager!", e);
         }
-        System.out.println("Shards started!");
+        Logging.logger.success("Shards started!");
     }
 
-    public static void loadClass() {
+    public synchronized void shutdown() {
+        if (MANAGER == null)    {
+            throw new IllegalStateException("Not running!");
+        }
+
+        MANAGER.shutdown();
+        MANAGER = null;
     }
 
-    public static void forEachGuild(Consumer<Guild> consumer) {
+    public void forEachGuild(Consumer<Guild> consumer) {
         if (consumer == null) return;
-        manager.getGuilds().forEach(consumer);
+        MANAGER.getGuilds().forEach(consumer);
     }
 
-    public static int getGuildCount() {
-        return (int) manager.getGuildCache().size();
+    public int getGuildCount() {
+        return (int) MANAGER.getGuildCache().size();
     }
 
-    public static int getUserCount() {
-        AtomicInteger i = new AtomicInteger(0);
-        manager.getShards().forEach(jda -> {
-            i.addAndGet(jda.getUsers().size());
-        });
-        return i.get();
+    public long getUserCount() {
+        return MANAGER == null ? -1L : MANAGER.getShards().stream()
+                .map(JDA::getUserCache)
+                .mapToLong(SnowflakeCacheView::size)
+                .sum();
     }
 
-    public static void forEachShard(Consumer<JDA> consumer) {
-        if (consumer == null) return;
-        manager.getShards().forEach(consumer);
+    public Stream<JDA> getShards() {
+        return MANAGER == null ? Stream.empty() : MANAGER.getShards().stream();
     }
 
-    public static int getShardCount() {
-        return manager.getShardsTotal();
+    public long getShardCount() {
+        return MANAGER == null ? -1L : MANAGER.getShardsTotal();
     }
 
-    public static void shutdown() {
-        manager.shutdown();
+    private String loadToken()   {
+        try {
+            File tokenFile = new File("discordtoken.txt");
+            if (PFiles.checkFileExists(tokenFile) && tokenFile.length() > 0L)   {
+                try (InputStream in = new FileInputStream(tokenFile))   {
+                    return new String(StreamUtil.toByteArray(in), StandardCharsets.UTF_8).trim();
+                }
+            } else {
+                String token;
+                try (Scanner scanner = new Scanner(System.in))  {
+                    System.out.print("Enter your discord bot token: ");
+                    System.out.flush();
+                    token = scanner.nextLine().trim();
+                }
+                try (PAppendable out = new UTF8FileWriter(PFiles.ensureFileExists(tokenFile)))  {
+                    out.appendLn(token);
+                }
+                return token;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

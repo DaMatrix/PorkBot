@@ -41,6 +41,8 @@ public class PorkListener extends ListenerAdapter {
 
         if (message.startsWith(Constants.COMMAND_PREFIX))   {
             CommandRegistry.runCommand(event, message);
+        } else {
+            PorkAudio.checkSearchResponse(event, message);
         }
     }
 

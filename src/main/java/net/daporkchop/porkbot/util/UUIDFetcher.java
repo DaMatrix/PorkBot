@@ -17,11 +17,12 @@ package net.daporkchop.porkbot.util;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import lombok.NonNull;
+import net.daporkchop.lib.common.pool.handle.Handle;
+import net.daporkchop.lib.common.util.PorkUtil;
+import net.daporkchop.lib.http.Http;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,21 +35,41 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class UUIDFetcher extends Thread {
-    private static final int                                       PROFILES_PER_REQUEST = 10;
-    private static final URL                                       PROFILE_URL          = HTTPUtils.constantURL("https://api.mojang.com/profiles/minecraft");
-    private static final JsonParser                                jsonParser           = new JsonParser();
-    private static final Cache<String, String>                     CACHE                = CacheBuilder.newBuilder()
-            .maximumSize(5000L)
-            .expireAfterAccess(1L, TimeUnit.DAYS)
-            .build();
-    private static final Map<String, Collection<Consumer<String>>> PENDING              = new HashMap<>();
-    private static final String                                    EMPTY_UUID           = "8667ba71b85a4004af54457a9734eed7";
+public final class UUIDFetcher extends Thread {
+    private static final int    PROFILES_PER_REQUEST = 10;
+    private static final String PROFILE_URL          = "https://api.mojang.com/profiles/minecraft";
+    private static final String EMPTY_UUID           = "8667ba71b85a4004af54457a9734eed7";
 
-    public static UUID getUUID(String id) {
-        return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32));
+    private static final Cache<String, String> CACHE = CacheBuilder.newBuilder()
+            .maximumSize(5000L)
+            .expireAfterWrite(1L, TimeUnit.DAYS)
+            .build();
+
+    private static final Map<String, Collection<Consumer<String>>> PENDING = new HashMap<>();
+
+    public static UUID getUUID(@NonNull String id) {
+        if (id.length() == 32) {
+            char[] old = PorkUtil.unwrap(id);
+            try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {
+                StringBuilder builder = handle.value();
+                builder.setLength(0);
+
+                builder.append(old, 0, 8).append('-')
+                        .append(old, 8, 4).append('-')
+                        .append(old, 12, 4).append('-')
+                        .append(old, 16, 4).append('-')
+                        .append(old, 20, 12);
+
+                return UUID.fromString(builder.toString());
+            }
+        } else if (id.length() == 32 + 4)   {
+            return UUID.fromString(id);
+        } else {
+            throw new IllegalArgumentException(id);
+        }
     }
 
     public static void enqueueRequest(String name, Consumer<String> callback) {
@@ -85,10 +106,9 @@ public class UUIDFetcher extends Thread {
                     for (Iterator<String> i = PENDING.keySet().iterator(); i.hasNext() && nameBuf.size() < PROFILES_PER_REQUEST; ) {
                         nameBuf.add(i.next());
                     }
-                    StreamSupport.stream(jsonParser.parse(HTTPUtils.performPostRequest(
+                    StreamSupport.stream(Constants.JSON_PARSER.parse(Http.postJsonString(
                             PROFILE_URL,
-                            nameBuf.stream().collect(Collector.of(() -> new StringJoiner("\",\"", "[\"", "\"]"), StringJoiner::add, StringJoiner::merge, StringJoiner::toString)),
-                            "application/json"
+                            nameBuf.stream().collect(Collectors.joining("\",\"", "[\"", "\"]"))
                     )).getAsJsonArray().spliterator(), false)
                             .map(JsonElement::getAsJsonObject)
                             .forEach(obj -> {

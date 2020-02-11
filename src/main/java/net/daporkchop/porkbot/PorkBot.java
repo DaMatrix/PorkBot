@@ -16,9 +16,16 @@
 
 package net.daporkchop.porkbot;
 
+import io.netty.util.concurrent.DefaultEventExecutor;
+import io.netty.util.concurrent.EventExecutorGroup;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import net.daporkchop.lib.common.function.io.IORunnable;
 import net.daporkchop.lib.common.util.PorkUtil;
+import net.daporkchop.lib.logging.Logging;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.audio.CommandPlay;
+import net.daporkchop.porkbot.command.audio.CommandQueue;
 import net.daporkchop.porkbot.command.audio.CommandShuffle;
 import net.daporkchop.porkbot.command.audio.CommandSkip;
 import net.daporkchop.porkbot.command.audio.CommandStop;
@@ -45,36 +52,25 @@ import net.daporkchop.porkbot.web.PorkBotWebServer;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PorkBot {
-    public static PorkBot INSTANCE;
+    public static final PorkBot INSTANCE = new PorkBot();
 
-    public static Timer            TIMER      = new Timer();
-    public static PorkBotWebServer WEB_SERVER = new PorkBotWebServer();
+    public static final EventExecutorGroup SCHEDULED_EXECUTOR      = new DefaultEventExecutor();
+    public static final PorkBotWebServer   WEB_SERVER = new PorkBotWebServer();
 
     public static void main(String[] args) {
-        INSTANCE = new PorkBot();
         INSTANCE.start();
-    }
-
-    public PorkBot() {
-        ShardUtils.loadClass();
     }
 
     public void start() {
         UUIDFetcher.init();
-        //AudioUtils.init();
 
-        //final String authToken = KeyGetter.getAuthtoken();
+        SCHEDULED_EXECUTOR.scheduleAtFixedRate((IORunnable) CommandRegistry::save, 1L, 1L, TimeUnit.HOURS);
 
-        TIMER.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                CommandRegistry.save();
-            }
-        }, 1000, 120000);
-
-        //bot
+        //general
         CommandRegistry.registerCommand(new CommandBotInfo());
         CommandRegistry.registerCommand(new CommandCommandInfo());
         CommandRegistry.registerCommand(new CommandHelp());
@@ -119,23 +115,31 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandInterject());
         CommandRegistry.registerCommand(new CommandShutdown());
 
-        //music
+        //audio
         CommandRegistry.registerCommand(new CommandPlay());
+        CommandRegistry.registerCommand(new CommandQueue());
         CommandRegistry.registerCommand(new CommandShuffle());
         CommandRegistry.registerCommand(new CommandSkip());
         CommandRegistry.registerCommand(new CommandStop());
         //CommandRegistry.registerCommand(new CommandPlayAll());
         //CommandRegistry.registerCommand(new CommandQueue());
         //CommandRegistry.registerCommand(new CommandStop());
+
+        ShardUtils.start();
     }
 
     public void shutdown() {
-        WEB_SERVER.shutdown();
-        CommandRegistry.save();
+        Logging.logger.info("Shutting down shard manager...");
         ShardUtils.shutdown();
-        PorkBot.TIMER.cancel();
-        PorkBot.TIMER.purge();
-        PorkUtil.sleep(2000L);
+        Logging.logger.info("Shutting down webserver...");
+        WEB_SERVER.shutdown();
+        Logging.logger.info("Shutting down scheduled task executor...");
+        SCHEDULED_EXECUTOR.shutdownGracefully().syncUninterruptibly();
+        Logging.logger.info("Saving command data...");
+        CommandRegistry.save();
+
+        Logging.logger.info("Exiting...");
+        PorkUtil.sleep(1000L);
         System.exit(0);
     }
 }

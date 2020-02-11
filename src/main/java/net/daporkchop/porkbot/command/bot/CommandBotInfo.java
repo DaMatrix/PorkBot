@@ -23,53 +23,39 @@ import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class CommandBotInfo extends Command {
-
     public CommandBotInfo() {
         super("botinfo");
     }
 
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.BLUE);
-        builder.setTitle("**PorkBot info**", "http://www.daporkchop.net/porkbot");
-
-        builder.setThumbnail("https://www.daporkchop.net/toembed/profilepic-512p.gif");
-
-        builder.addField("Name:", "PorkBot#" + evt.getJDA().getSelfUser().getDiscriminator(), true);
-
-        builder.addField("Total servers:", String.valueOf(ShardUtils.getGuildCount()), true);
-
-        builder.addField("Total users:", String.valueOf(ShardUtils.getUserCount()), true);
-
-        builder.addField("ID:", evt.getJDA().getSelfUser().getId(), true);
-
-        builder.addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true);
-
-        builder.addField("Commands all time:", String.valueOf(CommandRegistry.COMMAND_COUNT_TOTAL), true);
-
-        builder.addField("Used RAM:", ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB", false);
-
-        builder.addField("", "**SHARD INFO**", false);
-
-        builder.addField("Shard #:", String.valueOf(evt.getJDA().getShardInfo().getShardId()), true);
-        builder.addField("Shard servers:", String.valueOf(evt.getJDA().getGuilds().size()), true);
-
-        builder.addField("Shard users:", String.valueOf(evt.getJDA().getUsers().size()), true);
-
-        MessageUtils.sendMessage(builder, evt.getChannel());
+        MessageUtils.sendMessage(new EmbedBuilder().setColor(Color.BLUE)
+                        .setAuthor("PorkBot", "https://www.daporkchop.net/porkbot", "https://www.daporkchop.net/toembed/profilepic-64p.gif")
+                        .addField("Name:", "PorkBot#" + evt.getJDA().getSelfUser().getDiscriminator(), true)
+                        .addField("Total servers:", String.valueOf(ShardUtils.getGuildCount()), true)
+                        .addField("Total users:", String.valueOf(ShardUtils.getUserCount()), true)
+                        .addField("ID:", evt.getJDA().getSelfUser().getId(), true)
+                        .addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true)
+                        .addField("Commands all time:", String.valueOf(CommandRegistry.COMMAND_COUNT_TOTAL), true)
+                        .addField("Used RAM:", ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB", true)
+                        .addField("Total shards:", String.valueOf(ShardUtils.getShardCount()), true)
+                        .addField("", "**SHARD INFO**", false)
+                        .addField("Shard #:", String.valueOf(evt.getJDA().getShardInfo().getShardId()), true)
+                        .addField("Shard servers:", String.valueOf(evt.getJDA().getGuilds().size()), true)
+                        .addField("Shard users:", String.valueOf(evt.getJDA().getUsers().size()), true),
+                evt.getChannel());
     }
 
     @Override
     public String getUsage() {
-        return "..ping";
+        return "..botinfo";
     }
 
     @Override
     public String getUsageExample() {
-        return "..ping";
+        return "..botinfo";
     }
 }
