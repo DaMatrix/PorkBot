@@ -92,6 +92,7 @@ public class PorkBot {
         CommandRegistry.registerCommand(new SkinCommand("mcskin", "body"));
         CommandRegistry.registerCommand(new SkinCommand("skinsteal", "raw"));
 
+        PorkBot.WEB_SERVER.register("/api/mc/favicon", new JavaPing.FaviconApiMethod());
         CommandRegistry.registerCommand(new JavaPing("mcping", JavaPing.FLAG_ALL));
         CommandRegistry.registerCommand(new JavaPing("mcmotd", JavaPing.FLAG_MOTD));
         CommandRegistry.registerCommand(new JavaPing("mccount", JavaPing.FLAG_COUNT));

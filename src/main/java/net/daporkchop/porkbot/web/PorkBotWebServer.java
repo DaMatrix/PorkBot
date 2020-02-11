@@ -67,7 +67,7 @@ public final class PorkBotWebServer implements ServerHandler {
     public void handleQuery(@NonNull Query query) throws Exception {
         if (query.method() != HttpMethod.GET) {
             throw StatusCodes.METHOD_NOT_ALLOWED.exception();
-        } else if ((query.fragment() != null && !query.fragment().isEmpty()) || !query.params().isEmpty()) {
+        } else if ((query.fragment() != null && !query.fragment().isEmpty())) {
             throw StatusCodes.BAD_REQUEST.exception();
         }
     }

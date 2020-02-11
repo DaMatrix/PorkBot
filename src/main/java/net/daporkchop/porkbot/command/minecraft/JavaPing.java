@@ -16,14 +16,32 @@
 
 package net.daporkchop.porkbot.command.minecraft;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import lombok.NonNull;
+import net.daporkchop.lib.binary.oio.StreamUtil;
+import net.daporkchop.lib.http.entity.content.type.ContentType;
+import net.daporkchop.lib.http.server.ResponseBuilder;
+import net.daporkchop.lib.http.util.StatusCodes;
+import net.daporkchop.lib.http.util.URLEncoding;
+import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
+import net.daporkchop.porkbot.web.ApiMethod;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author DaPorkchop_
@@ -62,38 +80,26 @@ public final class JavaPing extends Command {
                 //server's online
                 builder.setColor(Color.GREEN);
 
-                if ((this.flags & FLAG_COUNT) != 0)   {
-                    builder.addField(
-                            "Player count:",
-                            String.format("%d/%d", java.onlinePlayers, java.maxPlayers),
-                            true
-                    );
+                if ((this.flags & FLAG_COUNT) != 0) {
+                    builder.addField("Player count:", String.format("%d/%d", java.onlinePlayers, java.maxPlayers), true);
                 }
-                if ((this.flags & FLAG_LATENCY) != 0)   {
-                    builder.addField(
-                            "Latency:",
-                            String.format("%d ms", java.latency),
-                            true
-                    );
+                if ((this.flags & FLAG_LATENCY) != 0) {
+                    builder.addField("Latency:", String.format("%d ms", java.latency), true);
                 }
-                if ((this.flags & FLAG_VERSION) != 0)   {
-                    builder.addField(
-                            "Version:",
-                            String.format("%s (Protocol %d)", java.version, java.protocol),
-                            true
-                    );
+                if ((this.flags & FLAG_VERSION) != 0) {
+                    builder.addField("Version:", String.format("%s (Protocol %d)", java.version, java.protocol), true);
                 }
-                if ((this.flags & FLAG_MOTD) != 0)   {
-                    builder.addField(
-                            "MOTD:",
-                            java.motd,
-                            true
-                    );
+                if ((this.flags & FLAG_MOTD) != 0) {
+                    builder.addField("MOTD:", java.motd, true);
                 }
-                if ((this.flags & FLAG_FAVICON) != 0)   {
-                    builder.setThumbnail("attachment://favicon.png");
-                    MessageUtils.sendImage(builder, Base64.getDecoder().decode(java.favicon), "favicon.png", evt.getChannel());
-                    return;
+
+                FaviconApiMethod.FAVICON_CACHE.put(
+                        new InetSocketAddress(ipPort[0], ipPort.length == 1 ? 25565 : Integer.parseInt(ipPort[1])),
+                        java.favicon != null ? Base64.getDecoder().decode(java.favicon) : FaviconApiMethod.DEFAULT_FAVICON
+                );
+                if ((this.flags & FLAG_FAVICON) != 0) {
+                    String host = URLEncoding.encode(ipPort[0] + ':' + (ipPort.length == 1 ? "25565" : ipPort[1]));
+                    builder.setThumbnail(Constants.BASE_URL + "/api/mc/favicon/" + host + ".png");
                 }
             } else {
                 //server's offline
@@ -116,5 +122,47 @@ public final class JavaPing extends Command {
     @Override
     public String getUsageExample() {
         return String.format("..%s 2b2t.org", this.prefix);
+    }
+
+    public static final class FaviconApiMethod implements ApiMethod {
+        private static final Pattern PATTERN = Pattern.compile("^/api/mc/favicon/([^:]+):([0-9]{1,5})\\.png$");
+
+        private static final LoadingCache<InetSocketAddress, byte[]> FAVICON_CACHE = CacheBuilder.newBuilder()
+                .softValues()
+                .expireAfterWrite(1L, TimeUnit.HOURS)
+                .build(new CacheLoader<InetSocketAddress, byte[]>() {
+                    @Override
+                    public byte[] load(InetSocketAddress key) throws Exception {
+                        MCPing.Java java = MCPing.pingPc(key.getHostName(), key.getPort()).get();
+                        if (java.favicon != null) {
+                            return Base64.getDecoder().decode(java.favicon);
+                        } else {
+                            return DEFAULT_FAVICON;
+                        }
+                    }
+                });
+
+        private static final ContentType PNG_TYPE = ContentType.of("image/png");
+
+        private static final byte[] DEFAULT_FAVICON;
+
+        static {
+            try (InputStream in = PorkBot.class.getResourceAsStream("/defaultfavicon.png")) {
+                DEFAULT_FAVICON = StreamUtil.toByteArray(in);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void handle(@NonNull String path, @NonNull ResponseBuilder response) throws Exception {
+            Matcher matcher = PATTERN.matcher(path);
+            if (!matcher.find()) {
+                throw StatusCodes.BAD_REQUEST.exception();
+            }
+
+            response.status(StatusCodes.OK)
+                    .body(PNG_TYPE, FAVICON_CACHE.get(new InetSocketAddress(matcher.group(1), Integer.parseUnsignedInt(matcher.group(2)))));
+        }
     }
 }

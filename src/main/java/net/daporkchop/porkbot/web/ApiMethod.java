@@ -18,6 +18,8 @@ package net.daporkchop.porkbot.web;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import net.daporkchop.lib.http.header.map.HeaderMap;
+import net.daporkchop.lib.http.request.query.Query;
 import net.daporkchop.lib.http.server.ResponseBuilder;
 
 /**
