@@ -16,6 +16,7 @@
 
 package net.daporkchop.porkbot.command;
 
+import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ObjectDB;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -72,7 +73,7 @@ public abstract class CommandRegistry {
         try {
             try {
                 String[] split = rawContent.split(" ");
-                Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
+                Command cmd = COMMANDS.getOrDefault(split[0].substring(Constants.COMMAND_PREFIX.length()), null);
                 if (cmd != null) {
                         evt.getChannel().sendTyping().complete(); //TODO: i don't want to have to wait for this to complete!
                         cmd.execute(evt, split, rawContent);

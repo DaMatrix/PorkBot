@@ -24,14 +24,12 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import gnu.trove.impl.sync.TSynchronizedLongObjectMap;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import net.daporkchop.lib.common.pool.handle.Handle;
+import net.daporkchop.lib.common.util.PorkUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -53,10 +51,10 @@ public class PorkAudio {
         //AudioSourceManagers.registerLocalSource(PLAYER_MANAGER);
     }
 
-    public synchronized ServerAudioManager getAudioManager(@NonNull Guild guild, boolean create)    {
+    public synchronized ServerAudioManager getAudioManager(@NonNull Guild guild, boolean create) {
         ServerAudioManager manager = SERVERS.get(guild.getIdLong());
 
-        if (manager == null && create)    {
+        if (manager == null && create) {
             SERVERS.put(guild.getIdLong(), manager = new ServerAudioManager(guild, PLAYER_MANAGER.createPlayer()));
             guild.getAudioManager().setSendingHandler(manager.sendHandler());
         }
@@ -64,7 +62,7 @@ public class PorkAudio {
         return manager;
     }
 
-    public void addTrackToQueue(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull String url)    {
+    public void addTrackToQueue(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull String url) {
         VoiceChannel dstChannel = requester.getVoiceState().getChannel();
         if (dstChannel == null) {
             msgChannel.sendMessage("You must be in a voice channel to add tracks to the play queue!").queue();
@@ -77,12 +75,10 @@ public class PorkAudio {
             public void trackLoaded(AudioTrack track) {
                 AudioTrackInfo info = track.getInfo();
                 EmbedBuilder builder = new EmbedBuilder();
-                builder.setTitle("Added to queue!", url);
+                builder.setTitle("Added to queue!", info.uri);
                 builder.addField("Title", String.valueOf(info.title), true);
                 builder.addField("Author", String.valueOf(info.author), true);
-                builder.addField("Length", String.format("%d:%d", info.length / 1000L / 60L, info.length / 1000L % 60L), false);
-                builder.addField("Identifier", String.valueOf(info.identifier), true);
-                builder.addField("URI", String.valueOf(info.uri), false);
+                builder.addField("Length", formattedTrackLength(info.length), false);
                 msgChannel.sendMessage(builder.build()).queue();
 
                 manager.connect(dstChannel).lastAccessedFrom(msgChannel).scheduler().enqueue(track);
@@ -90,6 +86,8 @@ public class PorkAudio {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
+                msgChannel.sendMessage("Loaded playlist: " + playlist.getName()).queue();
+                //TODO
             }
 
             @Override
@@ -102,5 +100,23 @@ public class PorkAudio {
                 msgChannel.sendMessage("Unable to find `" + url + "`: " + exception.getMessage()).queue();
             }
         });
+    }
+
+    public String formattedTrackLength(long length) {
+        try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {
+            StringBuilder builder = handle.value();
+            builder.setLength(0);
+
+            long seconds = length / 1000L;
+            long minutes = seconds / 60L;
+            long hours = minutes / 60L;
+
+            if (hours > 0L) {
+                builder.append(hours).append(':');
+            }
+
+            builder.append(minutes % 60L).append(':').append(seconds % 60L);
+            return builder.toString();
+        }
     }
 }

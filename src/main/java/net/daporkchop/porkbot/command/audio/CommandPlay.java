@@ -16,26 +16,54 @@
 
 package net.daporkchop.porkbot.command.audio;
 
+import net.daporkchop.lib.common.cache.Cache;
+import net.daporkchop.lib.common.misc.string.PStrings;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.Constants;
+import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author DaPorkchop_
  */
 public class CommandPlay extends Command {
+    private static final Pattern URL_PATTERN = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play ((?>https?|ftp)://[0-9a-zA-Z-._~:/?#\\[\\]@!$&'()*+,;=%]+)");
+    private static final Cache<Matcher> URL_PATTERN_MATCHER_CACHE = Cache.soft(() -> URL_PATTERN.matcher(""));
+
+    private static final Pattern SEARCH_PATTERN = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (.+)");
+    private static final Cache<Matcher> SEARCH_PATTERN_MATCHER_CACHE = Cache.soft(() -> SEARCH_PATTERN.matcher(""));
+
     public CommandPlay() {
         super("play");
     }
 
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
-        if (args.length < 2 || args[1].isEmpty()) {
-            this.sendErrorMessage(evt.getChannel(), "No track URL or search terms given!");
-            return;
-        }
+        try {
+            if (args.length < 2 || args[1].isEmpty()) {
+                this.sendErrorMessage(evt.getChannel(), "No track URL or search terms given!");
+                return;
+            }
 
-        PorkAudio.addTrackToQueue(evt.getGuild(), evt.getChannel(), evt.getMember(), args[1]);
+            String request;
+            Matcher matcher = URL_PATTERN_MATCHER_CACHE.get().reset(rawContent);
+            if (matcher.matches()) {
+                request = matcher.group(1);
+            } else if ((matcher = SEARCH_PATTERN_MATCHER_CACHE.get()).reset(rawContent).matches()) {
+                request = "ytsearch:" + matcher.group(1);
+            } else {
+                evt.getChannel().sendMessage("Invalid play request?!?").queue();
+                return;
+            }
+
+            PorkAudio.addTrackToQueue(evt.getGuild(), evt.getChannel(), evt.getMember(), request);
+        } catch (Exception e)   {
+            MessageUtils.sendException(e, evt);
+        }
     }
 
     @Override

@@ -31,4 +31,6 @@ public class Constants {
     public final Gson GSON = new Gson();
 
     public final String UUID_CAPTURE = "([0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12})";
+
+    public final String COMMAND_PREFIX = TEST ? ",," : "..";
 }

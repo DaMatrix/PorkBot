@@ -39,11 +39,7 @@ public class PorkListener extends ListenerAdapter {
         }
         String message = event.getMessage().getContentRaw();
 
-        if (Constants.TEST) {
-            if (message.startsWith(",,")) {
-                CommandRegistry.runCommand(event, message.replaceFirst(",,", ".."));
-            }
-        } else if (message.startsWith("..")) {
+        if (message.startsWith(Constants.COMMAND_PREFIX))   {
             CommandRegistry.runCommand(event, message);
         }
     }

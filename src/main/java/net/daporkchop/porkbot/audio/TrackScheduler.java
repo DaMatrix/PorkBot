@@ -56,12 +56,16 @@ public final class TrackScheduler extends AudioEventAdapter {
             return;
         }
 
-        AudioTrack[] tracks = this.queue.toArray(new AudioTrack[this.queue.size()]);
+        AudioTrack[] tracks = this.queue();
         PArrays.shuffle(tracks);
         this.queue.clear();
         for (AudioTrack track : tracks)  {
             this.queue.add(track);
         }
+    }
+
+    public synchronized AudioTrack[] queue()    {
+        return this.queue.toArray(new AudioTrack[this.queue.size()]);
     }
 
     public synchronized void skipAll()  {
