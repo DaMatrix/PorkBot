@@ -38,7 +38,7 @@ public class CommandSkip extends Command {
             evt.getChannel().sendMessage("Must be in the same voice channel!").queue();
         } else {
             evt.getChannel().sendMessage(manager.lastAccessedFrom(evt.getChannel()).scheduler().next()
-                    ? "Skipped to next track in queue!"
+                    ? "Skipped to next track!"
                     : "No tracks left in queue, stopping!").queue();
         }
     }

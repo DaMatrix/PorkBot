@@ -76,7 +76,7 @@ public final class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public synchronized void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if (endReason.mayStartNext && this.next())    {
+        if (endReason == AudioTrackEndReason.REPLACED || endReason.mayStartNext && this.next())    {
             return;
         }
 

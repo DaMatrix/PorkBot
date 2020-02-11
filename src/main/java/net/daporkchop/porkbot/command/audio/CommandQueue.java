@@ -49,6 +49,18 @@ public class CommandQueue extends Command {
                 StringBuilder sb = handle.value();
                 sb.setLength(0);
 
+                {
+                    AudioTrackInfo info = manager.player().getPlayingTrack().getInfo();
+
+                    sb.append('*').append(info.author).append("* - ")
+                        .append(info.title).append(' ');
+
+                    PorkAudio.formattedTrackLength(info.length, sb.append('`')).append('`');
+                }
+
+                builder.addField("Currently playing:", sb.toString(), false);
+                sb.setLength(0);
+
                 for (int i = 0; i < tracks.length; i++) {
                     AudioTrackInfo info = tracks[i].getInfo();
 
@@ -59,8 +71,12 @@ public class CommandQueue extends Command {
                     PorkAudio.formattedTrackLength(info.length, sb.append('`')).append('`').append('\n');
                 }
 
-                sb.setLength(sb.length() - 1);
-                builder.addField("Queue:", sb.toString(), false);
+                if (sb.length() > 0) {
+                    sb.setLength(sb.length() - 1);
+                    builder.addField("Queue:", sb.toString(), false);
+                } else {
+                    builder.addField("Queue:", "*<empty>*", false);
+                }
             }
 
             evt.getChannel().sendMessage(builder.build()).queue();
