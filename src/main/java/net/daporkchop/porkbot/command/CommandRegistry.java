@@ -53,7 +53,7 @@ public abstract class CommandRegistry {
      * @param cmd
      * @return cmd again lul
      */
-    public static final Command registerCommand(Command cmd) {
+    public static Command registerCommand(Command cmd) {
         cmd.uses = command_save.getInteger(cmd.prefix + "_uses", 0);
         COMMANDS.put(cmd.prefix, cmd);
         return cmd;
@@ -71,10 +71,6 @@ public abstract class CommandRegistry {
     private static void doRunCommand(GuildMessageReceivedEvent evt, String rawContent) {
         try {
             try {
-                if (evt.getChannel() == null) {
-                    return;
-                }
-
                 String[] split = rawContent.split(" ");
                 Command cmd = COMMANDS.getOrDefault(split[0].substring(2), null);
                 if (cmd != null) {

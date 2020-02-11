@@ -16,18 +16,15 @@
 
 package net.daporkchop.porkbot.util;
 
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.PorkListener;
-import net.daporkchop.porkbot.command.CommandRegistry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -37,12 +34,12 @@ public class ShardUtils {
     static {
         System.out.println("Starting shards...");
         try {
-            DefaultShardManagerBuilder builder = new DefaultShardManagerBuilder();
-            builder.setToken(KeyGetter.getToken());
-            builder.setShardsTotal(-1);
-            builder.addEventListeners(new PorkListener());
-            builder.setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
-            manager = builder.build();
+            manager = new DefaultShardManagerBuilder().setToken(KeyGetter.getToken())
+                    .setShardsTotal(-1)
+                    .addEventListeners(new PorkListener())
+                    .setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"))
+                    .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE))
+                    .build();
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);
