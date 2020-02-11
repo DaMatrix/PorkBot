@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 DaPorkchop_
+ * Copyright (c) 2016-2020 DaPorkchop_
  *
  * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
  * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
@@ -15,24 +15,22 @@
  */
 package net.daporkchop.porkbot.util.mcpinger.pcping;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+@UtilityClass
 public class MinecraftPingUtil {
+    public final int PROTOCOL_VERSION = 315;
+    public final int STATUS_HANDSHAKE = 1;
 
-    public static byte PACKET_HANDSHAKE = 0x00, PACKET_STATUSREQUEST = 0x00,
-            PACKET_PING = 0x01;
-    public static int PROTOCOL_VERSION = 315;
-    public static int STATUS_HANDSHAKE = 1;
+    public final byte PACKET_HANDSHAKE = 0x00;
+    public final byte PACKET_STATUSREQUEST = 0x00;
+    public final byte PACKET_PING = 0x01;
 
-    public static void validate(final Object o, final String m) {
-        if (o == null) {
-            throw new RuntimeException(m);
-        }
-    }
-
-    public static void io(final boolean b, final String m) throws IOException {
+    public void io(final boolean b, final String m) throws IOException {
         if (b) {
             throw new IOException(m);
         }
@@ -42,7 +40,7 @@ public class MinecraftPingUtil {
      * @author thinkofdeath
      * See: https://gist.github.com/thinkofdeath/e975ddee04e9c87faf22
      */
-    public static int readVarInt(DataInputStream in) throws IOException {
+    public int readVarInt(DataInputStream in) throws IOException {
         int i = 0;
         int j = 0;
         while (true) {
@@ -65,7 +63,7 @@ public class MinecraftPingUtil {
      * @author thinkofdeath
      * See: https://gist.github.com/thinkofdeath/e975ddee04e9c87faf22
      */
-    public static void writeVarInt(DataOutputStream out, int paramInt) throws IOException {
+    public void writeVarInt(DataOutputStream out, int paramInt) throws IOException {
         while (true) {
             if ((paramInt & 0xFFFFFF80) == 0) {
                 out.writeByte(paramInt);
@@ -76,5 +74,4 @@ public class MinecraftPingUtil {
             paramInt >>>= 7;
         }
     }
-
 }
