@@ -26,6 +26,7 @@ import net.daporkchop.lib.logging.Logging;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.audio.CommandOrdered;
 import net.daporkchop.porkbot.command.audio.CommandPlay;
+import net.daporkchop.porkbot.command.audio.CommandPlayList;
 import net.daporkchop.porkbot.command.audio.CommandQueue;
 import net.daporkchop.porkbot.command.audio.CommandShuffled;
 import net.daporkchop.porkbot.command.audio.CommandSkip;
@@ -115,6 +116,7 @@ public class PorkBot {
         //audio
         CommandRegistry.registerCommand(new CommandOrdered());
         CommandRegistry.registerCommand(new CommandPlay());
+        CommandRegistry.registerCommand(new CommandPlayList());
         CommandRegistry.registerCommand(new CommandQueue());
         CommandRegistry.registerCommand(new CommandShuffled());
         CommandRegistry.registerCommand(new CommandSkip());

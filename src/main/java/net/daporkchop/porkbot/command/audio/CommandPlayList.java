@@ -18,14 +18,23 @@ package net.daporkchop.porkbot.command.audio;
 
 import net.daporkchop.lib.common.cache.Cache;
 import net.daporkchop.lib.common.util.PorkUtil;
+import net.daporkchop.lib.http.Http;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.SearchPlatform;
+import net.daporkchop.porkbot.audio.ServerAudioManager;
+import net.daporkchop.porkbot.audio.track.FutureTrack;
+import net.daporkchop.porkbot.audio.track.LateResolvingTrack;
+import net.daporkchop.porkbot.audio.track.LateResolvingTrackGroup;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.Constants;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,14 +42,11 @@ import java.util.regex.Pattern;
  * @author DaPorkchop_
  */
 public class CommandPlayList extends Command {
-    private static final Pattern        URL_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play ((?>https?|ftp)://[0-9a-zA-Z-._~:/?#\\[\\]@!$&'()*+,;=%]+)");
+    private static final Pattern        URL_PATTERN               = Pattern.compile("^((?>https?|ftp)://[0-9a-zA-Z-._~:/?#\\[\\]@!$&'()*+,;=%]+)$", Pattern.MULTILINE);
     private static final Cache<Matcher> URL_PATTERN_MATCHER_CACHE = Cache.soft(() -> URL_PATTERN.matcher(""));
 
-    private static final Pattern        SEARCH_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (?>(?i)(" + String.join("|", SearchPlatform.getAllPlatformNamesAndAliases()) + ")(?-i) )?(.+)");
-    private static final Cache<Matcher> SEARCH_PATTERN_MATCHER_CACHE = Cache.soft(() -> SEARCH_PATTERN.matcher(""));
-
     public CommandPlayList() {
-        super("play");
+        super("playlist");
     }
 
     @Override
@@ -49,35 +55,37 @@ public class CommandPlayList extends Command {
         VoiceChannel dstChannel;
 
         if (args.length < 2 || args[1].isEmpty()) {
-            this.sendErrorMessage(evt.getChannel(), "No track URL or search terms given!");
+            this.sendErrorMessage(evt.getChannel(), "No list URL given!");
         } else if ((dstChannel = evt.getMember().getVoiceState().getChannel()) == null) {
             evt.getChannel().sendMessage("You must be in a voice channel to play audio!").queue();
-        } else if ((matcher = URL_PATTERN_MATCHER_CACHE.get().reset(rawContent)).matches()) {
-            PorkAudio.addTrackByURL(evt.getGuild(), evt.getChannel(), evt.getMember(), matcher.group(1), dstChannel);
+        } else if ((matcher = URL_PATTERN_MATCHER_CACHE.get().reset(args[1])).matches()) {
+            try {
+                matcher.reset(Http.getString(args[1]));
 
-            if (evt.getGuild().getMember(evt.getJDA().getSelfUser()).hasPermission(evt.getChannel(), Permission.MESSAGE_MANAGE)) {
-                evt.getMessage().suppressEmbeds(true).queue();
-            }
-        } else if ((matcher = SEARCH_PATTERN_MATCHER_CACHE.get()).reset(rawContent).matches()) {
-            SearchPlatform platform = SearchPlatform.from(PorkUtil.fallbackIfNull(matcher.group(1), SearchPlatform.YOUTUBE.name()));
-            if (platform == null)   {
-                evt.getChannel().sendMessage("Unknown platform: `" + matcher.group(1) + '`').queue();
-            } else {
-                PorkAudio.addTrackBySearch(evt.getGuild(), evt.getChannel(), evt.getMember(), platform, matcher.group(2), dstChannel);
+                Queue<LateResolvingTrack> tracks = new LinkedList<>();
+                while (matcher.find())  {
+                    tracks.add(new LateResolvingTrack(matcher.group(1), dstChannel));
+                }
+                PorkAudio.getAudioManager(evt.getGuild(), true).lastAccessedFrom(evt.getChannel()).scheduler().enqueueAll((Collection<FutureTrack>) (Object) tracks);
+
+                new LateResolvingTrackGroup(tracks).run();
+
+                evt.getChannel().sendMessage("Enqueued " + tracks.size() + " tracks!").queue();
+            } catch (Exception e)   {
+                evt.getChannel().sendMessage("Unable to fetch or parse list!").queue();
             }
         } else {
-            throw new IllegalStateException();
+            this.sendErrorMessage(evt.getChannel(), "Invalid URL!");
         }
-
     }
 
     @Override
     public String getUsage() {
-        return "..play <url or YouTube search terms>";
+        return "..playlist <url>";
     }
 
     @Override
     public String getUsageExample() {
-        return "..play https://cloud.daporkchop.net/random/music/DBOYD/DBOYD%20-%20Lazy%20Dayze.mp3";
+        return "..playlist https://cloud.daporkchop.net/random/music/httplist.txt";
     }
 }

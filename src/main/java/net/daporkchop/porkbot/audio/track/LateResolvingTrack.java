@@ -25,6 +25,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import net.daporkchop.lib.unsafe.PUnsafe;
+import net.daporkchop.porkbot.audio.PorkAudio;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
 import java.util.LinkedList;
@@ -41,13 +42,33 @@ public final class LateResolvingTrack implements FutureTrack, AudioLoadResultHan
     private       List<BiConsumer<AudioTrack, Throwable>> listeners;
     private       Object                                  track;
 
+    private String url;
+
     public LateResolvingTrack(@NonNull String url, @NonNull VoiceChannel requestedIn) {
         this.requestedIn = requestedIn;
+        this.url = url;
+    }
+
+    public synchronized void start() {
+        if (this.url == null) {
+            return;
+        }
+
+        //PorkAudio.PLAYER_MANAGER.loadItemOrdered(PorkAudio.getAudioManager(requestedIn.getGuild(), true), url, this);
+        PorkAudio.PLAYER_MANAGER.loadItem(this.url, this);
+
+        this.url = null;
+    }
+
+    public synchronized int listeners() {
+        return this.listeners == null ? 0 : this.listeners.size();
     }
 
     @Override
     public synchronized AudioTrackInfo getInfo() {
-        return this.track instanceof AudioTrack ? ((AudioTrack) this.track).getInfo() : UNKNOWN_INFO;
+        return this.track instanceof AudioTrack
+                ? ((AudioTrack) this.track).getInfo()
+                : this.track == null ? UNKNOWN_INFO : FAILED_INFO;
     }
 
     @Override

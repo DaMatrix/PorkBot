@@ -57,7 +57,7 @@ import java.util.concurrent.TimeUnit;
  */
 @UtilityClass
 public class PorkAudio {
-    private final AudioPlayerManager PLAYER_MANAGER = new DefaultAudioPlayerManager();
+    public final AudioPlayerManager PLAYER_MANAGER = new DefaultAudioPlayerManager();
 
     private final Map<Long, ServerAudioManager> SERVERS = new HashMap<>();
 
@@ -102,7 +102,7 @@ public class PorkAudio {
             return;
         }
 
-        PLAYER_MANAGER.loadItemOrdered(manager, url, new FromURLLoadResultHandler(msgChannel, dstChannel, manager, url));
+        PLAYER_MANAGER.loadItem(url, new FromURLLoadResultHandler(msgChannel, dstChannel, manager, url));
     }
 
     public void addTrackBySearch(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query, @NonNull VoiceChannel dstChannel) {
@@ -192,8 +192,8 @@ public class PorkAudio {
     public EmbedBuilder embed(@NonNull AudioTrack track, @NonNull EmbedBuilder builder) {
         AudioTrackInfo info = track.getInfo();
         return builder
-                .addField("Title", String.valueOf(info.title), true)
-                .addField("Author", String.valueOf(info.author), true)
+                .addField("Title", Constants.escape(String.valueOf(info.title)), true)
+                .addField("Author", Constants.escape(String.valueOf(info.author)), true)
                 .addField("Length", formattedTrackLength(info.length), true);
     }
 
@@ -234,17 +234,17 @@ public class PorkAudio {
     public StringBuilder appendTrackInfo(@NonNull AudioTrackInfo info, @NonNull StringBuilder builder) {
         builder.append('*');
         if (info.author.length() + info.title.length() >= Constants.MAX_NAME_LENGTH) {
-            builder.append(info.author, 0, Math.min(Constants.MAX_NAME_LENGTH - 6, info.author.length()));
+            Constants.appendEscaped(builder, info.author, 0, Math.min(Constants.MAX_NAME_LENGTH - 6, info.author.length()));
             if (info.author.length() >= Constants.MAX_NAME_LENGTH - 6) {
                 builder.append("...* - ...");
             } else {
-                builder.append("* - ")
-                        .append(info.title, 0, Math.min(Constants.MAX_NAME_LENGTH - 3 - info.author.length(), info.title.length()))
-                        .append("...");
+                builder.append("* - ");
+                Constants.appendEscaped(builder, info.title, 0, Math.min(Constants.MAX_NAME_LENGTH - 3 - info.author.length(), info.title.length()));
+                builder.append("...");
             }
         } else {
-            builder.append('*').append(info.author).append("* - ")
-                    .append(info.title);
+            Constants.appendEscaped(builder, info.author);
+            Constants.appendEscaped(builder.append("* - "), info.title);
         }
 
         return formattedTrackLength(info.length, builder.append(' '));

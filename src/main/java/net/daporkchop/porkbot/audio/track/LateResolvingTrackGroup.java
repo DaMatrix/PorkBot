@@ -17,50 +17,38 @@
 package net.daporkchop.porkbot.audio.track;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import com.sedmelluq.discord.lavaplayer.track.info.AudioTrackInfoBuilder;
 import lombok.NonNull;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import lombok.RequiredArgsConstructor;
+import net.daporkchop.porkbot.PorkBot;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Queue;
 import java.util.function.BiConsumer;
 
 /**
- * An audio track that may or may not have been resolved yet.
- *
  * @author DaPorkchop_
  */
-public interface FutureTrack {
-    AudioTrackInfo UNKNOWN_INFO = AudioTrackInfoBuilder.empty().build();
-    AudioTrackInfo FAILED_INFO = AudioTrackInfoBuilder.empty().setTitle("Failed to load").build();
+@RequiredArgsConstructor
+public final class LateResolvingTrackGroup implements Runnable {
+    @NonNull
+    private final Queue<LateResolvingTrack> tracks;
 
-    /**
-     * @return the {@link VoiceChannel} that the track was requested to be played in
-     */
-    VoiceChannel requestedIn();
+    @Override
+    public synchronized void run()    {
+        if (this.tracks.isEmpty())  {
+            return;
+        }
 
-    /**
-     * @return gets the track's {@link AudioTrackInfo}, or {@link #UNKNOWN_INFO} if it hasn't been resolved yet
-     */
-    AudioTrackInfo getInfo();
+        LateResolvingTrack track = this.tracks.stream()
+                .max(Comparator.comparingInt(LateResolvingTrack::listeners))
+                .get();
 
-    /**
-     * @return whether or not this track has been resolved
-     */
-    boolean isResolved();
+        track.start();
+        track.whenResolved((realTrack, t) -> {
+            this.tracks.remove(track);
 
-    /**
-     * @return whether or not this track has been resolved successfully
-     */
-    boolean isSuccess();
-
-    /**
-     * Runs the given callback function as soon as this track has been resolved.
-     * <p>
-     * If the track has already been resolved, this method may be run on the calling thread in a blocking manner.
-     *
-     * @param callback the function to run
-     */
-    void whenResolved(@NonNull BiConsumer<AudioTrack, Throwable> callback);
-
-    AudioTrack getNow();
+            PorkBot.SCHEDULED_EXECUTOR.submit(this);
+        });
+    }
 }

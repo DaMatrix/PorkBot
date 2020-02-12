@@ -18,7 +18,14 @@ package net.daporkchop.porkbot.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import net.daporkchop.lib.common.cache.Cache;
+import net.daporkchop.lib.common.pool.handle.Handle;
+import net.daporkchop.lib.common.util.PorkUtil;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author DaPorkchop_
@@ -35,6 +42,43 @@ public class Constants {
     public final String BASE_URL       = DEV_MODE ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
     public final String COMMAND_PREFIX = DEV_MODE ? ",," : "..";
 
+    public final Pattern        ESCAPE_PATTERN       = Pattern.compile("([*_~`()\\[\\]])");
+    public final Cache<Matcher> ESCAPE_MATCHER_CACHE = Cache.soft(() -> ESCAPE_PATTERN.matcher(""));
+
     public final int MAX_SEARCH_RESULTS = 5;
-    public final int MAX_NAME_LENGTH = 50;
+    public final int MAX_NAME_LENGTH    = 50;
+
+    public String escape(@NonNull String src)   {
+        try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get())  {
+            StringBuilder builder = handle.value();
+            builder.setLength(0);
+
+            appendEscaped(builder, src);
+            return builder.toString();
+        }
+    }
+
+    public void appendEscaped(@NonNull StringBuilder builder, @NonNull String src)   {
+        appendEscaped(builder, src, 0, src.length());
+    }
+
+    public void appendEscaped(@NonNull StringBuilder builder, @NonNull String src, int start, int length)   {
+        PorkUtil.assertInRangeLen(src.length(), start, length);
+        for (int i = 0; i < length; i++)    {
+            char c = src.charAt(start + i);
+            switch (c)  {
+                case '*':
+                case '_':
+                case '~':
+                case '`':
+                case '(':
+                case ')':
+                case '[':
+                case ']':
+                    builder.append('\\');
+                default:
+                    builder.append(c);
+            }
+        }
+    }
 }

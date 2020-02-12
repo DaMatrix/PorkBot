@@ -22,14 +22,11 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import net.daporkchop.lib.common.util.PArrays;
-import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.audio.track.FutureTrack;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -38,30 +35,28 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public final class TrackScheduler extends AudioEventAdapter {
     @NonNull
-    private final AudioPlayer player;
+    private final AudioPlayer        player;
     @NonNull
     private final ServerAudioManager manager;
 
     private final LinkedList<FutureTrack> queue = new LinkedList<>();
 
-    public void enqueue(@NonNull FutureTrack track)  {
+    public void enqueue(@NonNull FutureTrack track) {
         synchronized (this.manager) {
-            if (!track.isResolved() || (track.isSuccess() && !this.player.startTrack(track.getNow(), true))) {
-                this.queue.add(track);
+            this.queue.add(track);
+
+            if (this.player.getPlayingTrack() == null) {
+                this.next();
             }
         }
     }
 
-    public void enqueueAll(@NonNull Collection<FutureTrack> tracks)   {
+    public void enqueueAll(@NonNull Collection<FutureTrack> tracks) {
         synchronized (this.manager) {
-            if (this.manager.shuffled())    {
-                this.queue.addAll(tracks);
+            this.queue.addAll(tracks);
 
-                if (this.player.getPlayingTrack() == null)  {
-                    this.next();
-                }
-            } else {
-                tracks.forEach(this::enqueue);
+            if (this.player.getPlayingTrack() == null) {
+                this.next();
             }
         }
     }
@@ -71,9 +66,10 @@ public final class TrackScheduler extends AudioEventAdapter {
             FutureTrack next = this.manager.shuffled()
                     ? this.queue.remove(ThreadLocalRandom.current().nextInt(this.queue.size())) //probably not the smartest thing to be doing on a linked list, but most people won't be using shuffling anyway
                     : this.queue.poll();
-            if (next != null)   {
+            if (next != null) {
                 next.whenResolved((track, e) -> {
-                    if (e == null)  {
+                    if (e == null) {
+                        this.manager.connect(next.requestedIn());
                         this.player.startTrack(track, false);
                     } else {
                         //use executor to avoid stack overflow if there are a lot of consecutive errored tracks
@@ -82,18 +78,19 @@ public final class TrackScheduler extends AudioEventAdapter {
                 });
                 return true;
             } else {
+                this.player.startTrack(null, false);
                 return false;
             }
         }
     }
 
-    public FutureTrack[] queueSnapshot()    {
+    public FutureTrack[] queueSnapshot() {
         synchronized (this.manager) {
             return this.queue.isEmpty() ? null : this.queue.toArray(new FutureTrack[this.queue.size()]);
         }
     }
 
-    public void skipAll()  {
+    public void skipAll() {
         synchronized (this.manager) {
             this.queue.clear();
             this.player.destroy();
