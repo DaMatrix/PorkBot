@@ -22,6 +22,7 @@ import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.SearchPlatform;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.Constants;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.regex.Matcher;
@@ -44,19 +45,20 @@ public class CommandPlay extends Command {
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
         Matcher matcher;
+        VoiceChannel dstChannel;
 
         if (args.length < 2 || args[1].isEmpty()) {
             this.sendErrorMessage(evt.getChannel(), "No track URL or search terms given!");
-        } else if (evt.getMember().getVoiceState().getChannel() == null) {
+        } else if ((dstChannel = evt.getMember().getVoiceState().getChannel()) == null) {
             evt.getChannel().sendMessage("You must be in a voice channel to play audio!").queue();
         } else if ((matcher = URL_PATTERN_MATCHER_CACHE.get().reset(rawContent)).matches()) {
-            PorkAudio.addTrackToQueue(evt.getGuild(), evt.getChannel(), evt.getMember(), matcher.group(1));
+            PorkAudio.addTrackByURL(evt.getGuild(), evt.getChannel(), evt.getMember(), matcher.group(1), dstChannel);
         } else if ((matcher = SEARCH_PATTERN_MATCHER_CACHE.get()).reset(rawContent).matches()) {
             SearchPlatform platform = SearchPlatform.from(PorkUtil.fallbackIfNull(matcher.group(1), SearchPlatform.YOUTUBE.name()));
             if (platform == null)   {
                 evt.getChannel().sendMessage("Unknown platform: `" + matcher.group(1) + '`').queue();
             } else {
-                PorkAudio.addTrackBySearch(evt.getGuild(), evt.getChannel(), evt.getMember(), platform, matcher.group(2));
+                PorkAudio.addTrackBySearch(evt.getGuild(), evt.getChannel(), evt.getMember(), platform, matcher.group(2), dstChannel);
             }
         } else {
             throw new IllegalStateException();

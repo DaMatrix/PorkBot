@@ -20,8 +20,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
+import net.dv8tion.jda.api.EmbedBuilder;
 
-import java.awt.Color;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -33,18 +33,21 @@ import java.util.TreeMap;
 public final class SearchPlatform {
     private static final Map<String, SearchPlatform> PLATFORM_LOOKUP = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
+    public static final SearchPlatform BANDCAMP   = new SearchPlatform(0xFF1DA0C3, "bandcamp", "bandcamp");
+    public static final SearchPlatform INTERNET   = new SearchPlatform(0xFF3B88C3, "Web URL", "globe-wireframe");
     public static final SearchPlatform SOUNDCLOUD = new SearchPlatform(0xFFF7620E, "scsearch:", "SoundCloud", "sc");
+    public static final SearchPlatform TWITCH     = new SearchPlatform(0xFF6C2498, "Twitch", "twitch");
     public static final SearchPlatform YOUTUBE    = new SearchPlatform(0xFFDD473A, "ytsearch:", "YouTube", "yt");
 
     public static SearchPlatform from(@NonNull String name) {
         return PLATFORM_LOOKUP.get(name);
     }
 
-    public static String[] getAllPlatformNamesAndAliases()  {
+    public static String[] getAllPlatformNamesAndAliases() {
         return PLATFORM_LOOKUP.keySet().toArray(new String[PLATFORM_LOOKUP.size()]);
     }
 
-    private final int  color;
+    private final int    color;
     @Getter(AccessLevel.NONE)
     private final String prefix;
     private final String icon;
@@ -66,7 +69,23 @@ public final class SearchPlatform {
         }
     }
 
+    private SearchPlatform(int color, @NonNull String name, @NonNull String icon) {
+        this.color = color;
+        this.prefix = "";
+        this.icon = "https://cloud.daporkchop.net/static/img/logo/128/" + icon + ".png";
+        this.name = name;
+    }
+
     public String prefix(@NonNull String query) {
         return query.startsWith(this.prefix) ? query : this.prefix + query;
+    }
+
+    public EmbedBuilder embed() {
+        return this.embed(new EmbedBuilder());
+    }
+
+    public EmbedBuilder embed(@NonNull EmbedBuilder builder) {
+        return builder.setColor(this.color)
+                .setAuthor(this.name, null, this.icon);
     }
 }

@@ -81,4 +81,8 @@ public final class ServerAudioManager {
         VoiceChannel channel = manager.getQueuedAudioConnection();
         return channel == null ? manager.getConnectedChannel() : channel;
     }
+
+    public boolean isConnectedToGivenChannel(@NonNull VoiceChannel dstChannel)  {
+        return this.connectedChannel() == dstChannel;
+    }
 }

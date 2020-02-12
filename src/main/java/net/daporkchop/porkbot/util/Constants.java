@@ -27,11 +27,13 @@ import lombok.experimental.UtilityClass;
 public class Constants {
     public final boolean DEV_MODE = Boolean.valueOf(System.getProperty("porkbot.dev", "false"));
 
-    public final Gson GSON = new Gson();
+    public final Gson       GSON        = new Gson();
     public final JsonParser JSON_PARSER = new JsonParser();
 
     public final String UUID_CAPTURE = "([0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12})";
 
-    public final String BASE_URL              = DEV_MODE ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
-    public final String COMMAND_PREFIX        = DEV_MODE ? ",," : "..";
+    public final String BASE_URL       = DEV_MODE ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
+    public final String COMMAND_PREFIX = DEV_MODE ? ",," : "..";
+
+    public final int MAX_SEARCH_RESULTS = 5;
 }

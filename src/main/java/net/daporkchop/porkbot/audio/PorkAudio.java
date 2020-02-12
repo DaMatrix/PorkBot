@@ -18,11 +18,13 @@ package net.daporkchop.porkbot.audio;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioTrack;
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioTrack;
+import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioTrack;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
@@ -31,6 +33,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.util.PorkUtil;
+import net.daporkchop.porkbot.audio.load.FromURLLoadResultHandler;
+import net.daporkchop.porkbot.audio.load.SearchLoadResultHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -41,7 +45,6 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -80,82 +83,44 @@ public class PorkAudio {
         return manager;
     }
 
-    public void addTrackToQueue(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull String url) {
-        VoiceChannel dstChannel = requester.getVoiceState().getChannel();
+    public void addTrackByURL(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull String url, @NonNull VoiceChannel dstChannel) {
         ServerAudioManager manager = getAudioManager(guild, true).lastAccessedFrom(msgChannel);
+        if (!manager.isConnectedToGivenChannel(dstChannel)) {
+            msgChannel.sendMessage("Not in the same voice channel!").queue();
+            return;
+        }
 
-        PLAYER_MANAGER.loadItemOrdered(manager, url, new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack track) {
-                msgChannel.sendMessage(embed(track)
-                        .setTitle("Added to queue!", track.getInfo().uri)
-                        .build()).queue();
-
-                manager.connect(dstChannel).lastAccessedFrom(msgChannel).scheduler().enqueue(track);
-            }
-
-            @Override
-            public void playlistLoaded(AudioPlaylist playlist) {
-                msgChannel.sendMessage("Loaded playlist: " + playlist.getName()).queue();
-                //TODO
-            }
-
-            @Override
-            public void noMatches() {
-                msgChannel.sendMessage("Unable to find `" + url + '`').queue();
-            }
-
-            @Override
-            public void loadFailed(FriendlyException exception) {
-                msgChannel.sendMessage("Unable to find `" + url + "`: " + exception.getMessage()).queue();
-            }
-        });
+        PLAYER_MANAGER.loadItemOrdered(manager, url, new FromURLLoadResultHandler(msgChannel, dstChannel, manager, url));
     }
 
-    public void addTrackBySearch(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query) {
-        String prefixed = platform.prefix(query);
-        VoiceChannel dstChannel = requester.getVoiceState().getChannel();
+    public void addTrackBySearch(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query, @NonNull VoiceChannel dstChannel) {
         ServerAudioManager manager = getAudioManager(guild, true).lastAccessedFrom(msgChannel);
+        if (!manager.isConnectedToGivenChannel(dstChannel)) {
+            msgChannel.sendMessage("Not in the same voice channel!").queue();
+            return;
+        }
+
+        String prefixed = platform.prefix(query);
 
         AudioTrack[] cachedTracks = SEARCH_CACHE.getIfPresent(prefixed);
         if (cachedTracks != null) {
-            promptForSearchChoice(cachedTracks, msgChannel, requester, platform, query, dstChannel, manager);
+            handleSearchResults(cachedTracks, manager, msgChannel, dstChannel, requester, platform, query);
         } else {
-            PLAYER_MANAGER.loadItem(prefixed, new AudioLoadResultHandler() {
-                @Override
-                public void trackLoaded(AudioTrack track) {
-                    msgChannel.sendMessage("Search only returned one result!").queue();
-                }
-
-                @Override
-                public void playlistLoaded(AudioPlaylist playlist) {
-                    List<AudioTrack> list = playlist.getTracks();
-                    AudioTrack[] tracks = new AudioTrack[Math.min(5, list.size())];
-                    for (int i = 0; i < tracks.length; i++) {
-                        tracks[i] = list.get(i);
-                    }
-
-                    SEARCH_CACHE.put(prefixed, tracks);
-                    promptForSearchChoice(tracks, msgChannel, requester, platform, query, dstChannel, manager);
-                }
-
-                @Override
-                public void noMatches() {
-                    msgChannel.sendMessage("No results for `" + query + '`').queue();
-                }
-
-                @Override
-                public void loadFailed(FriendlyException exception) {
-                    msgChannel.sendMessage("Unable to search for `" + query + "`: " + exception.getMessage()).queue();
-                }
-            });
+            PLAYER_MANAGER.loadItem(prefixed, new SearchLoadResultHandler(msgChannel, dstChannel, manager, query, requester, SEARCH_CACHE, prefixed));
         }
     }
 
-    private void promptForSearchChoice(@NonNull AudioTrack[] tracks, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query, @NonNull VoiceChannel dstChannel, @NonNull ServerAudioManager manager) {
-        EmbedBuilder builder = new EmbedBuilder()
-                .setColor(platform.color())
-                .setAuthor(platform.name(), null, platform.icon())
+    public void handleSearchResults(@NonNull AudioTrack[] tracks, @NonNull ServerAudioManager manager, @NonNull TextChannel msgChannel, @NonNull VoiceChannel dstChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query) {
+        if (tracks.length == 0) {
+            msgChannel.sendMessage("Search: `" + query + "` returned no results!").queue();
+            return;
+        } else if (tracks.length == 1)  {
+            //immediately enqueue
+            addIndividualTrack(tracks[0], manager, msgChannel, dstChannel);
+            return;
+        }
+
+        EmbedBuilder builder = platform.embed()
                 .setTitle("Type the number of the track you want to play.");
 
         try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {
@@ -163,13 +128,9 @@ public class PorkAudio {
             sb.setLength(0);
 
             for (int i = 0; i < tracks.length; i++) {
-                AudioTrackInfo info = tracks[i].getInfo();
+                sb.append('`').append(i + 1).append('.').append('`').append(' ');
 
-                sb.append('`').append(i + 1).append('.').append('`').append(' ')
-                        .append('*').append(info.author).append("* - ")
-                        .append(info.title).append(' ');
-
-                formattedTrackLength(info.length, sb.append('`')).append('`').append('\n');
+                appendTrackInfo(tracks[i].getInfo(), sb).append('\n');
             }
 
             sb.setLength(sb.length() - 1);
@@ -178,7 +139,16 @@ public class PorkAudio {
 
         msgChannel.sendMessage(builder.build()).queue(message -> WAITING_SEARCHES.put(
                 new UUID(message.getTextChannel().getIdLong(), requester.getIdLong()),
-                new WaitingSearchResults(tracks, message, manager, dstChannel, builder)));
+                new WaitingSearchResults(tracks, message, manager, dstChannel)));
+    }
+
+    public void addIndividualTrack(@NonNull AudioTrack track, @NonNull ServerAudioManager manager, @NonNull TextChannel msgChannel, @NonNull VoiceChannel dstChannel)    {
+        msgChannel.sendMessage(PorkAudio.embed(track, PorkAudio.findPlatform(track).embed())
+                .setTitle("Added to queue!", track.getInfo().uri)
+                .build()).queue();
+
+        manager.connect(dstChannel).lastAccessedFrom(msgChannel).scheduler()
+                .enqueue(track);
     }
 
     public void checkSearchResponse(@NonNull GuildMessageReceivedEvent event, @NonNull String text) {
@@ -187,7 +157,7 @@ public class PorkAudio {
         if (results != null) {
             WAITING_SEARCHES.invalidate(id);
 
-            if (event.getGuild().getMember(event.getJDA().getSelfUser()).hasPermission(Permission.MESSAGE_MANAGE)) {
+            if (event.getGuild().getMember(event.getJDA().getSelfUser()).hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)) {
                 event.getMessage().delete().queue();
             }
 
@@ -195,7 +165,7 @@ public class PorkAudio {
                 int i = Integer.parseUnsignedInt(text) - 1;
 
                 AudioTrack track = results.tracks[i].makeClone();
-                results.message.editMessage(embed(track, results.builder.clearFields())
+                results.message.editMessage(embed(track, findPlatform(track).embed())
                         .setTitle("Added to queue!", track.getInfo().uri)
                         .build()).queue();
 
@@ -204,10 +174,6 @@ public class PorkAudio {
                 event.getChannel().sendMessage("Invalid selection: `" + text + "` (must be in range 1-" + results.tracks.length + ')').queue();
             }
         }
-    }
-
-    public EmbedBuilder embed(@NonNull AudioTrack track) {
-        return embed(track, new EmbedBuilder());
     }
 
     public EmbedBuilder embed(@NonNull AudioTrack track, @NonNull EmbedBuilder builder) {
@@ -247,6 +213,38 @@ public class PorkAudio {
         return builder;
     }
 
+    public StringBuilder appendTrackInfo(@NonNull AudioTrackInfo info, @NonNull StringBuilder builder) {
+        builder.append('*').append(info.author).append("* - ")
+                .append(info.title).append(' ');
+
+        builder.append('`');
+        return formattedTrackLength(info.length, builder).append('`').append('\n');
+    }
+
+    public SearchPlatform findPlatform(@NonNull AudioTrack track)   {
+        if (track instanceof YoutubeAudioTrack) {
+            return SearchPlatform.YOUTUBE;
+        } else if (track instanceof SoundCloudAudioTrack)   {
+            return SearchPlatform.SOUNDCLOUD;
+        } else if (track instanceof BandcampAudioTrack) {
+            return SearchPlatform.BANDCAMP;
+        } else if (track instanceof TwitchStreamAudioTrack) {
+            return SearchPlatform.TWITCH;
+        } else {
+            return SearchPlatform.INTERNET;
+        }
+    }
+
+    public SearchPlatform findPlatform(@NonNull AudioPlaylist playlist)   {
+        if (playlist.getSelectedTrack() != null)    {
+            return findPlatform(playlist.getSelectedTrack());
+        } else if (!playlist.getTracks().isEmpty()) {
+            return findPlatform(playlist.getTracks().get(0));
+        } else {
+            return SearchPlatform.INTERNET;
+        }
+    }
+
     @RequiredArgsConstructor
     private static final class WaitingSearchResults {
         @NonNull
@@ -257,7 +255,5 @@ public class PorkAudio {
         private final ServerAudioManager manager;
         @NonNull
         private final VoiceChannel       dstChannel;
-        @NonNull
-        private final EmbedBuilder       builder;
     }
 }

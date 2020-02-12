@@ -21,6 +21,7 @@ import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.ShardUtils;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
@@ -34,7 +35,8 @@ import javax.annotation.Nonnull;
 public class PorkListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
-        if (event.getAuthor().isBot()) {
+        if (event.getAuthor().isBot()
+                || !event.getGuild().getMember(event.getJDA().getSelfUser()).hasPermission(event.getChannel(), Permission.MESSAGE_WRITE)) {
             return;
         }
         String message = event.getMessage().getContentRaw();

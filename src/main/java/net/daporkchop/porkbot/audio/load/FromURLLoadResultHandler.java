@@ -1,0 +1,80 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2020 DaPorkchop_
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income, nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from DaPorkchop_.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: DaPorkchop_), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
+package net.daporkchop.porkbot.audio.load;
+
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import net.daporkchop.porkbot.audio.PorkAudio;
+import net.daporkchop.porkbot.audio.ServerAudioManager;
+import net.daporkchop.porkbot.audio.TrackScheduler;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
+
+/**
+ * @author DaPorkchop_
+ */
+@RequiredArgsConstructor
+public class FromURLLoadResultHandler implements AudioLoadResultHandler {
+    @NonNull
+    protected final TextChannel msgChannel;
+    @NonNull
+    protected final VoiceChannel dstChannel;
+    @NonNull
+    protected final ServerAudioManager manager;
+    @NonNull
+    protected final String input;
+
+    @Override
+    public void trackLoaded(AudioTrack track) {
+        PorkAudio.addIndividualTrack(track, this.manager, this.msgChannel, this.dstChannel);
+    }
+
+    @Override
+    public void playlistLoaded(AudioPlaylist playlist) {
+        this.msgChannel.sendMessage("Loaded playlist: " + playlist.getName()).queue();
+
+        TrackScheduler scheduler = this.manager.connect(this.dstChannel).lastAccessedFrom(this.msgChannel).scheduler();
+
+        AudioTrack selectedTrack = playlist.getSelectedTrack();
+        if (selectedTrack != null)  {
+            //always add the selected track first (if present)
+            scheduler.enqueue(selectedTrack);
+        }
+
+        for (AudioTrack track : playlist.getTracks())   {
+            if (track == selectedTrack) {
+                continue; //don't add the selected track again
+            }
+
+            scheduler.enqueue(selectedTrack);
+        }
+    }
+
+    @Override
+    public void noMatches() {
+        this.msgChannel.sendMessage("Nothing found for `" + this.input + '`').queue();
+    }
+
+    @Override
+    public void loadFailed(FriendlyException exception) {
+        this.msgChannel.sendMessage("Unable to find `" + this.input + "`: " + exception.getMessage()).queue();
+    }
+}
