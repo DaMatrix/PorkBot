@@ -25,8 +25,11 @@ import lombok.RequiredArgsConstructor;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.audio.TrackScheduler;
+import net.daporkchop.porkbot.audio.track.ResolvedTrack;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+
+import java.util.stream.Collectors;
 
 /**
  * @author DaPorkchop_
@@ -50,7 +53,7 @@ public class FromURLLoadResultHandler implements AudioLoadResultHandler {
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
         this.manager.connect(this.dstChannel).lastAccessedFrom(this.msgChannel).scheduler()
-                .enqueueAll(playlist.getTracks(), playlist.getSelectedTrack());
+                .enqueueAll(playlist.getTracks().stream().map(track -> new ResolvedTrack(track, this.dstChannel)).collect(Collectors.toList()));
 
         this.msgChannel.sendMessage(PorkAudio.findPlatform(playlist).embed()
                 .setTitle("Added playlist to queue", this.input)

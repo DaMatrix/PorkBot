@@ -14,27 +14,54 @@
  *
  */
 
-package net.daporkchop.porkbot.util;
+package net.daporkchop.porkbot.audio.track;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
-import lombok.experimental.UtilityClass;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
+import net.dv8tion.jda.api.entities.VoiceChannel;
+
+import java.util.function.BiConsumer;
 
 /**
+ * A {@link FutureTrack} that has already been resolved.
+ *
  * @author DaPorkchop_
  */
-@UtilityClass
-public class Constants {
-    public final boolean DEV_MODE = Boolean.valueOf(System.getProperty("porkbot.dev", "false"));
+@RequiredArgsConstructor
+@Accessors(fluent = true)
+public final class ResolvedTrack implements FutureTrack {
+    @NonNull
+    private final AudioTrack track;
+    @Getter
+    @NonNull
+    private final VoiceChannel requestedIn;
 
-    public final Gson       GSON        = new Gson();
-    public final JsonParser JSON_PARSER = new JsonParser();
+    @Override
+    public AudioTrackInfo getInfo() {
+        return this.track.getInfo();
+    }
 
-    public final String UUID_CAPTURE = "([0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12})";
+    @Override
+    public boolean isResolved() {
+        return true;
+    }
 
-    public final String BASE_URL       = DEV_MODE ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
-    public final String COMMAND_PREFIX = DEV_MODE ? ",," : "..";
+    @Override
+    public boolean isSuccess() {
+        return true;
+    }
 
-    public final int MAX_SEARCH_RESULTS = 5;
-    public final int MAX_NAME_LENGTH = 50;
+    @Override
+    public void whenResolved(@NonNull BiConsumer<AudioTrack, Throwable> callback) {
+        callback.accept(this.track, null);
+    }
+
+    @Override
+    public AudioTrack getNow() {
+        return this.track;
+    }
 }

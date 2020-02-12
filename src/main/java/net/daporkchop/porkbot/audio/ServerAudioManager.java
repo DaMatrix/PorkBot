@@ -17,6 +17,7 @@
 package net.daporkchop.porkbot.audio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -32,6 +33,9 @@ import net.dv8tion.jda.api.managers.AudioManager;
 @Getter
 @Accessors(fluent = true, chain = true)
 public final class ServerAudioManager {
+    @Getter(AccessLevel.NONE)
+    private long lastActive = 0L;
+
     private final Guild          guild;
     private final AudioPlayer    player;
     private final TrackScheduler scheduler;
@@ -85,8 +89,19 @@ public final class ServerAudioManager {
         return channel == null ? manager.getConnectedChannel() : channel;
     }
 
-    public boolean couldBeConnectedTo(@NonNull VoiceChannel dstChannel)  {
+    public boolean couldConnectToIfNeeded(@NonNull VoiceChannel dstChannel)  {
         VoiceChannel connected = this.connectedChannel();
         return connected == null || connected == dstChannel;
+    }
+
+    public void checkTimedOut() {
+        if (this.player.getPlayingTrack() != null) {
+            this.player.checkCleanup(5000L);
+            this.lastActive = System.currentTimeMillis();
+        } else if (this.lastActive + 5000L < System.currentTimeMillis() && this.connectedChannel() != null) {
+            //if we're connected AND the last time a track was playing was over 5 seconds ago, disconnect
+            this.guild.getAudioManager().closeAudioConnection();
+            this.lastAccessedFrom.sendMessage("Player was idle for too long, stopping.").queue();
+        }
     }
 }

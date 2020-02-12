@@ -21,6 +21,7 @@ import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.ServerAudioManager;
+import net.daporkchop.porkbot.audio.track.FutureTrack;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -40,7 +41,7 @@ public class CommandQueue extends Command {
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
         ServerAudioManager manager = PorkAudio.getAudioManager(evt.getGuild(), true);
-        AudioTrack[] tracks = manager.lastAccessedFrom(evt.getChannel()).scheduler().queueSnapshot();
+        FutureTrack[] tracks = manager.lastAccessedFrom(evt.getChannel()).scheduler().queueSnapshot();
 
         int page = 0;
         if (args.length >= 2) {
@@ -90,7 +91,10 @@ public class CommandQueue extends Command {
                 builder.addField("Queue (page " + (page + 1) + '/' + ((tracks.length - 1) / Constants.MAX_SEARCH_RESULTS + 1) + "):", sb.toString(), false);
 
                 builder.addField("Total tracks:", String.valueOf(tracks.length), true)
-                        .addField("Total runtime:", PorkAudio.formattedTrackLength(Arrays.stream(tracks).map(AudioTrack::getInfo).mapToLong(i -> i.length).sum()), true)
+                        .addField("Total runtime:", PorkAudio.formattedTrackLength(Arrays.stream(tracks).map(FutureTrack::getInfo)
+                                .mapToLong(i -> i.length)
+                                .filter(l -> l != Long.MAX_VALUE)
+                                .sum()), true)
                         .addField("Shuffled:", manager.shuffled() ? "Yes" : "No", true);
             }
         }

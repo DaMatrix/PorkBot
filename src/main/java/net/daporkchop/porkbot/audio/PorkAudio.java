@@ -36,6 +36,8 @@ import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.audio.load.FromURLLoadResultHandler;
 import net.daporkchop.porkbot.audio.load.SearchLoadResultHandler;
+import net.daporkchop.porkbot.audio.track.ResolvedTrack;
+import net.daporkchop.porkbot.util.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -66,9 +68,7 @@ public class PorkAudio {
         //clean up idle audio managers automatically
         PorkBot.SCHEDULED_EXECUTOR.scheduleWithFixedDelay(() -> {
             synchronized (SERVERS) {
-                SERVERS.forEach((guildId, manager) -> {
-                    manager.player().checkCleanup(5000L); //if a player is idle this will make it be cleaned up, resulting in TrackScheduler removing the session
-                });
+                SERVERS.forEach((guildId, manager) -> manager.checkTimedOut());
             }
         }, 10L, 10L, TimeUnit.SECONDS);
     }
@@ -97,7 +97,7 @@ public class PorkAudio {
 
     public void addTrackByURL(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull String url, @NonNull VoiceChannel dstChannel) {
         ServerAudioManager manager = getAudioManager(guild, true).lastAccessedFrom(msgChannel);
-        if (!manager.couldBeConnectedTo(dstChannel)) {
+        if (!manager.couldConnectToIfNeeded(dstChannel)) {
             msgChannel.sendMessage("Not in the same voice channel!").queue();
             return;
         }
@@ -107,7 +107,7 @@ public class PorkAudio {
 
     public void addTrackBySearch(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query, @NonNull VoiceChannel dstChannel) {
         ServerAudioManager manager = getAudioManager(guild, true).lastAccessedFrom(msgChannel);
-        if (!manager.couldBeConnectedTo(dstChannel)) {
+        if (!manager.couldConnectToIfNeeded(dstChannel)) {
             msgChannel.sendMessage("Not in the same voice channel!").queue();
             return;
         }
@@ -160,7 +160,7 @@ public class PorkAudio {
                 .build()).queue();
 
         manager.connect(dstChannel).lastAccessedFrom(msgChannel).scheduler()
-                .enqueue(track);
+                .enqueue(new ResolvedTrack(track, dstChannel));
     }
 
     public void checkSearchResponse(@NonNull GuildMessageReceivedEvent event, @NonNull String text) {
@@ -181,7 +181,8 @@ public class PorkAudio {
                         .setTitle("Added to queue!", track.getInfo().uri)
                         .build()).queue();
 
-                results.manager.connect(results.dstChannel).lastAccessedFrom(event.getChannel()).scheduler().enqueue(track);
+                results.manager.connect(results.dstChannel).lastAccessedFrom(event.getChannel()).scheduler()
+                        .enqueue(new ResolvedTrack(track, results.dstChannel));
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 event.getChannel().sendMessage("Invalid selection: `" + text + "` (must be in range 1-" + results.tracks.length + ')').queue();
             }
@@ -207,31 +208,46 @@ public class PorkAudio {
 
     public StringBuilder formattedTrackLength(long length, @NonNull StringBuilder builder) {
         builder.append('`');
+        if (length == Long.MAX_VALUE || length < 0L) {
+            builder.append("unknown length");
+        } else {
+            long seconds = length / 1000L;
+            long minutes = seconds / 60L;
+            long hours = minutes / 60L;
 
-        long seconds = length / 1000L;
-        long minutes = seconds / 60L;
-        long hours = minutes / 60L;
+            if (hours > 0L) {
+                builder.append(hours).append(':');
+                if (minutes % 60L < 10L) {
+                    builder.append('0');
+                }
+            }
 
-        if (hours > 0L) {
-            builder.append(hours).append(':');
-            if (minutes % 60L < 10L) {
+            builder.append(minutes % 60L).append(':');
+            if (seconds % 60L < 10L) {
                 builder.append('0');
             }
+            builder.append(seconds % 60L);
         }
-
-        builder.append(minutes % 60L).append(':');
-        if (seconds % 60L < 10L) {
-            builder.append('0');
-        }
-        builder.append(seconds % 60L);
         return builder.append('`');
     }
 
     public StringBuilder appendTrackInfo(@NonNull AudioTrackInfo info, @NonNull StringBuilder builder) {
-        builder.append('*').append(info.author).append("* - ")
-                .append(info.title).append(' ');
+        builder.append('*');
+        if (info.author.length() + info.title.length() >= Constants.MAX_NAME_LENGTH) {
+            builder.append(info.author, 0, Math.min(Constants.MAX_NAME_LENGTH - 6, info.author.length()));
+            if (info.author.length() >= Constants.MAX_NAME_LENGTH - 6) {
+                builder.append("...* - ...");
+            } else {
+                builder.append("* - ")
+                        .append(info.title, 0, Math.min(Constants.MAX_NAME_LENGTH - 3 - info.author.length(), info.title.length()))
+                        .append("...");
+            }
+        } else {
+            builder.append('*').append(info.author).append("* - ")
+                    .append(info.title);
+        }
 
-        return formattedTrackLength(info.length, builder);
+        return formattedTrackLength(info.length, builder.append(' '));
     }
 
     public SearchPlatform findPlatform(@NonNull AudioTrack track) {
