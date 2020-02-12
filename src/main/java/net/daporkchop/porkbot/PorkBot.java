@@ -43,15 +43,12 @@ import net.daporkchop.porkbot.command.minecraft.JavaPing;
 import net.daporkchop.porkbot.command.minecraft.PEPing;
 import net.daporkchop.porkbot.command.minecraft.SkinCommand;
 import net.daporkchop.porkbot.command.misc.CommandDice;
-import net.daporkchop.porkbot.command.misc.CommandEmojiID;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.daporkchop.porkbot.web.PorkBotWebServer;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -111,7 +108,6 @@ public class PorkBot {
 
         //misc
         CommandRegistry.registerCommand(new CommandDice());
-        CommandRegistry.registerCommand(new CommandEmojiID());
         CommandRegistry.registerCommand(new CommandInterject());
         CommandRegistry.registerCommand(new CommandShutdown());
 

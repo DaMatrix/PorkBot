@@ -41,6 +41,7 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +62,11 @@ public class PorkAudio {
 
     private final Cache<UUID, WaitingSearchResults> WAITING_SEARCHES = CacheBuilder.newBuilder()
             .expireAfterWrite(1L, TimeUnit.MINUTES)
+            .build();
+
+    private final Cache<String, AudioTrack[]> SEARCH_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(7L, TimeUnit.DAYS)
+            .softValues()
             .build();
 
     public synchronized ServerAudioManager getAudioManager(@NonNull Guild guild, boolean create) {
@@ -107,57 +113,72 @@ public class PorkAudio {
     }
 
     public void addTrackBySearch(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query) {
+        String prefixed = platform.prefix(query);
         VoiceChannel dstChannel = requester.getVoiceState().getChannel();
         ServerAudioManager manager = getAudioManager(guild, true).lastAccessedFrom(msgChannel);
 
-        PLAYER_MANAGER.loadItem(platform.prefix(query), new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack track) {
-                msgChannel.sendMessage("Search only returned one result!").queue();
-            }
-
-            @Override
-            public void playlistLoaded(AudioPlaylist playlist) {
-                EmbedBuilder builder = new EmbedBuilder()
-                        .setColor(platform.color())
-                        .setAuthor(platform.name(), null, platform.icon())
-                        .setTitle("Type the number of the track you want to play.");
-
-                AudioTrack[] tracks = new AudioTrack[Math.min(5, playlist.getTracks().size())];
-                try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {
-                    StringBuilder sb = handle.value();
-                    sb.setLength(0);
-
-                    for (int i = 0; i < tracks.length; i++) {
-                        AudioTrack track = tracks[i] = playlist.getTracks().get(i);
-                        AudioTrackInfo info = track.getInfo();
-
-                        sb.append('`').append(i + 1).append('.').append('`').append(' ')
-                                .append('*').append(info.author).append("* - ")
-                                .append(info.title).append(' ');
-
-                        formattedTrackLength(info.length, sb.append('`')).append('`').append('\n');
-                    }
-
-                    sb.setLength(sb.length() - 1);
-                    builder.addField("Search results for: `" + query + '`', sb.toString(), false);
+        AudioTrack[] cachedTracks = SEARCH_CACHE.getIfPresent(prefixed);
+        if (cachedTracks != null) {
+            promptForSearchChoice(cachedTracks, msgChannel, requester, platform, query, dstChannel, manager);
+        } else {
+            PLAYER_MANAGER.loadItem(prefixed, new AudioLoadResultHandler() {
+                @Override
+                public void trackLoaded(AudioTrack track) {
+                    msgChannel.sendMessage("Search only returned one result!").queue();
                 }
 
-                msgChannel.sendMessage(builder.build()).queue(message -> WAITING_SEARCHES.put(
-                        new UUID(message.getTextChannel().getIdLong(), requester.getIdLong()),
-                        new WaitingSearchResults(tracks, message, manager, dstChannel, builder)));
+                @Override
+                public void playlistLoaded(AudioPlaylist playlist) {
+                    List<AudioTrack> list = playlist.getTracks();
+                    AudioTrack[] tracks = new AudioTrack[Math.min(5, list.size())];
+                    for (int i = 0; i < tracks.length; i++) {
+                        tracks[i] = list.get(i);
+                    }
+
+                    SEARCH_CACHE.put(prefixed, tracks);
+                    promptForSearchChoice(tracks, msgChannel, requester, platform, query, dstChannel, manager);
+                }
+
+                @Override
+                public void noMatches() {
+                    msgChannel.sendMessage("No results for `" + query + '`').queue();
+                }
+
+                @Override
+                public void loadFailed(FriendlyException exception) {
+                    msgChannel.sendMessage("Unable to search for `" + query + "`: " + exception.getMessage()).queue();
+                }
+            });
+        }
+    }
+
+    private void promptForSearchChoice(@NonNull AudioTrack[] tracks, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query, @NonNull VoiceChannel dstChannel, @NonNull ServerAudioManager manager) {
+        EmbedBuilder builder = new EmbedBuilder()
+                .setColor(platform.color())
+                .setAuthor(platform.name(), null, platform.icon())
+                .setTitle("Type the number of the track you want to play.");
+
+        try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {
+            StringBuilder sb = handle.value();
+            sb.setLength(0);
+
+            for (int i = 0; i < tracks.length; i++) {
+                AudioTrackInfo info = tracks[i].getInfo();
+
+                sb.append('`').append(i + 1).append('.').append('`').append(' ')
+                        .append('*').append(info.author).append("* - ")
+                        .append(info.title).append(' ');
+
+                formattedTrackLength(info.length, sb.append('`')).append('`').append('\n');
             }
 
-            @Override
-            public void noMatches() {
-                msgChannel.sendMessage("No results for `" + query + '`').queue();
-            }
+            sb.setLength(sb.length() - 1);
+            builder.addField("Search results for: `" + query + '`', sb.toString(), false);
+        }
 
-            @Override
-            public void loadFailed(FriendlyException exception) {
-                msgChannel.sendMessage("Unable to search for `" + query + "`: " + exception.getMessage()).queue();
-            }
-        });
+        msgChannel.sendMessage(builder.build()).queue(message -> WAITING_SEARCHES.put(
+                new UUID(message.getTextChannel().getIdLong(), requester.getIdLong()),
+                new WaitingSearchResults(tracks, message, manager, dstChannel, builder)));
     }
 
     public void checkSearchResponse(@NonNull GuildMessageReceivedEvent event, @NonNull String text) {
@@ -173,11 +194,12 @@ public class PorkAudio {
             try {
                 int i = Integer.parseUnsignedInt(text) - 1;
 
-                results.message.editMessage(embed(results.tracks[i], results.builder.clearFields())
-                        .setTitle("Added to queue!", results.tracks[i].getInfo().uri)
+                AudioTrack track = results.tracks[i].makeClone();
+                results.message.editMessage(embed(track, results.builder.clearFields())
+                        .setTitle("Added to queue!", track.getInfo().uri)
                         .build()).queue();
 
-                results.manager.connect(results.dstChannel).lastAccessedFrom(event.getChannel()).scheduler().enqueue(results.tracks[i]);
+                results.manager.connect(results.dstChannel).lastAccessedFrom(event.getChannel()).scheduler().enqueue(track);
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 event.getChannel().sendMessage("Invalid selection: `" + text + "` (must be in range 1-" + results.tracks.length + ')').queue();
             }
@@ -236,6 +258,6 @@ public class PorkAudio {
         @NonNull
         private final VoiceChannel       dstChannel;
         @NonNull
-        private final EmbedBuilder     builder;
+        private final EmbedBuilder       builder;
     }
 }
