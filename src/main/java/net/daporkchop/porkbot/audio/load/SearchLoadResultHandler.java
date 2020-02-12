@@ -67,8 +67,6 @@ public class SearchLoadResultHandler extends FromURLLoadResultHandler {
         }
         this.searchCache.put(this.prefixed, tracks);
 
-        super.playlistLoaded(playlist);
-
         PorkAudio.handleSearchResults(tracks, this.manager, this.msgChannel, this.dstChannel, this.requester, PorkAudio.findPlatform(playlist), this.input);
     }
 }

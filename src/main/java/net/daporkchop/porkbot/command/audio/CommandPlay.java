@@ -22,6 +22,7 @@ import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.SearchPlatform;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.Constants;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
@@ -53,6 +54,10 @@ public class CommandPlay extends Command {
             evt.getChannel().sendMessage("You must be in a voice channel to play audio!").queue();
         } else if ((matcher = URL_PATTERN_MATCHER_CACHE.get().reset(rawContent)).matches()) {
             PorkAudio.addTrackByURL(evt.getGuild(), evt.getChannel(), evt.getMember(), matcher.group(1), dstChannel);
+
+            if (evt.getGuild().getMember(evt.getJDA().getSelfUser()).hasPermission(evt.getChannel(), Permission.MESSAGE_MANAGE)) {
+                evt.getMessage().suppressEmbeds(true).queue();
+            }
         } else if ((matcher = SEARCH_PATTERN_MATCHER_CACHE.get()).reset(rawContent).matches()) {
             SearchPlatform platform = SearchPlatform.from(PorkUtil.fallbackIfNull(matcher.group(1), SearchPlatform.YOUTUBE.name()));
             if (platform == null)   {

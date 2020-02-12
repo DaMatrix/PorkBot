@@ -39,48 +39,66 @@ public final class TrackScheduler extends AudioEventAdapter {
 
     private final Queue<AudioTrack> queue = new LinkedList<>();
 
-    public synchronized void enqueue(@NonNull AudioTrack track)  {
-        if (!this.player.startTrack(track, true))    {
-            this.queue.add(track);
+    public void enqueue(@NonNull AudioTrack track)  {
+        synchronized (this.manager) {
+            if (!this.player.startTrack(track, true)) {
+                this.queue.add(track);
+            }
         }
     }
 
-    public synchronized boolean next() {
-        AudioTrack next = this.queue.poll();
-        this.player.startTrack(next, false);
-        return next != null;
-    }
-
-    public synchronized void shuffle()  {
-        if (this.queue.size() <= 1) {
-            return;
-        }
-
-        AudioTrack[] tracks = this.queue();
-        PArrays.shuffle(tracks);
-        this.queue.clear();
-        for (AudioTrack track : tracks)  {
-            this.queue.add(track);
+    public boolean next() {
+        synchronized (this.manager) {
+            AudioTrack next = this.queue.poll();
+            this.player.startTrack(next, false);
+            return next != null;
         }
     }
 
-    public synchronized AudioTrack[] queue()    {
-        return this.queue.toArray(new AudioTrack[this.queue.size()]);
+    public void shuffle()  {
+        synchronized (this.manager) {
+            if (this.queue.size() <= 1) {
+                return;
+            }
+
+            AudioTrack[] tracks = this.queueSnapshot();
+            PArrays.shuffle(tracks);
+            this.queue.clear();
+            for (AudioTrack track : tracks) {
+                this.queue.add(track);
+            }
+        }
     }
 
-    public synchronized void skipAll()  {
-        this.queue.clear();
-        this.player.destroy();
-        this.manager.doDisconnect();
+    public AudioTrack[] queueSnapshot()    {
+        synchronized (this.manager) {
+            return this.queue.isEmpty() ? null : this.queue.toArray(new AudioTrack[this.queue.size()]);
+        }
+    }
+
+    public void skipAll()  {
+        synchronized (this.manager) {
+            this.queue.clear();
+            this.player.destroy();
+            this.manager.doDisconnect();
+        }
     }
 
     @Override
-    public synchronized void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if (endReason == AudioTrackEndReason.REPLACED || endReason.mayStartNext && this.next())    {
-            return;
-        }
+    public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        synchronized (this.manager) {
+            //System.out.printf("Ended \"%s\": %s\n", track.getInfo().title, endReason);
 
-        //shut down, we can't proceed
-        this.skipAll();
+            if (endReason == AudioTrackEndReason.REPLACED || endReason.mayStartNext && this.next()) {
+                return;
+            }
+
+            //shut down, we can't proceed
+            this.skipAll();
+
+            if (endReason == AudioTrackEndReason.CLEANUP) {
+                this.manager.lastAccessedFrom().sendMessage("Player was idle for too long, stopping.").queue();
+            }
+        }
     }
 }

@@ -34,13 +34,13 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 @RequiredArgsConstructor
 public class FromURLLoadResultHandler implements AudioLoadResultHandler {
     @NonNull
-    protected final TextChannel msgChannel;
+    protected final TextChannel        msgChannel;
     @NonNull
-    protected final VoiceChannel dstChannel;
+    protected final VoiceChannel       dstChannel;
     @NonNull
     protected final ServerAudioManager manager;
     @NonNull
-    protected final String input;
+    protected final String             input;
 
     @Override
     public void trackLoaded(AudioTrack track) {
@@ -49,23 +49,28 @@ public class FromURLLoadResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
-        this.msgChannel.sendMessage("Loaded playlist: " + playlist.getName()).queue();
-
         TrackScheduler scheduler = this.manager.connect(this.dstChannel).lastAccessedFrom(this.msgChannel).scheduler();
 
         AudioTrack selectedTrack = playlist.getSelectedTrack();
-        if (selectedTrack != null)  {
+        if (selectedTrack != null) {
             //always add the selected track first (if present)
             scheduler.enqueue(selectedTrack);
         }
 
-        for (AudioTrack track : playlist.getTracks())   {
+        for (AudioTrack track : playlist.getTracks()) {
             if (track == selectedTrack) {
                 continue; //don't add the selected track again
             }
 
-            scheduler.enqueue(selectedTrack);
+            scheduler.enqueue(track);
         }
+
+        this.msgChannel.sendMessage(PorkAudio.findPlatform(playlist).embed()
+                .setTitle("Added playlist to queue", this.input)
+                .addField("Name", playlist.getName(), true)
+                .addField("Tracks", String.valueOf(playlist.getTracks().size()), true)
+                .addField("Total runtime", PorkAudio.formattedTrackLength(playlist.getTracks().stream().map(AudioTrack::getInfo).mapToLong(i -> i.length).sum()), true)
+                .build()).queue();
     }
 
     @Override
