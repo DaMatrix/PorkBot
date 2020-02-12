@@ -17,28 +17,20 @@
 package net.daporkchop.porkbot.command.audio;
 
 import net.daporkchop.porkbot.audio.PorkAudio;
-import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.command.Command;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 /**
  * @author DaPorkchop_
  */
-public class CommandShuffle extends Command {
-    public CommandShuffle() {
-        super("shuffle");
+public class CommandShuffled extends Command {
+    public CommandShuffled() {
+        super("shuffled");
     }
 
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
-        ServerAudioManager manager = PorkAudio.getAudioManager(evt.getGuild(), false);
-        if (manager == null || manager.player().getPlayingTrack() == null || manager.connectedChannel() == null)    {
-            evt.getChannel().sendMessage("Not playing!").queue();
-        } else if (manager.connectedChannel() != evt.getMember().getVoiceState().getChannel())  {
-            evt.getChannel().sendMessage("Must be in the same voice channel!").queue();
-        } else {
-            manager.lastAccessedFrom(evt.getChannel()).scheduler().shuffle();
-            evt.getChannel().sendMessage("Queue shuffled!").queue();
-        }
+        PorkAudio.getAudioManager(evt.getGuild(), true).lastAccessedFrom(evt.getChannel()).shuffled(true);
+        evt.getChannel().sendMessage("Queue is now shuffled!").queue();
     }
 }

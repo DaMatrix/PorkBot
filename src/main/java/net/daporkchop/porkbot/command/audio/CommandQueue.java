@@ -90,7 +90,8 @@ public class CommandQueue extends Command {
                 builder.addField("Queue (page " + (page + 1) + '/' + ((tracks.length - 1) / Constants.MAX_SEARCH_RESULTS + 1) + "):", sb.toString(), false);
 
                 builder.addField("Total tracks:", String.valueOf(tracks.length), true)
-                        .addField("Total runtime:", PorkAudio.formattedTrackLength(Arrays.stream(tracks).map(AudioTrack::getInfo).mapToLong(i -> i.length).sum()), true);
+                        .addField("Total runtime:", PorkAudio.formattedTrackLength(Arrays.stream(tracks).map(AudioTrack::getInfo).mapToLong(i -> i.length).sum()), true)
+                        .addField("Shuffled:", manager.shuffled() ? "Yes" : "No", true);
             }
         }
 

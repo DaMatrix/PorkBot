@@ -49,21 +49,8 @@ public class FromURLLoadResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
-        TrackScheduler scheduler = this.manager.connect(this.dstChannel).lastAccessedFrom(this.msgChannel).scheduler();
-
-        AudioTrack selectedTrack = playlist.getSelectedTrack();
-        if (selectedTrack != null) {
-            //always add the selected track first (if present)
-            scheduler.enqueue(selectedTrack);
-        }
-
-        for (AudioTrack track : playlist.getTracks()) {
-            if (track == selectedTrack) {
-                continue; //don't add the selected track again
-            }
-
-            scheduler.enqueue(track);
-        }
+        this.manager.connect(this.dstChannel).lastAccessedFrom(this.msgChannel).scheduler()
+                .enqueueAll(playlist.getTracks(), playlist.getSelectedTrack());
 
         this.msgChannel.sendMessage(PorkAudio.findPlatform(playlist).embed()
                 .setTitle("Added playlist to queue", this.input)

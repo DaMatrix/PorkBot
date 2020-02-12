@@ -24,9 +24,10 @@ import net.daporkchop.lib.common.function.io.IORunnable;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.logging.Logging;
 import net.daporkchop.porkbot.command.CommandRegistry;
+import net.daporkchop.porkbot.command.audio.CommandOrdered;
 import net.daporkchop.porkbot.command.audio.CommandPlay;
 import net.daporkchop.porkbot.command.audio.CommandQueue;
-import net.daporkchop.porkbot.command.audio.CommandShuffle;
+import net.daporkchop.porkbot.command.audio.CommandShuffled;
 import net.daporkchop.porkbot.command.audio.CommandSkip;
 import net.daporkchop.porkbot.command.audio.CommandStop;
 import net.daporkchop.porkbot.command.bot.CommandBotInfo;
@@ -55,8 +56,8 @@ import java.util.concurrent.TimeUnit;
 public class PorkBot {
     public static final PorkBot INSTANCE = new PorkBot();
 
-    public static final EventExecutorGroup SCHEDULED_EXECUTOR      = new DefaultEventExecutor();
-    public static final PorkBotWebServer   WEB_SERVER = new PorkBotWebServer();
+    public static final EventExecutorGroup SCHEDULED_EXECUTOR = new DefaultEventExecutor();
+    public static final PorkBotWebServer   WEB_SERVER         = new PorkBotWebServer();
 
     public static void main(String[] args) {
         INSTANCE.start();
@@ -112,9 +113,10 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandShutdown());
 
         //audio
+        CommandRegistry.registerCommand(new CommandOrdered());
         CommandRegistry.registerCommand(new CommandPlay());
         CommandRegistry.registerCommand(new CommandQueue());
-        CommandRegistry.registerCommand(new CommandShuffle());
+        CommandRegistry.registerCommand(new CommandShuffled());
         CommandRegistry.registerCommand(new CommandSkip());
         CommandRegistry.registerCommand(new CommandStop());
         //CommandRegistry.registerCommand(new CommandPlayAll());

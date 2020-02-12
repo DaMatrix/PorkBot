@@ -24,8 +24,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.lib.common.util.PArrays;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author DaPorkchop_
@@ -37,7 +39,7 @@ public final class TrackScheduler extends AudioEventAdapter {
     @NonNull
     private final ServerAudioManager manager;
 
-    private final Queue<AudioTrack> queue = new LinkedList<>();
+    private final LinkedList<AudioTrack> queue = new LinkedList<>();
 
     public void enqueue(@NonNull AudioTrack track)  {
         synchronized (this.manager) {
@@ -47,26 +49,37 @@ public final class TrackScheduler extends AudioEventAdapter {
         }
     }
 
-    public boolean next() {
+    public void enqueueAll(@NonNull Collection<AudioTrack> tracks, AudioTrack selectedTrack)   {
         synchronized (this.manager) {
-            AudioTrack next = this.queue.poll();
-            this.player.startTrack(next, false);
-            return next != null;
+            if (this.manager.shuffled())    {
+                this.queue.addAll(tracks);
+
+                if (this.player.getPlayingTrack() == null)  {
+                    this.next();
+                }
+            } else {
+                if (selectedTrack != null)  {
+                    this.enqueue(selectedTrack);
+                }
+
+                for (AudioTrack track : tracks) {
+                    if (selectedTrack != null && track == selectedTrack)    {
+                        continue;
+                    }
+
+                    this.enqueue(track);
+                }
+            }
         }
     }
 
-    public void shuffle()  {
+    public boolean next() {
         synchronized (this.manager) {
-            if (this.queue.size() <= 1) {
-                return;
-            }
-
-            AudioTrack[] tracks = this.queueSnapshot();
-            PArrays.shuffle(tracks);
-            this.queue.clear();
-            for (AudioTrack track : tracks) {
-                this.queue.add(track);
-            }
+            AudioTrack next = this.manager.shuffled()
+                    ? this.queue.remove(ThreadLocalRandom.current().nextInt(this.queue.size())) //probably not the smartest thing to be doing on a linked list, but most people won't be using shuffling anyway
+                    : this.queue.poll();
+            this.player.startTrack(next, false);
+            return next != null;
         }
     }
 

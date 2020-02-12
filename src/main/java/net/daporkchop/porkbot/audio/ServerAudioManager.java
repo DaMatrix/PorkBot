@@ -40,6 +40,9 @@ public final class ServerAudioManager {
     @NonNull
     private TextChannel lastAccessedFrom;
 
+    @Setter
+    private boolean shuffled = false;
+
     public ServerAudioManager(@NonNull Guild guild, @NonNull AudioPlayer player) {
         this.guild = guild;
         (this.player = player).addListener(this.scheduler = new TrackScheduler(player, this));
