@@ -93,7 +93,7 @@ public class CommandQueue extends Command {
                 builder.addField("Total tracks:", String.valueOf(tracks.length), true)
                         .addField("Total runtime:", PorkAudio.formattedTrackLength(Arrays.stream(tracks).map(FutureTrack::getInfo)
                                 .mapToLong(i -> i.length)
-                                .filter(l -> l != Long.MAX_VALUE)
+                                .filter(l -> l != Long.MAX_VALUE && l >= 0L)
                                 .sum()), true)
                         .addField("Shuffled:", manager.shuffled() ? "Yes" : "No", true);
             }

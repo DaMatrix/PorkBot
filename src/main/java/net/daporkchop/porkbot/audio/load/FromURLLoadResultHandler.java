@@ -59,7 +59,10 @@ public class FromURLLoadResultHandler implements AudioLoadResultHandler {
                 .setTitle("Added playlist to queue", this.input)
                 .addField("Name", playlist.getName(), true)
                 .addField("Tracks", String.valueOf(playlist.getTracks().size()), true)
-                .addField("Total runtime", PorkAudio.formattedTrackLength(playlist.getTracks().stream().map(AudioTrack::getInfo).mapToLong(i -> i.length).sum()), true)
+                .addField("Total runtime", PorkAudio.formattedTrackLength(playlist.getTracks().stream().map(AudioTrack::getInfo)
+                        .mapToLong(i -> i.length)
+                        .filter(l -> l != Long.MAX_VALUE && l >= 0L)
+                        .sum()), true)
                 .build()).queue();
     }
 

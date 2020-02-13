@@ -23,6 +23,8 @@ import lombok.experimental.UtilityClass;
 import net.daporkchop.lib.common.cache.Cache;
 import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.util.PorkUtil;
+import net.daporkchop.lib.http.HttpClient;
+import net.daporkchop.lib.http.impl.java.JavaHttpClientBuilder;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,11 +47,15 @@ public class Constants {
     public final Pattern        ESCAPE_PATTERN       = Pattern.compile("([*_~`()\\[\\]])");
     public final Cache<Matcher> ESCAPE_MATCHER_CACHE = Cache.soft(() -> ESCAPE_PATTERN.matcher(""));
 
+    public final HttpClient BLOCKING_HTTP = new JavaHttpClientBuilder()
+            .blockingRequests(true)
+            .build();
+
     public final int MAX_SEARCH_RESULTS = 5;
     public final int MAX_NAME_LENGTH    = 50;
 
-    public String escape(@NonNull String src)   {
-        try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get())  {
+    public String escape(@NonNull String src) {
+        try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {
             StringBuilder builder = handle.value();
             builder.setLength(0);
 
@@ -58,15 +64,15 @@ public class Constants {
         }
     }
 
-    public void appendEscaped(@NonNull StringBuilder builder, @NonNull String src)   {
+    public void appendEscaped(@NonNull StringBuilder builder, @NonNull String src) {
         appendEscaped(builder, src, 0, src.length());
     }
 
-    public void appendEscaped(@NonNull StringBuilder builder, @NonNull String src, int start, int length)   {
+    public void appendEscaped(@NonNull StringBuilder builder, @NonNull String src, int start, int length) {
         PorkUtil.assertInRangeLen(src.length(), start, length);
-        for (int i = 0; i < length; i++)    {
+        for (int i = 0; i < length; i++) {
             char c = src.charAt(start + i);
-            switch (c)  {
+            switch (c) {
                 case '*':
                 case '_':
                 case '~':

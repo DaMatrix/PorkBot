@@ -18,12 +18,20 @@ package net.daporkchop.porkbot.audio;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioTrack;
+import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioTrack;
+import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioTrack;
+import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -36,6 +44,7 @@ import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.audio.load.FromURLLoadResultHandler;
 import net.daporkchop.porkbot.audio.load.SearchLoadResultHandler;
+import net.daporkchop.porkbot.audio.source.pplst.PplstAudioSourceManager;
 import net.daporkchop.porkbot.audio.track.ResolvedTrack;
 import net.daporkchop.porkbot.util.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -47,6 +56,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -63,7 +73,19 @@ public class PorkAudio {
 
     static {
         //register audio sources
-        AudioSourceManagers.registerRemoteSources(PLAYER_MANAGER);
+        {
+            PLAYER_MANAGER.registerSourceManager(new YoutubeAudioSourceManager(true));
+            PLAYER_MANAGER.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
+            PLAYER_MANAGER.registerSourceManager(new BandcampAudioSourceManager());
+            PLAYER_MANAGER.registerSourceManager(new VimeoAudioSourceManager());
+            PLAYER_MANAGER.registerSourceManager(new TwitchStreamAudioSourceManager());
+            PLAYER_MANAGER.registerSourceManager(new BeamAudioSourceManager());
+
+            HttpAudioSourceManager httpAudioSourceManager = new HttpAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY);
+            PLAYER_MANAGER.registerSourceManager(new PplstAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY, httpAudioSourceManager));
+            PLAYER_MANAGER.registerSourceManager(httpAudioSourceManager);
+        }
+        //AudioSourceManagers.registerRemoteSources(PLAYER_MANAGER);
 
         //clean up idle audio managers automatically
         PorkBot.SCHEDULED_EXECUTOR.scheduleWithFixedDelay(() -> {
@@ -207,28 +229,24 @@ public class PorkAudio {
     }
 
     public StringBuilder formattedTrackLength(long length, @NonNull StringBuilder builder) {
-        builder.append('`');
         if (length == Long.MAX_VALUE || length < 0L) {
             builder.append("unknown length");
         } else {
-            long seconds = length / 1000L;
-            long minutes = seconds / 60L;
-            long hours = minutes / 60L;
+            long seconds = (length / 1000L) % 60L;
+            long minutes = (length / (1000L * 60L)) % 60L;
+            long hours = (length / (1000L * 60L * 60L)) % 24L;
+            long days = length / (1000L * 60L * 60L * 24L);
 
-            if (hours > 0L) {
-                builder.append(hours).append(':');
-                if (minutes % 60L < 10L) {
-                    builder.append('0');
-                }
+            Formatter formatter = new Formatter(builder);
+            if (days > 0L)  {
+                formatter.format("`%dd %02dh %02dm %02ds`", days, hours, minutes, seconds);
+            } else if (hours > 0L)  {
+                formatter.format("`%dh %02dm %02ds`", hours, minutes, seconds);
+            } else  {
+                formatter.format("`%dm %02ds`", minutes, seconds);
             }
-
-            builder.append(minutes % 60L).append(':');
-            if (seconds % 60L < 10L) {
-                builder.append('0');
-            }
-            builder.append(seconds % 60L);
         }
-        return builder.append('`');
+        return builder;
     }
 
     public StringBuilder appendTrackInfo(@NonNull AudioTrackInfo info, @NonNull StringBuilder builder) {
