@@ -30,8 +30,12 @@ import java.util.function.BiConsumer;
  * @author DaPorkchop_
  */
 public interface FutureTrack {
-    AudioTrackInfo UNKNOWN_INFO = AudioTrackInfoBuilder.empty().build();
-    AudioTrackInfo FAILED_INFO = AudioTrackInfoBuilder.empty().setTitle("Failed to load").build();
+    AudioTrackInfo UNKNOWN_INFO = AudioTrackInfoBuilder.empty()
+            .setTitle("Loading title...").setAuthor("Loading author...")
+            .build();
+    AudioTrackInfo FAILED_INFO = AudioTrackInfoBuilder.empty()
+            .setTitle("Failed to load").setAuthor("Failed to load")
+            .build();
 
     /**
      * @return the {@link VoiceChannel} that the track was requested to be played in

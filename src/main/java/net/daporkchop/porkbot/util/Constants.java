@@ -26,6 +26,10 @@ import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.HttpClient;
 import net.daporkchop.lib.http.impl.java.JavaHttpClientBuilder;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,6 +89,15 @@ public class Constants {
                 default:
                     builder.append(c);
             }
+        }
+    }
+
+    public String escapeUrl(@NonNull String path) {
+        try {
+            URL url = new URL(path);
+            return new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef()).toASCIIString();
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new IllegalArgumentException(path, e);
         }
     }
 }

@@ -17,6 +17,7 @@
 package net.daporkchop.porkbot.audio.source.pplst;
 
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerDescriptor;
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerHints;
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerProbe;
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -107,17 +108,27 @@ public class PplstAudioSourceManager implements AudioSourceManager {
 
         matcher = LINE_PATTERN_MATCHER_CACHE.get().reset(body);
         while (matcher.find()) {
-            MediaContainerProbe probe = this.registry.find(matcher.group(3));
+            String format = matcher.group(3);
+            MediaContainerProbe probe = this.registry.find(format);
             if (probe == null) {
-                continue;
+                MediaContainerHints hints = MediaContainerHints.from(null, format);
+                for (MediaContainerProbe testProbe : this.registry.getAll())    {
+                    if (testProbe.matchesHints(hints))  {
+                        probe = testProbe;
+                        break;
+                    }
+                }
+
+                if (probe == null) {
+                    continue;
+                }
             }
 
             String path = matcher.group(6);
             try {
                 //escape string correctly
-                URL url = new URL(path);
-                path = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef()).toASCIIString();
-            } catch (Exception e)   {
+                path = Constants.escapeUrl(path);
+            } catch (IllegalArgumentException e)   {
                 continue; //invalid path
             }
 

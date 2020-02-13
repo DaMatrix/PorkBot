@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * @author DaPorkchop_
  */
 public class CommandPlay extends Command {
-    private static final Pattern        URL_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play ((?>https?|ftp)://[0-9a-zA-Z-._~:/?#\\[\\]@!$&'()*+,;=%]+)");
+    private static final Pattern        URL_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (https?://[0-9a-zA-Z-._~:/?#\\[\\]@!$&'()*+,;=%]+)");
     private static final Cache<Matcher> URL_PATTERN_MATCHER_CACHE = Cache.soft(() -> URL_PATTERN.matcher(""));
 
     private static final Pattern        SEARCH_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (?>(?i)(" + String.join("|", SearchPlatform.getAllPlatformNamesAndAliases()) + ")(?-i) )?(.+)");

@@ -23,9 +23,9 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 /**
  * @author DaPorkchop_
  */
-public class CommandShuffled extends Command {
-    public CommandShuffled() {
-        super("shuffled");
+public class CommandShuffle extends Command {
+    public CommandShuffle() {
+        super("shuffle");
     }
 
     @Override

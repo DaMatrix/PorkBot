@@ -16,7 +16,9 @@
 
 package net.daporkchop.porkbot.command.audio;
 
+import net.daporkchop.lib.binary.oio.StreamUtil;
 import net.daporkchop.lib.common.cache.Cache;
+import net.daporkchop.lib.common.function.PFunctions;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.Http;
 import net.daporkchop.porkbot.audio.PorkAudio;
@@ -31,8 +33,13 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.regex.Matcher;
@@ -42,7 +49,7 @@ import java.util.regex.Pattern;
  * @author DaPorkchop_
  */
 public class CommandPlayList extends Command {
-    private static final Pattern        URL_PATTERN               = Pattern.compile("^((?>https?|ftp)://[0-9a-zA-Z-._~:/?#\\[\\]@!$&'()*+,;=%]+)$", Pattern.MULTILINE);
+    private static final Pattern        URL_PATTERN               = Pattern.compile("^(https?://.+)$", Pattern.MULTILINE);
     private static final Cache<Matcher> URL_PATTERN_MATCHER_CACHE = Cache.soft(() -> URL_PATTERN.matcher(""));
 
     public CommandPlayList() {
@@ -64,7 +71,7 @@ public class CommandPlayList extends Command {
 
                 Queue<LateResolvingTrack> tracks = new LinkedList<>();
                 while (matcher.find())  {
-                    tracks.add(new LateResolvingTrack(matcher.group(1), dstChannel));
+                    tracks.add(new LateResolvingTrack(Constants.escapeUrl(matcher.group(1)), dstChannel));
                 }
                 PorkAudio.getAudioManager(evt.getGuild(), true).lastAccessedFrom(evt.getChannel()).scheduler().enqueueAll((Collection<FutureTrack>) (Object) tracks);
 

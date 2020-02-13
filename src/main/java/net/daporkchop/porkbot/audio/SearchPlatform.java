@@ -35,7 +35,7 @@ public final class SearchPlatform {
 
     public static final SearchPlatform BANDCAMP   = new SearchPlatform(0xFF1DA0C3, "bandcamp", "bandcamp");
     public static final SearchPlatform INTERNET   = new SearchPlatform(0xFF3B88C3, "Web URL", "globe-wireframe");
-    public static final SearchPlatform SOUNDCLOUD = new SearchPlatform(0xFFF7620E, "scsearch:", "SoundCloud", "sc");
+    public static final SearchPlatform SOUNDCLOUD = new SearchPlatform(0xFFF7620E, "scsearch:", "SoundCloud", "sc", "soundc");
     public static final SearchPlatform TWITCH     = new SearchPlatform(0xFF6C2498, "Twitch", "twitch");
     public static final SearchPlatform YOUTUBE    = new SearchPlatform(0xFFDD473A, "ytsearch:", "YouTube", "yt");
 
