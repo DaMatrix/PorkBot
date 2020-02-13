@@ -64,12 +64,12 @@ public final class ServerAudioManager {
 
         AudioManager manager = this.guild.getAudioManager();
         if (!manager.isConnected() && !manager.isAttemptingToConnect()) {
-            if (dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_CONNECT))    {
+            if (!dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_CONNECT))    {
                 if (errorMsg && this.lastAccessedFrom != null)   {
                     this.lastAccessedFrom.sendMessage("No permission to join channel `" + dstChannel.getName() + '`').queue();
                 }
                 return false;
-            } else if (dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_SPEAK))    {
+            } else if (!dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_SPEAK))    {
                 if (errorMsg && this.lastAccessedFrom != null)   {
                     this.lastAccessedFrom.sendMessage("No permission to speak in channel `" + dstChannel.getName() + '`').queue();
                 }
