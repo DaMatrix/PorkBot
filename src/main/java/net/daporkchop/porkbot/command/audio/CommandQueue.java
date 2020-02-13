@@ -72,7 +72,7 @@ public class CommandQueue extends Command {
             if (currentTrack == null) {
                 builder.addField("Currently playing:", "*<not playing>*", false);
             } else {
-                PorkAudio.appendTrackInfo(currentTrack.getInfo(), sb);
+                PorkAudio.appendTrackInfo(currentTrack.getPosition(), currentTrack.getInfo(), sb);
                 builder.addField("Currently playing:", sb.toString(), false);
                 sb.setLength(0);
             }

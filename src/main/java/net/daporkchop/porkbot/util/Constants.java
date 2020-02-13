@@ -25,11 +25,14 @@ import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.HttpClient;
 import net.daporkchop.lib.http.impl.java.JavaHttpClientBuilder;
+import net.dv8tion.jda.api.entities.Message;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +42,8 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class Constants {
     public final boolean DEV_MODE = Boolean.valueOf(System.getProperty("porkbot.dev", "false"));
+
+    public final long DELETE_DELAY = 10L;
 
     public final Gson       GSON        = new Gson();
     public final JsonParser JSON_PARSER = new JsonParser();
@@ -57,6 +62,8 @@ public class Constants {
 
     public final int MAX_SEARCH_RESULTS = 5;
     public final int MAX_NAME_LENGTH    = 50;
+
+    public final Consumer<Message> DELETE_LATER = message -> message.delete().queueAfter(DELETE_DELAY, TimeUnit.SECONDS);
 
     public String escape(@NonNull String src) {
         try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {

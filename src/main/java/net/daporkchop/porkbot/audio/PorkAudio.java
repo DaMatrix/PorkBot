@@ -186,7 +186,6 @@ public class PorkAudio {
         msgChannel.sendMessage(PorkAudio.embed(track, PorkAudio.findPlatform(track).embed())
                 .setTitle("Added to queue", track.getInfo().uri)
                 .build()).queue();
-
     }
 
     public void checkSearchResponse(@NonNull GuildMessageReceivedEvent event, @NonNull String text) {
@@ -236,8 +235,16 @@ public class PorkAudio {
     }
 
     public StringBuilder formattedTrackLength(long length, @NonNull StringBuilder builder) {
+        return formattedTrackLength(length, builder, true);
+    }
+
+    public StringBuilder formattedTrackLength(long length, @NonNull StringBuilder builder, boolean code) {
+        if (code)   {
+            builder.append('`');
+        }
+
         if (length == Long.MAX_VALUE || length < 0L) {
-            builder.append("unknown length");
+            builder.append("unknown");
         } else {
             long seconds = (length / 1000L) % 60L;
             long minutes = (length / (1000L * 60L)) % 60L;
@@ -246,17 +253,21 @@ public class PorkAudio {
 
             Formatter formatter = new Formatter(builder);
             if (days > 0L)  {
-                formatter.format("`%dd %02dh %02dm %02ds`", days, hours, minutes, seconds);
+                formatter.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds);
             } else if (hours > 0L)  {
-                formatter.format("`%dh %02dm %02ds`", hours, minutes, seconds);
+                formatter.format("%dh %02dm %02ds", hours, minutes, seconds);
             } else  {
-                formatter.format("`%dm %02ds`", minutes, seconds);
+                formatter.format("%dm %02ds", minutes, seconds);
             }
         }
-        return builder;
+        return code ? builder.append('`') : builder;
     }
 
     public StringBuilder appendTrackInfo(@NonNull AudioTrackInfo info, @NonNull StringBuilder builder) {
+        return appendTrackInfo(-1L, info, builder);
+    }
+
+    public StringBuilder appendTrackInfo(long currentTime, @NonNull AudioTrackInfo info, @NonNull StringBuilder builder) {
         builder.append('*');
         if (info.author.length() + info.title.length() >= Constants.MAX_NAME_LENGTH) {
             Constants.appendEscaped(builder, info.author, 0, Math.min(Constants.MAX_NAME_LENGTH - 6, info.author.length()));
@@ -272,7 +283,14 @@ public class PorkAudio {
             Constants.appendEscaped(builder.append("* - "), info.title);
         }
 
-        return formattedTrackLength(info.length, builder.append(' '));
+        builder.append(' ');
+        if (currentTime >= 0L)   {
+            formattedTrackLength(currentTime, builder.append('`'), false);
+            formattedTrackLength(info.length, builder.append('/'), false).append('`');
+        } else {
+            formattedTrackLength(info.length, builder);
+        }
+        return builder;
     }
 
     public SearchPlatform findPlatform(@NonNull AudioTrack track) {

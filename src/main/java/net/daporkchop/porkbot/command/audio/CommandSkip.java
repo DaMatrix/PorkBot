@@ -19,6 +19,7 @@ package net.daporkchop.porkbot.command.audio;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.command.Command;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 /**
@@ -32,14 +33,23 @@ public class CommandSkip extends Command {
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
         ServerAudioManager manager = PorkAudio.getAudioManager(evt.getGuild(), false);
-        if (manager == null || manager.player().getPlayingTrack() == null || manager.connectedChannel() == null)    {
+        if (manager == null) {
             evt.getChannel().sendMessage("Not playing!").queue();
-        } else if (manager.connectedChannel() != evt.getMember().getVoiceState().getChannel())  {
-            evt.getChannel().sendMessage("Must be in the same voice channel!").queue();
+            return;
         } else {
-            evt.getChannel().sendMessage(manager.lastAccessedFrom(evt.getChannel()).scheduler().next()
-                    ? "Skipped to next track!"
-                    : "No tracks left in queue, stopping!").queue();
+            synchronized (manager) {
+                if (manager.connectedChannel() == null || manager.player().getPlayingTrack() == null) {
+                    evt.getChannel().sendMessage("Not playing!").queue();
+                } else if (manager.connectedChannel() != evt.getMember().getVoiceState().getChannel()) {
+                    evt.getChannel().sendMessage("Must be in the same voice channel!").queue();
+                } else {
+                    manager.lastAccessedFrom(evt.getChannel()).scheduler().next();
+
+                    if (evt.getGuild().getMember(evt.getJDA().getSelfUser()).hasPermission(evt.getChannel(), Permission.MESSAGE_MANAGE)) {
+                        evt.getMessage().delete().queue();
+                    }
+                }
+            }
         }
     }
 }

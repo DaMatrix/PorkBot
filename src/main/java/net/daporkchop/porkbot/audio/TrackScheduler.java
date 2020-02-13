@@ -20,14 +20,17 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackState;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.audio.track.FutureTrack;
+import net.dv8tion.jda.api.entities.Message;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author DaPorkchop_
@@ -66,13 +69,14 @@ public final class TrackScheduler extends AudioEventAdapter {
             FutureTrack next = this.manager.shuffled()
                     ? this.queue.remove(ThreadLocalRandom.current().nextInt(this.queue.size())) //probably not the smartest thing to be doing on a linked list, but most people won't be using shuffling anyway
                     : this.queue.poll();
+
             if (next != null) {
                 next.whenResolved((track, e) -> {
                     synchronized (this.manager) {
                         if (e == null && this.manager.connect(next.requestedIn(), false)) {
                             this.player.startTrack(track, false);
                         } else {
-                            //use executor to avoid stack overflow if there are a lot of consecutive errored tracks
+                            //use executor to avoid stack overflow
                             PorkBot.SCHEDULED_EXECUTOR.submit(this::next);
                         }
                     }
@@ -100,9 +104,52 @@ public final class TrackScheduler extends AudioEventAdapter {
     }
 
     @Override
+    public void onTrackStart(AudioPlayer player, AudioTrack track) {
+        synchronized (this.manager) {
+            if (player.getPlayingTrack() != track) {
+                //not sure if this could ever happen, but don't bother doing anything if it does
+                return;
+            }
+
+            switch (track.getState()) {
+                case INACTIVE:
+                case LOADING:
+                    //track isn't loaded yet, so wait a moment before trying again
+                    PorkBot.SCHEDULED_EXECUTOR.schedule(() -> this.onTrackStart(player, track), 500L, TimeUnit.MILLISECONDS);
+                    break;
+                case PLAYING:
+                    if (track.getUserData() != null) {
+                        System.err.println("Message was already sent?!? A");
+                        return;
+                    }
+                    this.manager.lastAccessedFrom().sendMessage(PorkAudio.embed(track, PorkAudio.findPlatform(track).embed())
+                            .setTitle("Now playing", track.getInfo().uri)
+                            .build())
+                            .setCheck(() -> track.getState() == AudioTrackState.PLAYING)
+                            .queue(message -> {
+                                synchronized (this.manager) {
+                                    if (track.getUserData() != null) {
+                                        System.err.println("Message was already sent?!? B");
+                                        return;
+                                    }
+
+                                    track.setUserData(message);
+                                }
+                            });
+                    break;
+            }
+        }
+    }
+
+    @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         synchronized (this.manager) {
-            //System.out.printf("Ended \"%s\": %s\n", track.getInfo().title, endReason);
+            Message message = track.getUserData(Message.class);
+            if (message != null) {
+                message.delete().queue();
+            }
+
+            System.out.printf("Removed track: \"%s\", state: %s, reason: %s\n", track.getInfo().title, track.getState(), endReason);
 
             if (endReason == AudioTrackEndReason.REPLACED || endReason.mayStartNext && this.next()) {
                 return;
