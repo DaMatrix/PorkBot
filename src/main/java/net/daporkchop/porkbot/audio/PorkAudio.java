@@ -220,8 +220,8 @@ public class PorkAudio {
     public EmbedBuilder embed(@NonNull AudioTrack track, @NonNull EmbedBuilder builder) {
         AudioTrackInfo info = track.getInfo();
         return builder
-                .addField("Title", Constants.escape(String.valueOf(info.title)), true)
                 .addField("Author", Constants.escape(String.valueOf(info.author)), true)
+                .addField("Title", Constants.escape(String.valueOf(info.title)), true)
                 .addField("Length", formattedTrackLength(info.length), true);
     }
 
