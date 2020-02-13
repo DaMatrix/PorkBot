@@ -52,7 +52,11 @@ public class FromURLLoadResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
-        this.manager.connect(this.dstChannel).lastAccessedFrom(this.msgChannel).scheduler()
+        if (!this.manager.lastAccessedFrom(this.msgChannel).connect(this.dstChannel, true))   {
+            return;
+        }
+
+        this.manager.scheduler()
                 .enqueueAll(playlist.getTracks().stream().map(track -> new ResolvedTrack(track, this.dstChannel)).collect(Collectors.toList()));
 
         this.msgChannel.sendMessage(PorkAudio.findPlatform(playlist).embed()

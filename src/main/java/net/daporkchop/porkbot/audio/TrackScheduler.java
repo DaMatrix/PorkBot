@@ -68,12 +68,13 @@ public final class TrackScheduler extends AudioEventAdapter {
                     : this.queue.poll();
             if (next != null) {
                 next.whenResolved((track, e) -> {
-                    if (e == null) {
-                        this.manager.connect(next.requestedIn());
-                        this.player.startTrack(track, false);
-                    } else {
-                        //use executor to avoid stack overflow if there are a lot of consecutive errored tracks
-                        PorkBot.SCHEDULED_EXECUTOR.submit(this::next);
+                    synchronized (this.manager) {
+                        if (e == null && this.manager.connect(next.requestedIn(), false)) {
+                            this.player.startTrack(track, false);
+                        } else {
+                            //use executor to avoid stack overflow if there are a lot of consecutive errored tracks
+                            PorkBot.SCHEDULED_EXECUTOR.submit(this::next);
+                        }
                     }
                 });
                 return true;

@@ -57,6 +57,7 @@ public class CommandPlayList extends Command {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
         Matcher matcher;
         VoiceChannel dstChannel;
@@ -69,11 +70,17 @@ public class CommandPlayList extends Command {
             try {
                 matcher.reset(Http.getString(args[1]));
 
+                ServerAudioManager manager = PorkAudio.getAudioManager(evt.getGuild(), true);
+                if (!manager.lastAccessedFrom(evt.getChannel()).connect(dstChannel, true))  {
+                    return;
+                }
+
                 Queue<LateResolvingTrack> tracks = new LinkedList<>();
                 while (matcher.find())  {
                     tracks.add(new LateResolvingTrack(Constants.escapeUrl(matcher.group(1)), dstChannel));
                 }
-                PorkAudio.getAudioManager(evt.getGuild(), true).lastAccessedFrom(evt.getChannel()).scheduler().enqueueAll((Collection<FutureTrack>) (Object) tracks);
+
+                manager.scheduler().enqueueAll((Collection<FutureTrack>) (Object) tracks);
 
                 new LateResolvingTrackGroup(tracks).run();
 

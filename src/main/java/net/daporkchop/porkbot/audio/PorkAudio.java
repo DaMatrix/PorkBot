@@ -177,12 +177,16 @@ public class PorkAudio {
     }
 
     public void addIndividualTrack(@NonNull AudioTrack track, @NonNull ServerAudioManager manager, @NonNull TextChannel msgChannel, @NonNull VoiceChannel dstChannel) {
+        if (!manager.lastAccessedFrom(msgChannel).connect(dstChannel, true))    {
+            return;
+        }
+
+        manager.scheduler().enqueue(new ResolvedTrack(track, dstChannel));
+
         msgChannel.sendMessage(PorkAudio.embed(track, PorkAudio.findPlatform(track).embed())
                 .setTitle("Added to queue", track.getInfo().uri)
                 .build()).queue();
 
-        manager.connect(dstChannel).lastAccessedFrom(msgChannel).scheduler()
-                .enqueue(new ResolvedTrack(track, dstChannel));
     }
 
     public void checkSearchResponse(@NonNull GuildMessageReceivedEvent event, @NonNull String text) {
@@ -203,8 +207,11 @@ public class PorkAudio {
                         .setTitle("Added to queue!", track.getInfo().uri)
                         .build()).queue();
 
-                results.manager.connect(results.dstChannel).lastAccessedFrom(event.getChannel()).scheduler()
-                        .enqueue(new ResolvedTrack(track, results.dstChannel));
+                if (!results.manager.lastAccessedFrom(event.getChannel()).connect(results.dstChannel, true))    {
+                    return;
+                }
+
+                results.manager.scheduler().enqueue(new ResolvedTrack(track, results.dstChannel));
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 event.getChannel().sendMessage("Invalid selection: `" + text + "` (must be in range 1-" + results.tracks.length + ')').queue();
             }

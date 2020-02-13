@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -56,17 +57,29 @@ public final class ServerAudioManager {
         return new AudioPlayerSendHandler(this.player);
     }
 
-    public synchronized ServerAudioManager connect(VoiceChannel dstChannel) {
+    public synchronized boolean connect(VoiceChannel dstChannel, boolean errorMsg) {
         if (dstChannel.getGuild() != this.guild) {
             throw new IllegalArgumentException();
         }
 
         AudioManager manager = this.guild.getAudioManager();
         if (!manager.isConnected() && !manager.isAttemptingToConnect()) {
+            if (dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_CONNECT))    {
+                if (errorMsg && this.lastAccessedFrom != null)   {
+                    this.lastAccessedFrom.sendMessage("No permission to join channel `" + dstChannel.getName() + '`').queue();
+                }
+                return false;
+            } else if (dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_SPEAK))    {
+                if (errorMsg && this.lastAccessedFrom != null)   {
+                    this.lastAccessedFrom.sendMessage("No permission to speak in channel `" + dstChannel.getName() + '`').queue();
+                }
+                return false;
+            }
             manager.setSelfDeafened(true);
+            manager.setSelfMuted(false);
             manager.openAudioConnection(dstChannel);
         }
-        return this;
+        return true;
     }
 
     synchronized void doDisconnect()   {
