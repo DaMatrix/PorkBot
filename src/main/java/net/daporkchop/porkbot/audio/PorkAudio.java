@@ -150,7 +150,7 @@ public class PorkAudio {
             return;
         } else if (tracks.length == 1) {
             //immediately enqueue
-            addIndividualTrack(tracks[0], manager, msgChannel, dstChannel);
+            addIndividualTrack(tracks[0].makeClone(), manager, msgChannel, dstChannel);
             return;
         }
 
