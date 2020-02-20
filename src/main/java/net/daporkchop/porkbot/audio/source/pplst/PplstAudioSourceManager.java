@@ -35,20 +35,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.lib.common.cache.Cache;
 import net.daporkchop.lib.common.util.PorkUtil;
-import net.daporkchop.lib.http.HttpMethod;
-import net.daporkchop.lib.http.impl.netty.util.NettyHttpUtil;
 import net.daporkchop.lib.http.request.Request;
-import net.daporkchop.lib.http.util.URLEncoding;
 import net.daporkchop.porkbot.util.Constants;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,20 +52,20 @@ import java.util.regex.Pattern;
  * @author DaPorkchop_
  */
 @RequiredArgsConstructor
-public class PplstAudioSourceManager implements AudioSourceManager {
+public final class PplstAudioSourceManager implements AudioSourceManager {
     private static final Pattern        FILENAME_PATTERN               = Pattern.compile("^https?://.*/(.*?)\\.pplst$");
-    private static final Cache<Matcher> FILENAME_PATTERN_MATCHER_CACHE = Cache.soft(() -> FILENAME_PATTERN.matcher(""));
+    static final Cache<Matcher> FILENAME_PATTERN_MATCHER_CACHE = Cache.soft(() -> FILENAME_PATTERN.matcher(""));
 
     private static final Pattern        PPLST_PATTERN               = Pattern.compile("^pplst(?>,name=\"(.*?)\")?$", Pattern.MULTILINE);
-    private static final Cache<Matcher> PPLST_PATTERN_MATCHER_CACHE = Cache.soft(() -> PPLST_PATTERN.matcher(""));
+    static final Cache<Matcher> PPLST_PATTERN_MATCHER_CACHE = Cache.soft(() -> PPLST_PATTERN.matcher(""));
 
     private static final Pattern        LINE_PATTERN               = Pattern.compile("^track(?>,album=\"(.*?)\")?(?>,artist=\"(.*?)\")?,format=\"(.*?)\",length=\"([0-9]+\\.[0-9]+)\"(?>,name=\"(.*?)\")?,path=\"(.*?)\"$", Pattern.MULTILINE);
-    private static final Cache<Matcher> LINE_PATTERN_MATCHER_CACHE = Cache.soft(() -> LINE_PATTERN.matcher(""));
+    static final Cache<Matcher> LINE_PATTERN_MATCHER_CACHE = Cache.soft(() -> LINE_PATTERN.matcher(""));
 
     @NonNull
     private final MediaContainerRegistry registry;
     @NonNull
-    private final HttpAudioSourceManager httpSourceManager;
+    final HttpAudioSourceManager httpSourceManager;
 
     @Override
     public String getSourceName() {
@@ -82,7 +78,17 @@ public class PplstAudioSourceManager implements AudioSourceManager {
             return null;
         }
 
-        Request<String> request = Constants.BLOCKING_HTTP.request(reference.identifier)
+        AtomicReference<String> playlistName = new AtomicReference<>("Unknown playlist");
+
+        List<AudioTrack> tracks = new ArrayList<>();
+        this.loadPPLST(reference.identifier, playlistName,
+                (info, probe) -> tracks.add(new HttpAudioTrack(info, new MediaContainerDescriptor(probe, null), this.httpSourceManager)));
+
+        return new BasicAudioPlaylist(playlistName.get(), tracks, null, false);
+    }
+
+    public void loadPPLST(@NonNull String identifier, AtomicReference<String> playlistName, @NonNull BiConsumer<AudioTrackInfo, MediaContainerProbe> callback)    {
+        Request<String> request = Constants.BLOCKING_HTTP.request(identifier)
                 .aggregateToString()
                 .maxLength(1 << 22) // 4 MiB
                 .send();
@@ -92,21 +98,19 @@ public class PplstAudioSourceManager implements AudioSourceManager {
         }
         String body = request.bodyFuture().getNow().body();
 
-        String playlistName = "Unknown playlist";
+        if (playlistName != null) {
+            Matcher matcher = FILENAME_PATTERN_MATCHER_CACHE.get().reset(identifier);
+            if (matcher.find()) {
+                playlistName.set(matcher.group(1));
+            }
 
-        Matcher matcher = FILENAME_PATTERN_MATCHER_CACHE.get().reset(reference.identifier);
-        if (matcher.find()) {
-            playlistName = matcher.group(1);
+            matcher = PPLST_PATTERN_MATCHER_CACHE.get().reset(body);
+            while (matcher.find()) {
+                playlistName.set(PorkUtil.fallbackIfNull(matcher.group(1), playlistName.get()));
+            }
         }
 
-        matcher = PPLST_PATTERN_MATCHER_CACHE.get().reset(body);
-        while (matcher.find()) {
-            playlistName = PorkUtil.fallbackIfNull(matcher.group(1), playlistName);
-        }
-
-        List<AudioTrack> tracks = new ArrayList<>();
-
-        matcher = LINE_PATTERN_MATCHER_CACHE.get().reset(body);
+        Matcher matcher = LINE_PATTERN_MATCHER_CACHE.get().reset(body);
         while (matcher.find()) {
             String format = matcher.group(3);
             MediaContainerProbe probe = this.registry.find(format);
@@ -140,10 +144,8 @@ public class PplstAudioSourceManager implements AudioSourceManager {
                     .setUri(path)
                     .build();
 
-            tracks.add(new HttpAudioTrack(info, new MediaContainerDescriptor(probe, null), this.httpSourceManager));
+            callback.accept(info, probe);
         }
-
-        return new BasicAudioPlaylist(playlistName, tracks, null, false);
     }
 
     @Override

@@ -21,7 +21,6 @@ import com.google.common.cache.CacheBuilder;
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
@@ -44,6 +43,7 @@ import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.audio.load.FromURLLoadResultHandler;
 import net.daporkchop.porkbot.audio.load.SearchLoadResultHandler;
+import net.daporkchop.porkbot.audio.source.pplst.PorkCloudAudioSourceManager;
 import net.daporkchop.porkbot.audio.source.pplst.PplstAudioSourceManager;
 import net.daporkchop.porkbot.audio.track.ResolvedTrack;
 import net.daporkchop.porkbot.util.Constants;
@@ -82,10 +82,11 @@ public class PorkAudio {
             PLAYER_MANAGER.registerSourceManager(new BeamAudioSourceManager());
 
             HttpAudioSourceManager httpAudioSourceManager = new HttpAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY);
-            PLAYER_MANAGER.registerSourceManager(new PplstAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY, httpAudioSourceManager));
+            PplstAudioSourceManager pplstAudioSourceManager = new PplstAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY, httpAudioSourceManager);
+            PLAYER_MANAGER.registerSourceManager(pplstAudioSourceManager);
+            PLAYER_MANAGER.registerSourceManager(new PorkCloudAudioSourceManager(pplstAudioSourceManager));
             PLAYER_MANAGER.registerSourceManager(httpAudioSourceManager);
         }
-        //AudioSourceManagers.registerRemoteSources(PLAYER_MANAGER);
 
         //clean up idle audio managers automatically
         PorkBot.SCHEDULED_EXECUTOR.scheduleWithFixedDelay(() -> {
@@ -134,7 +135,7 @@ public class PorkAudio {
             return;
         }
 
-        String prefixed = platform.prefix(query);
+        String prefixed = platform.prefixed(query);
 
         AudioTrack[] cachedTracks = SEARCH_CACHE.getIfPresent(prefixed);
         if (cachedTracks != null) {
@@ -177,7 +178,7 @@ public class PorkAudio {
     }
 
     public void addIndividualTrack(@NonNull AudioTrack track, @NonNull ServerAudioManager manager, @NonNull TextChannel msgChannel, @NonNull VoiceChannel dstChannel) {
-        if (!manager.lastAccessedFrom(msgChannel).connect(dstChannel, true))    {
+        if (!manager.lastAccessedFrom(msgChannel).connect(dstChannel, true)) {
             return;
         }
 
@@ -206,7 +207,7 @@ public class PorkAudio {
                         .setTitle("Added to queue!", track.getInfo().uri)
                         .build()).queue();
 
-                if (!results.manager.lastAccessedFrom(event.getChannel()).connect(results.dstChannel, true))    {
+                if (!results.manager.lastAccessedFrom(event.getChannel()).connect(results.dstChannel, true)) {
                     return;
                 }
 
@@ -239,7 +240,7 @@ public class PorkAudio {
     }
 
     public StringBuilder formattedTrackLength(long length, @NonNull StringBuilder builder, boolean code) {
-        if (code)   {
+        if (code) {
             builder.append('`');
         }
 
@@ -252,11 +253,11 @@ public class PorkAudio {
             long days = length / (1000L * 60L * 60L * 24L);
 
             Formatter formatter = new Formatter(builder);
-            if (days > 0L)  {
+            if (days > 0L) {
                 formatter.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds);
-            } else if (hours > 0L)  {
+            } else if (hours > 0L) {
                 formatter.format("%dh %02dm %02ds", hours, minutes, seconds);
-            } else  {
+            } else {
                 formatter.format("%dm %02ds", minutes, seconds);
             }
         }
@@ -284,7 +285,7 @@ public class PorkAudio {
         }
 
         builder.append(' ');
-        if (currentTime >= 0L)   {
+        if (currentTime >= 0L) {
             formattedTrackLength(currentTime, builder.append('`'), false);
             formattedTrackLength(info.length, builder.append('/'), false).append('`');
         } else {
@@ -302,6 +303,8 @@ public class PorkAudio {
             return SearchPlatform.BANDCAMP;
         } else if (track instanceof TwitchStreamAudioTrack) {
             return SearchPlatform.TWITCH;
+        } else if (track instanceof PorkCloudAudioSourceManager.PorkCloudAudioTrack) {
+            return SearchPlatform.DAPORKCHOP;
         } else {
             return SearchPlatform.INTERNET;
         }

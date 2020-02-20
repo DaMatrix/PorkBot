@@ -48,7 +48,9 @@ public class SearchLoadResultHandler extends FromURLLoadResultHandler {
     @Override
     public void trackLoaded(@NonNull AudioTrack track) {
         //if a single track is loaded, cache it and then call super to add it to the queue
-        this.searchCache.put(this.prefixed, new AudioTrack[]{ track });
+        if (!Constants.DEV_MODE)    {
+            this.searchCache.put(this.prefixed, new AudioTrack[]{ track });
+        }
 
         super.trackLoaded(track);
     }
@@ -65,7 +67,9 @@ public class SearchLoadResultHandler extends FromURLLoadResultHandler {
         for (int i = 0; i < tracks.length; i++) {
             tracks[i] = list.get(i);
         }
-        this.searchCache.put(this.prefixed, tracks);
+        if (!Constants.DEV_MODE)    {
+            this.searchCache.put(this.prefixed, tracks);
+        }
 
         PorkAudio.handleSearchResults(tracks, this.manager, this.msgChannel, this.dstChannel, this.requester, PorkAudio.findPlatform(playlist), this.input);
     }

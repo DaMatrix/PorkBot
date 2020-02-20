@@ -34,10 +34,11 @@ public final class SearchPlatform {
     private static final Map<String, SearchPlatform> PLATFORM_LOOKUP = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     public static final SearchPlatform BANDCAMP   = new SearchPlatform(0xFF1DA0C3, "bandcamp", "bandcamp");
+    public static final SearchPlatform DAPORKCHOP = new SearchPlatform(0xFFFF7777, "porksearch:", "DaPorkchop_'s music folder", "minecraft-porkchop_raw", "porkcloud", "porkc", "pc");
     public static final SearchPlatform INTERNET   = new SearchPlatform(0xFF3B88C3, "Web URL", "globe-wireframe");
-    public static final SearchPlatform SOUNDCLOUD = new SearchPlatform(0xFFF7620E, "scsearch:", "SoundCloud", "sc", "soundc");
+    public static final SearchPlatform SOUNDCLOUD = new SearchPlatform(0xFFF7620E, "scsearch:", "SoundCloud", "soundcloud", "sc", "soundc");
     public static final SearchPlatform TWITCH     = new SearchPlatform(0xFF6C2498, "Twitch", "twitch");
-    public static final SearchPlatform YOUTUBE    = new SearchPlatform(0xFFDD473A, "ytsearch:", "YouTube", "yt");
+    public static final SearchPlatform YOUTUBE    = new SearchPlatform(0xFFDD473A, "ytsearch:", "YouTube", "youtube", "yt", "youtb", "yout");
 
     public static SearchPlatform from(@NonNull String name) {
         return PLATFORM_LOOKUP.get(name);
@@ -48,18 +49,17 @@ public final class SearchPlatform {
     }
 
     private final int    color;
-    @Getter(AccessLevel.NONE)
     private final String prefix;
     private final String icon;
     private final String name;
 
-    private SearchPlatform(int color, @NonNull String prefix, @NonNull String name, String... aliases) {
+    private SearchPlatform(int color, @NonNull String prefix, @NonNull String name, @NonNull String icon, String... aliases) {
         this.color = color;
         this.prefix = prefix;
-        this.icon = "https://cloud.daporkchop.net/static/img/logo/128/" + name.toLowerCase() + ".png";
+        this.icon = "https://cloud.daporkchop.net/static/img/logo/128/" + icon + ".png";
         this.name = name;
 
-        if (PLATFORM_LOOKUP.putIfAbsent(name, this) != null) {
+        if (name.indexOf(' ') == -1 && PLATFORM_LOOKUP.putIfAbsent(name, this) != null) {
             throw new IllegalStateException(name);
         }
         for (String alias : aliases) {
@@ -76,7 +76,7 @@ public final class SearchPlatform {
         this.name = name;
     }
 
-    public String prefix(@NonNull String query) {
+    public String prefixed(@NonNull String query) {
         return query.startsWith(this.prefix) ? query : this.prefix + query;
     }
 
