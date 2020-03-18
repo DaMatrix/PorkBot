@@ -82,6 +82,6 @@ public class CommandPlay extends Command {
 
     @Override
     public String getUsageExample() {
-        return "..play https://cloud.daporkchop.net/random/music/DBOYD/DBOYD%20-%20Lazy%20Dayze.mp3";
+        return "..play https://cloud.daporkchop.net/random/music/don'tblinkoryou'lldie/don'tblinkoryou'lldie%20-%20Lazy%20Dayze.mp3";
     }
 }
