@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>net.daporkchop.lib</groupId>
-            <artifactId>http-netty</artifactId>
+            <artifactId>http</artifactId>
             <version>0.5.1-SNAPSHOT</version>
         </dependency>
         <dependency>

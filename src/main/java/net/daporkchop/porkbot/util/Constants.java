@@ -54,7 +54,6 @@ public class Constants {
 
     public final String UUID_CAPTURE = "([0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12})";
 
-    public final String BASE_URL       = DEV_MODE ? "https://porkbot-test.daporkchop.net" : "https://porkbot.daporkchop.net";
     public final String COMMAND_PREFIX = DEV_MODE ? ",," : "..";
 
     public final Pattern        ESCAPE_PATTERN       = Pattern.compile("([*_~`()\\[\\]])");

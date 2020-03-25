@@ -20,36 +20,40 @@
 
 package net.daporkchop.porkbot.command.minecraft;
 
+import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.Weigher;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import net.daporkchop.lib.http.Http;
-import net.daporkchop.lib.http.entity.content.type.ContentType;
-import net.daporkchop.lib.http.server.ResponseBuilder;
-import net.daporkchop.lib.http.util.StatusCodes;
-import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
-import net.daporkchop.porkbot.web.ApiMethod;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.awt.Color;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * @author DaPorkchop_
  */
 public final class SkinCommand extends Command {
-    //protected static final String BASE_URL = "https://crafatar.daporkchop.net";
+    protected final Type type;
 
-    protected final String target;
-
-    public SkinCommand(String prefix, String target) {
+    public SkinCommand(String prefix, @NonNull Type type) {
         super(prefix);
 
-        this.target = Constants.BASE_URL + "/api/mc/skin/" + target + '/';
+        this.type = type;
     }
 
     @Override
@@ -64,14 +68,28 @@ public final class SkinCommand extends Command {
                 if (uuid == null) {
                     MessageUtils.sendMessage("Player " + args[1] + " could not be found! Are they a paid Java Edition user?", evt.getChannel());
                 } else {
-                    EmbedBuilder builder = new EmbedBuilder();
-                    builder.setAuthor(args[1] + "'s skin", null, Constants.BASE_URL + "/api/mc/skin/face/" + uuid + ".png");
-                    builder.setImage(this.target + uuid + ".png");
-                    builder.setColor(Color.DARK_GRAY);
+                    Type.FACE.fetch(uuid).thenAcceptBothAsync(this.type.fetch(uuid), (face, img) -> {
+                        String fileNameFace = Type.FACE.fileName(uuid);
+                        String fileName = this.type.fileName(uuid);
 
-                    //builder.addField(args[1] + "'s skin", "", false);
+                        MessageEmbed embed = new EmbedBuilder().setColor(Color.DARK_GRAY)
+                                .setAuthor(args[1] + "'s skin", null, "attachment://" + fileNameFace)
+                                .setImage("attachment://" + fileName)
+                                .setTimestamp(Instant.now())
+                                .build();
 
-                    MessageUtils.sendMessage(builder, evt.getChannel());
+                        try {
+                            evt.getChannel().sendMessage(embed)
+                                    .addFile(face, fileNameFace)
+                                    .addFile(img, fileName)
+                                    .queue();
+                        } catch (PermissionException e) {
+                            //we can't do anything about it
+                            if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
+                                evt.getChannel().sendMessage("Lacking permission to embed links!").queue();
+                            }
+                        }
+                    }, ForkJoinPool.commonPool());
                 }
             });
         } catch (Exception e) {
@@ -89,29 +107,34 @@ public final class SkinCommand extends Command {
         return String.format("..%s Notch", this.prefix);
     }
 
-    public static final class SkinApiMethod implements ApiMethod {
-        private static final String      BASE_URL = "https://crafatar.com";
-        private static final ContentType PNG_TYPE = ContentType.of("image/png");
+    @RequiredArgsConstructor
+    public enum Type implements Function<String, byte[]> {
+        FACE("https://crafatar.com/avatars/%s?size=128&default=MHF_Steve&overlay"),
+        HEAD("https://crafatar.com/renders/head/%s?scale=10&default=MHF_Steve&overlay"),
+        BODY("https://crafatar.com/renders/body/%s?scale=10&default=MHF_Steve&overlay"),
+        RAW("https://crafatar.com/skins/%s?default=MHF_Steve");
 
-        private final Pattern pattern;
-        private final String  format;
+        @NonNull
+        private final String format;
 
-        public SkinApiMethod(@NonNull String name, @NonNull String format) {
-            this.pattern = Pattern.compile("^/api/mc/skin/" + name + '/' + Constants.UUID_CAPTURE + "\\.png$");
-            this.format = format;
+        public final String nameLowercase = this.name().toLowerCase();
 
-            PorkBot.WEB_SERVER.register("/api/mc/skin/" + name, this);
-        }
+        private final LoadingCache<String, byte[]> cache = CacheBuilder.newBuilder()
+                .weigher((Weigher<String, byte[]>) (k, v) -> k.length() + v.length)
+                .maximumWeight(1 << 24L) //16 MiB
+                .build(CacheLoader.from(this));
 
         @Override
-        public void handle(@NonNull String path, @NonNull ResponseBuilder response) throws Exception {
-            Matcher matcher = this.pattern.matcher(path);
-            if (!matcher.find()) {
-                throw StatusCodes.BAD_REQUEST.exception();
-            }
+        public byte[] apply(@NonNull String uuid) {
+            return Http.get(String.format(this.format, uuid));
+        }
 
-            response.status(StatusCodes.OK)
-                    .body(PNG_TYPE, Http.get(BASE_URL + String.format(this.format, matcher.group(1))));
+        public CompletableFuture<byte[]> fetch(@NonNull String uuid) {
+            return CompletableFuture.supplyAsync(() -> this.cache.getUnchecked(uuid), ForkJoinPool.commonPool());
+        }
+
+        public String fileName(@NonNull String uuid) {
+            return String.format("%s-%s.png", this.nameLowercase, uuid);
         }
     }
 }

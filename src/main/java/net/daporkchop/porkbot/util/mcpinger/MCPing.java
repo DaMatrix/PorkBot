@@ -163,7 +163,8 @@ public abstract class MCPing {
                     String text = desc.get("text").getAsString();
                     desc.remove("text");
                     if (desc.size() != 0)   {
-                        text = MCTextEncoder.encode(MCTextType.LEGACY, MinecraftFormatParser.getDefaultInstance().parse(Constants.GSON.toJson(desc)));
+                        //text = MCTextEncoder.encode(MCTextType.LEGACY, MinecraftFormatParser.getDefaultInstance().parse(Constants.GSON.toJson(desc)));
+                        text = MinecraftFormatParser.getDefaultInstance().parse(Constants.GSON.toJson(desc)).toRawString();
                     }
 
                     future.complete(new Java()

@@ -27,8 +27,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 
 public abstract class CommandRegistry {
 
@@ -36,15 +35,14 @@ public abstract class CommandRegistry {
      * A HashMap containing all the commands and their prefix
      */
     public static final HashMap<String, Command> COMMANDS      = new HashMap<>();
-    private static final ExecutorService         EXECUTOR      = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     /**
      * Counts all commands run this session
      */
-    public static long                           COMMAND_COUNT = 0L;
+    public static       long                     COMMAND_COUNT = 0L;
     /**
      * Counts all commands run
      */
-    public static long COMMAND_COUNT_TOTAL;
+    public static  long     COMMAND_COUNT_TOTAL;
     private static ObjectDB command_save;
 
     static {
@@ -61,6 +59,9 @@ public abstract class CommandRegistry {
     public static Command registerCommand(Command cmd) {
         cmd.uses = command_save.getInteger(cmd.prefix + "_uses", 0);
         COMMANDS.put(cmd.prefix, cmd);
+        for (String alias : cmd.aliases) {
+            COMMANDS.put(alias, cmd);
+        }
         return cmd;
     }
 
@@ -70,27 +71,24 @@ public abstract class CommandRegistry {
      * @param evt
      */
     public static void runCommand(GuildMessageReceivedEvent evt, String rawContent) {
-        EXECUTOR.submit(() -> doRunCommand(evt, rawContent));
+        ForkJoinPool.commonPool().submit(() -> doRunCommand(evt, rawContent));
     }
 
     private static void doRunCommand(GuildMessageReceivedEvent evt, String rawContent) {
-        try {
-            try {
-                String[] split = rawContent.split(" ");
-                Command cmd = COMMANDS.getOrDefault(split[0].substring(Constants.COMMAND_PREFIX.length()), null);
-                if (cmd != null) {
-                        evt.getChannel().sendTyping().complete(); //TODO: i don't want to have to wait for this to complete!
-                        cmd.execute(evt, split, rawContent);
-                        COMMAND_COUNT++;
-                        COMMAND_COUNT_TOTAL++;
-                        cmd.uses++;
+        String[] split = rawContent.split(" ");
+        Command cmd = COMMANDS.getOrDefault(split[0].substring(Constants.COMMAND_PREFIX.length()), null);
+        if (cmd != null) {
+            evt.getChannel().sendTyping().queue(v -> {
+                try {
+                    cmd.execute(evt, split, rawContent);
+                    COMMAND_COUNT++;
+                    COMMAND_COUNT_TOTAL++;
+                    cmd.uses++;
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getChannel());
                 }
-            } catch (Throwable e) {
-                e.printStackTrace();
-                MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getChannel());
-            }
-        } catch (NullPointerException e) {
-            evt.getChannel().sendMessage("PorkBot is still starting up! Please wait.").queue();
+            });
         }
     }
 

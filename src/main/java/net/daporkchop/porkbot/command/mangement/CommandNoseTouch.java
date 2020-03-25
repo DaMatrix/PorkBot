@@ -67,6 +67,9 @@ public class CommandNoseTouch extends Command {
         if (!evt.getGuild().getMember(evt.getJDA().getSelfUser()).hasPermission(channel, Permission.MESSAGE_ADD_REACTION)) {
             channel.sendMessage("Missing permission to add reactions!").queue();
             return;
+        } else if (!evt.getGuild().getMember(evt.getJDA().getSelfUser()).hasPermission(channel, Permission.MESSAGE_HISTORY)) {
+            channel.sendMessage("Missing permission to view message history! (needed to add reactions)").queue();
+            return;
         }
 
         Set<Role> roles = new HashSet<>(evt.getMessage().getMentionedRoles());
@@ -118,7 +121,7 @@ public class CommandNoseTouch extends Command {
         } else {
             builder.append((Emote) emote);
         }
-        channel.sendMessage(builder.append('!').build()).queue(new Handler(members, emote));
+        channel.sendMessage(builder.append("! (").append(members.size()).append(" participants)").build()).queue(new Handler(members, emote));
     }
 
     @RequiredArgsConstructor
@@ -136,7 +139,7 @@ public class CommandNoseTouch extends Command {
             this.message = message;
 
             PorkListener.REACTION_ADD_HANDLERS.put(message.getIdLong(), this);
-            this.completeFuture = PorkBot.SCHEDULED_EXECUTOR.schedule(this, 1L, TimeUnit.MINUTES);
+            this.completeFuture = PorkBot.SCHEDULED_EXECUTOR.schedule(this, 2L, TimeUnit.MINUTES);
 
             if (this.emote instanceof String) {
                 message.addReaction((String) this.emote).queue();

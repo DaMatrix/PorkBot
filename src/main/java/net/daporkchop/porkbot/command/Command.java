@@ -29,8 +29,16 @@ public abstract class Command {
     public String prefix;
     public int uses = 0;
 
+    public transient String[] aliases;
+
     public Command(String prefix) {
+        this(prefix, new String[0]);
+    }
+
+    public Command(String prefix, String... aliases) {
         this.prefix = prefix;
+
+        this.aliases = aliases;
     }
 
     /**

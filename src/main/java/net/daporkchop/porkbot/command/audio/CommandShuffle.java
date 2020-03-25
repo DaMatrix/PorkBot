@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
  */
 public class CommandShuffle extends Command {
     public CommandShuffle() {
-        super("shuffle");
+        super("shuffle", "shuffled");
     }
 
     @Override

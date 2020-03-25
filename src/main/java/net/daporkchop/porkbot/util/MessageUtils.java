@@ -43,7 +43,9 @@ public class MessageUtils {
      */
     public static void sendMessage(String s, TextChannel channel) {
         try {
-            Thread.sleep(500);
+            if (false)  {
+                Thread.sleep(500);
+            }
             channel.sendMessage(s).queue();
         } catch (PermissionException | InterruptedException e) {
             //we can't do anything about it
@@ -59,7 +61,9 @@ public class MessageUtils {
     public static void sendMessage(EmbedBuilder builder, TextChannel channel) {
         try {
             builder.setTimestamp(Instant.now());
-            Thread.sleep(500);
+            if (false)  {
+                Thread.sleep(500);
+            }
             channel.sendMessage(builder.build()).queue();
         } catch (PermissionException e) {
             //we can't do anything about it
@@ -72,24 +76,24 @@ public class MessageUtils {
     }
 
     /**
-     * Sends an image with the embed
+     * Sends a message to a channel
      *
      * @param builder
-     * @param image
-     * @param name
      * @param channel
      */
-    public static void sendImage(EmbedBuilder builder, byte[] image, String name, TextChannel channel) {
+    public static void sendMessage(MessageBuilder builder, TextChannel channel) {
         try {
-            builder.setTimestamp(Instant.now());
-            channel.sendFile(image, name)
-                    .embed(builder.build())
-                    .queue();
+            if (false)  {
+                Thread.sleep(500);
+            }
+            channel.sendMessage(builder.build()).queue();
         } catch (PermissionException e) {
             //we can't do anything about it
             if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
                 channel.sendMessage("Lacking permission to embed links!").queue();
             }
+        } catch (InterruptedException e) {
+            //wtf java
         }
     }
 

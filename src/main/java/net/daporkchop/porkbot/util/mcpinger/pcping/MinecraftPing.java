@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
+//TODO: this is shit, rewrite it with netty
 public class MinecraftPing {
     private static final JsonParser PARSER = new JsonParser();
 

@@ -55,7 +55,6 @@ import net.daporkchop.porkbot.command.misc.CommandInterject;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
-import net.daporkchop.porkbot.web.PorkBotWebServer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +63,6 @@ public class PorkBot {
     public static final PorkBot INSTANCE = new PorkBot();
 
     public static final EventExecutorGroup SCHEDULED_EXECUTOR = new DefaultEventExecutor();
-    public static final PorkBotWebServer   WEB_SERVER         = new PorkBotWebServer();
 
     public static void main(String[] args) {
         INSTANCE.start();
@@ -88,16 +86,11 @@ public class PorkBot {
         CommandRegistry.registerCommand(new CommandMcUUID());
         CommandRegistry.registerCommand(new CommandOfflineUUID());
 
-        new SkinCommand.SkinApiMethod("face", "/avatars/%s?size=128&default=MHF_Steve&overlay");
-        new SkinCommand.SkinApiMethod("head", "/renders/head/%s?scale=10&default=MHF_Steve&overlay");
-        new SkinCommand.SkinApiMethod("body", "/renders/body/%s?scale=10&default=MHF_Steve&overlay");
-        new SkinCommand.SkinApiMethod("raw", "/skins/%s?default=MHF_Steve");
-        CommandRegistry.registerCommand(new SkinCommand("mcavatar", "face"));
-        CommandRegistry.registerCommand(new SkinCommand("mchead", "head"));
-        CommandRegistry.registerCommand(new SkinCommand("mcskin", "body"));
-        CommandRegistry.registerCommand(new SkinCommand("skinsteal", "raw"));
+        CommandRegistry.registerCommand(new SkinCommand("mcavatar", SkinCommand.Type.FACE));
+        CommandRegistry.registerCommand(new SkinCommand("mchead", SkinCommand.Type.HEAD));
+        CommandRegistry.registerCommand(new SkinCommand("mcskin", SkinCommand.Type.BODY));
+        CommandRegistry.registerCommand(new SkinCommand("skinsteal", SkinCommand.Type.RAW));
 
-        PorkBot.WEB_SERVER.register("/api/mc/favicon", new JavaPing.FaviconApiMethod());
         CommandRegistry.registerCommand(new JavaPing("mcping", JavaPing.FLAG_ALL));
         CommandRegistry.registerCommand(new JavaPing("mcmotd", JavaPing.FLAG_MOTD));
         CommandRegistry.registerCommand(new JavaPing("mccount", JavaPing.FLAG_COUNT));
@@ -142,8 +135,6 @@ public class PorkBot {
     public void shutdown() {
         Logging.logger.info("Shutting down shard manager...");
         ShardUtils.shutdown();
-        Logging.logger.info("Shutting down webserver...");
-        WEB_SERVER.shutdown();
         Logging.logger.info("Shutting down scheduled task executor...");
         SCHEDULED_EXECUTOR.shutdownGracefully().syncUninterruptibly();
         Logging.logger.info("Saving command data...");
