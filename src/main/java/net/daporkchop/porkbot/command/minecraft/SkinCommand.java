@@ -27,19 +27,24 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.Weigher;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.daporkchop.lib.binary.oio.StreamUtil;
 import net.daporkchop.lib.http.Http;
+import net.daporkchop.lib.http.HttpMethod;
 import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
@@ -126,7 +131,17 @@ public final class SkinCommand extends Command {
 
         @Override
         public byte[] apply(@NonNull String uuid) {
-            return Http.get(String.format(this.format, uuid));
+            try {
+                String url = String.format(this.format, uuid);
+                System.out.println(url);
+                HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                try (InputStream in = connection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST ? connection.getInputStream() : connection.getErrorStream())    {
+                    return StreamUtil.toByteArray(in);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
 
         public CompletableFuture<byte[]> fetch(@NonNull String uuid) {

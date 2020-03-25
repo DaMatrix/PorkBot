@@ -26,6 +26,7 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import net.daporkchop.lib.common.cache.Cache;
 import net.daporkchop.lib.common.pool.handle.Handle;
+import net.daporkchop.lib.common.pool.selection.SelectionPool;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.HttpClient;
 import net.daporkchop.lib.http.impl.java.JavaHttpClientBuilder;
@@ -61,6 +62,7 @@ public class Constants {
 
     public final HttpClient BLOCKING_HTTP = new JavaHttpClientBuilder()
             .blockingRequests(true)
+            .userAgents(SelectionPool.singleton("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0"))
             .build();
 
     public final int MAX_SEARCH_RESULTS = 5;
