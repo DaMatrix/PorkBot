@@ -62,7 +62,7 @@ public class ShardUtils {
                     .setShardsTotal(-1)
                     .addEventListeners(new PorkListener())
                     .setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"))
-                    .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE))
+                    .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE, CacheFlag.EMOTE))
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Unable to start ShardManager!", e);

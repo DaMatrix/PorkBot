@@ -24,19 +24,21 @@ import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.Constants;
-import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.exceptions.PermissionException;
+import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class PorkListener extends ListenerAdapter {
+    public static final Map<Long, Predicate<GuildMessageReactionAddEvent>> REACTION_ADD_HANDLERS = new ConcurrentHashMap<>();
+
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         if (event.getAuthor().isBot()
@@ -45,7 +47,7 @@ public class PorkListener extends ListenerAdapter {
         }
         String message = event.getMessage().getContentRaw();
 
-        if (message.startsWith(Constants.COMMAND_PREFIX))   {
+        if (message.startsWith(Constants.COMMAND_PREFIX)) {
             CommandRegistry.runCommand(event, message);
         } else {
             PorkAudio.checkSearchResponse(event, message);
@@ -61,6 +63,14 @@ public class PorkListener extends ListenerAdapter {
                 //we're the only one left in the channel
                 manager.handleAllLeft();
             }
+        }
+    }
+
+    @Override
+    public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
+        Predicate<GuildMessageReactionAddEvent> handler = REACTION_ADD_HANDLERS.get(event.getMessageIdLong());
+        if (handler != null && handler.test(event)) {
+            REACTION_ADD_HANDLERS.remove(event.getMessageIdLong());
         }
     }
 }

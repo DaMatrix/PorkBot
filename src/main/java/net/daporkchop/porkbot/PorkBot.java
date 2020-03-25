@@ -43,6 +43,7 @@ import net.daporkchop.porkbot.command.bot.CommandPing;
 import net.daporkchop.porkbot.command.bot.CommandSay;
 import net.daporkchop.porkbot.command.bot.CommandTest;
 import net.daporkchop.porkbot.command.mangement.CommandMuteAll;
+import net.daporkchop.porkbot.command.mangement.CommandNoseTouch;
 import net.daporkchop.porkbot.command.minecraft.CommandMcUUID;
 import net.daporkchop.porkbot.command.minecraft.CommandOfflineUUID;
 import net.daporkchop.porkbot.command.minecraft.JavaPEQuery;
@@ -121,6 +122,7 @@ public class PorkBot {
         //management
         CommandRegistry.registerCommand(new CommandMuteAll("muteall", "Muted", true));
         CommandRegistry.registerCommand(new CommandMuteAll("unmuteall", "Un-muted", false));
+        CommandRegistry.registerCommand(new CommandNoseTouch());
 
         //audio
         CommandRegistry.registerCommand(new CommandOrdered());
