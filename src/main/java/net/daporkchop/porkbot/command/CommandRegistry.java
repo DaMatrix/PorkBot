@@ -20,35 +20,37 @@
 
 package net.daporkchop.porkbot.command;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import lombok.experimental.UtilityClass;
+import net.daporkchop.lib.binary.oio.reader.UTF8FileReader;
+import net.daporkchop.lib.binary.oio.writer.UTF8FileWriter;
+import net.daporkchop.lib.common.misc.file.PFiles;
 import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ObjectDB;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class CommandRegistry {
+@UtilityClass
+public class CommandRegistry {
 
     /**
      * A HashMap containing all the commands and their prefix
      */
-    public static final HashMap<String, Command> COMMANDS      = new HashMap<>();
-    /**
-     * Counts all commands run this session
-     */
-    public static       long                     COMMAND_COUNT = 0L;
-    /**
-     * Counts all commands run
-     */
-    public static  long     COMMAND_COUNT_TOTAL;
-    private static ObjectDB command_save;
+    public final Map<String, Command> COMMANDS = new HashMap<>();
 
-    static {
-        command_save = new ObjectDB(new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"));
-        COMMAND_COUNT_TOTAL = command_save.getLong("totalCommands", 0L);
-    }
+    public final AtomicLong COMMAND_COUNT_SESSION = new AtomicLong(0L);
+    public final AtomicLong COMMAND_COUNT_TOTAL   = new AtomicLong(0L);
 
     /**
      * Registers a command to the command registry.
@@ -56,8 +58,7 @@ public abstract class CommandRegistry {
      * @param cmd
      * @return cmd again lul
      */
-    public static Command registerCommand(Command cmd) {
-        cmd.uses = command_save.getInteger(cmd.prefix + "_uses", 0);
+    public Command registerCommand(Command cmd) {
         COMMANDS.put(cmd.prefix, cmd);
         for (String alias : cmd.aliases) {
             COMMANDS.put(alias, cmd);
@@ -65,38 +66,73 @@ public abstract class CommandRegistry {
         return cmd;
     }
 
-    /**
-     * Runs a command
-     *
-     * @param evt
-     */
-    public static void runCommand(GuildMessageReceivedEvent evt, String rawContent) {
+    public void load() {
+        JsonObject obj;
+        File file = new File("command_info.json");
+        if (PFiles.checkFileExists(file)) {
+            try (Reader in = new UTF8FileReader(file)) {
+                obj = new JsonParser().parse(in).getAsJsonObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (PFiles.checkFileExists(file = new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"))) {
+            //convert old format
+            ObjectDB old = new ObjectDB(file);
+            COMMAND_COUNT_TOTAL.set(old.getLong("totalCommands", 0L));
+            for (Command command : COMMANDS.values()) {
+                command.uses.set(old.getInteger(command.prefix + "_uses", 0));
+            }
+            save();
+            PFiles.rm(file);
+            return;
+        } else {
+            return;
+        }
+
+        COMMAND_COUNT_TOTAL.set(obj.get("totalCommands").getAsLong());
+        obj.getAsJsonObject("commandUsages").entrySet().stream()
+                .filter(entry -> COMMANDS.containsKey(entry.getKey()))
+                .forEach(entry -> COMMANDS.get(entry.getKey()).uses.set(entry.getValue().getAsLong()));
+    }
+
+    public void save() {
+        JsonObject object = new JsonObject();
+
+        object.addProperty("version", 2);
+        object.addProperty("totalCommands", COMMAND_COUNT_TOTAL.get());
+        object.add("commandUsages", COMMANDS.values().stream().collect(
+                JsonObject::new,
+                (obj, command) -> obj.addProperty(command.prefix, command.uses.get()),
+                (a, b) -> {
+                    throw new IllegalStateException();
+                }));
+
+        try (Writer writer = new UTF8FileWriter(PFiles.ensureFileExists(new File("command_info.json")))) {
+            new GsonBuilder().setPrettyPrinting().create().toJson(object, writer);
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    public void runCommand(GuildMessageReceivedEvent evt, String rawContent) {
         ForkJoinPool.commonPool().submit(() -> doRunCommand(evt, rawContent));
     }
 
-    private static void doRunCommand(GuildMessageReceivedEvent evt, String rawContent) {
+    private void doRunCommand(GuildMessageReceivedEvent evt, String rawContent) {
         String[] split = rawContent.split(" ");
         Command cmd = COMMANDS.getOrDefault(split[0].substring(Constants.COMMAND_PREFIX.length()), null);
         if (cmd != null) {
             evt.getChannel().sendTyping().queue(v -> {
                 try {
                     cmd.execute(evt, split, rawContent);
-                    COMMAND_COUNT++;
-                    COMMAND_COUNT_TOTAL++;
-                    cmd.uses++;
+                    COMMAND_COUNT_SESSION.incrementAndGet();
+                    COMMAND_COUNT_TOTAL.incrementAndGet();
+                    cmd.uses.incrementAndGet();
                 } catch (Throwable e) {
                     e.printStackTrace();
                     MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getChannel());
                 }
             });
         }
-    }
-
-    public static void save() {
-        for (Command cmd : COMMANDS.values()) {
-            command_save.setInteger(cmd.prefix + "_uses", cmd.uses);
-        }
-        command_save.setLong("totalCommands", COMMAND_COUNT_TOTAL);
-        command_save.save();
     }
 }

@@ -131,6 +131,9 @@ public class PorkBot {
         //CommandRegistry.registerCommand(new CommandQueue());
         //CommandRegistry.registerCommand(new CommandStop());
 
+        //load state
+        CommandRegistry.load();
+        //actually start bot
         ShardUtils.start();
     }
 

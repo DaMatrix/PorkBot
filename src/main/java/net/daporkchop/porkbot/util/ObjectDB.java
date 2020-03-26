@@ -38,6 +38,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+//why does this exist
+//man i used to be shit at coding
+@Deprecated
 public class ObjectDB implements Serializable {
     public static final File USER_FOLDER = new File(System.getProperty("user.dir"));
     public static final File HOME_FOLDER = new File(System.getProperty("user.home"));

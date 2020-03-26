@@ -24,10 +24,12 @@ import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public abstract class Command {
 
     public String prefix;
-    public int uses = 0;
+    public final AtomicLong uses = new AtomicLong(0L);
 
     public transient String[] aliases;
 

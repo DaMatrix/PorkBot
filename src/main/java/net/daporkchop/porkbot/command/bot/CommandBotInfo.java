@@ -42,7 +42,7 @@ public class CommandBotInfo extends Command {
                         .addField("Total servers:", String.valueOf(ShardUtils.getGuildCount()), true)
                         .addField("Total users:", String.valueOf(ShardUtils.getUserCount()), true)
                         .addField("ID:", evt.getJDA().getSelfUser().getId(), true)
-                        .addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT), true)
+                        .addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT_SESSION), true)
                         .addField("Commands all time:", String.valueOf(CommandRegistry.COMMAND_COUNT_TOTAL), true)
                         .addField("Used RAM:", ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB", true)
                         .addField("Total shards:", String.valueOf(ShardUtils.getShardCount()), true)
