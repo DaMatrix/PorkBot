@@ -69,6 +69,7 @@ public class Constants {
     public final int MAX_NAME_LENGTH    = 50;
 
     public final Consumer<Message> DELETE_LATER = message -> message.delete().queueAfter(DELETE_DELAY, TimeUnit.SECONDS);
+    public static final Pattern EMOJI_PATTERN = Pattern.compile("([\\u20a0-\\u32ff\\ud83c\\udc00-\\ud83d\\udeff\\udbb9\\udce5-\\udbb9\\udcee])");
 
     public String escape(@NonNull String src) {
         try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {

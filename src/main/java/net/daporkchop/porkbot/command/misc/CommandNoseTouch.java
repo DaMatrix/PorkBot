@@ -18,7 +18,7 @@
  *
  */
 
-package net.daporkchop.porkbot.command.mangement;
+package net.daporkchop.porkbot.command.misc;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -45,8 +45,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static net.daporkchop.porkbot.util.Constants.*;
 
 /**
  * this was a request from an irl friend lol
@@ -54,8 +55,6 @@ import java.util.stream.Collectors;
  * @author DaPorkchop_
  */
 public class CommandNoseTouch extends Command {
-    private static final Pattern EMOJI_PATTERN = Pattern.compile("([\\u20a0-\\u32ff\\ud83c\\udc00-\\ud83d\\udeff\\udbb9\\udce5-\\udbb9\\udcee])");
-
     public CommandNoseTouch() {
         super("nosetouch");
     }
@@ -72,19 +71,16 @@ public class CommandNoseTouch extends Command {
             return;
         }
 
-        Set<Role> roles = new HashSet<>(evt.getMessage().getMentionedRoles());
-        Set<Member> members = rawContent.contains("@here")
-                ? channel.getMembers().stream().filter(m -> m.getOnlineStatus() == OnlineStatus.ONLINE).collect(Collectors.toSet())
-                : new HashSet<>(rawContent.contains("@everyone") ? channel.getMembers() : evt.getMessage().getMentionedMembers());
         Optional<Emote> optionalEmote = evt.getMessage().getEmotes().stream().findAny();
         Optional<String> optionalEmoji = optionalEmote.isPresent() ? Optional.empty()
                 : Arrays.stream(args).filter(s -> EMOJI_PATTERN.matcher(s).find()).findAny();
 
-        if (roles.isEmpty() && members.isEmpty()) {
+        Set<Member> members = CommandSelectRandom.getMentionedMembers(evt, rawContent, false);
+        if (members.isEmpty()) {
             channel.sendMessage("Must mention at least one role or member!").queue();
             return;
-        } else if (!optionalEmote.isPresent() && !optionalEmoji.isPresent()) {
-            channel.sendMessage("Must provide an emote to use!").queue();
+        } else if (members.size() == 1) {
+            channel.sendMessage("Must mention at least 2 users!").queue();
             return;
         }
 
@@ -92,31 +88,11 @@ public class CommandNoseTouch extends Command {
             channel.sendMessage("Unable to use given emote!").queue();
             return;
         }
-        Object emote = optionalEmote.isPresent() ? optionalEmote.get() : optionalEmoji.get();
-
-        if (!roles.isEmpty()) {
-            channel.getMembers().stream()
-                    .filter(member -> {
-                        for (Role role : member.getRoles()) {
-                            if (roles.contains(role)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    })
-                    .forEach(members::add);
-        }
-
-        if (members.isEmpty()) {
-            channel.sendMessage("No users match!").queue();
-            return;
-        } else if (members.size() == 1) {
-            channel.sendMessage("Must mention at least 2 users!").queue();
-            return;
-        }
+        Object emote = optionalEmote.isPresent() ? optionalEmote.get() :
+                optionalEmoji.isPresent() ? optionalEmoji.get() : evt.getJDA().getEmoteById(692688500331642900L);
 
         MessageBuilder builder = new MessageBuilder().append("React with ");
-        if (emote instanceof String)    {
+        if (emote instanceof String) {
             builder.append((String) emote);
         } else {
             builder.append((Emote) emote);

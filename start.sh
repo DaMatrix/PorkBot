@@ -29,7 +29,7 @@ sleep 2
 clear 
 
 while [ "$DO_LOOP" == "true" ]; do
-	mvn exec:java -Dexec.args="-Dfile.encoding=UTF-8" -Dexec.mainClass="net.daporkchop.porkbot.PorkBot" -Dexec.classpathScope=runtime
+	mvn exec:java -Dexec.args="-Dfile.encoding=UTF-8 -XX:+UseG1GC -Xmx600M" -Dexec.mainClass="net.daporkchop.porkbot.PorkBot" -Dexec.classpathScope=runtime
 	echo "Press Ctrl+c to stop" 
 	sleep 3
     if git pull | grep -q 'Already up-to-date.'; then

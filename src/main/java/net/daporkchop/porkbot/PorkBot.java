@@ -43,7 +43,7 @@ import net.daporkchop.porkbot.command.bot.CommandPing;
 import net.daporkchop.porkbot.command.bot.CommandSay;
 import net.daporkchop.porkbot.command.bot.CommandTest;
 import net.daporkchop.porkbot.command.mangement.CommandMuteAll;
-import net.daporkchop.porkbot.command.mangement.CommandNoseTouch;
+import net.daporkchop.porkbot.command.misc.CommandNoseTouch;
 import net.daporkchop.porkbot.command.minecraft.CommandMcUUID;
 import net.daporkchop.porkbot.command.minecraft.CommandOfflineUUID;
 import net.daporkchop.porkbot.command.minecraft.JavaPEQuery;
@@ -52,6 +52,7 @@ import net.daporkchop.porkbot.command.minecraft.PEPing;
 import net.daporkchop.porkbot.command.minecraft.SkinCommand;
 import net.daporkchop.porkbot.command.misc.CommandDice;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
+import net.daporkchop.porkbot.command.misc.CommandSelectRandom;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
@@ -110,12 +111,13 @@ public class PorkBot {
         //misc
         CommandRegistry.registerCommand(new CommandDice());
         CommandRegistry.registerCommand(new CommandInterject());
+        CommandRegistry.registerCommand(new CommandNoseTouch());
+        CommandRegistry.registerCommand(new CommandSelectRandom());
         CommandRegistry.registerCommand(new CommandShutdown());
 
         //management
         CommandRegistry.registerCommand(new CommandMuteAll("muteall", "Muted", true));
         CommandRegistry.registerCommand(new CommandMuteAll("unmuteall", "Un-muted", false));
-        CommandRegistry.registerCommand(new CommandNoseTouch());
 
         //audio
         CommandRegistry.registerCommand(new CommandOrdered());
