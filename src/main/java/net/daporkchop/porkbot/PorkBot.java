@@ -54,6 +54,7 @@ import net.daporkchop.porkbot.command.misc.CommandDice;
 import net.daporkchop.porkbot.command.misc.CommandInterject;
 import net.daporkchop.porkbot.command.misc.CommandSelectRandom;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
+import net.daporkchop.porkbot.util.Config;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 
@@ -72,7 +73,7 @@ public class PorkBot {
     public void start() {
         UUIDFetcher.init();
 
-        SCHEDULED_EXECUTOR.scheduleAtFixedRate((IORunnable) CommandRegistry::save, 1L, 1L, TimeUnit.HOURS);
+        SCHEDULED_EXECUTOR.scheduleAtFixedRate((IORunnable) Config::save, 1L, 1L, TimeUnit.HOURS);
 
         //general
         CommandRegistry.registerCommand(new CommandBotInfo());
@@ -132,7 +133,7 @@ public class PorkBot {
         //CommandRegistry.registerCommand(new CommandStop());
 
         //load state
-        CommandRegistry.load();
+        Config.load();
         //actually start bot
         ShardUtils.start();
     }
@@ -143,7 +144,7 @@ public class PorkBot {
         Logging.logger.info("Shutting down scheduled task executor...");
         SCHEDULED_EXECUTOR.shutdownGracefully().syncUninterruptibly();
         Logging.logger.info("Saving command data...");
-        CommandRegistry.save();
+        Config.save();
 
         Logging.logger.info("Exiting...");
         PorkUtil.sleep(1000L);

@@ -29,6 +29,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.audio.track.FutureTrack;
+import net.daporkchop.porkbot.util.Config;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.util.Collection;
@@ -47,6 +48,10 @@ public final class TrackScheduler extends AudioEventAdapter {
     private final ServerAudioManager manager;
 
     private final LinkedList<FutureTrack> queue = new LinkedList<>();
+
+    public int queueSize()  {
+        return this.queue.size();
+    }
 
     public void enqueue(@NonNull FutureTrack track) {
         synchronized (this.manager) {
@@ -147,6 +152,11 @@ public final class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        if (endReason != AudioTrackEndReason.LOAD_FAILED) {
+            Config.TIME_PLAYED_TOTAL.getAndAdd(track.getPosition());
+            Config.TRACKS_PLAYED_TOTAL.getAndIncrement();
+        }
+
         synchronized (this.manager) {
             Message message = track.getUserData(Message.class);
             if (message != null) {

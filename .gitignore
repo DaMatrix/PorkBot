@@ -8,6 +8,7 @@
 target/
 
 command_info\.dat
+command_info\.json
 
 devkey\.txt
 
