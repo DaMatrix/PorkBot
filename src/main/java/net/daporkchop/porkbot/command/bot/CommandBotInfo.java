@@ -20,14 +20,20 @@
 
 package net.daporkchop.porkbot.command.bot;
 
+import net.daporkchop.porkbot.audio.PorkAudio;
+import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.awt.Color;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CommandBotInfo extends Command {
     public CommandBotInfo() {
@@ -36,20 +42,26 @@ public class CommandBotInfo extends Command {
 
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String message) {
+        Collection<VoiceChannel> playingChannels = PorkAudio.getManagerSnapshot().stream()
+                .filter(ServerAudioManager::isPlaying)
+                .map(ServerAudioManager::connectedChannel)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         MessageUtils.sendMessage(new EmbedBuilder().setColor(Color.BLUE)
                         .setAuthor("PorkBot", "https://www.daporkchop.net/porkbot", "https://www.daporkchop.net/toembed/profilepic-64p.gif")
-                        .addField("Name:", "PorkBot#" + evt.getJDA().getSelfUser().getDiscriminator(), true)
                         .addField("Total servers:", String.valueOf(ShardUtils.getGuildCount()), true)
                         .addField("Total users:", String.valueOf(ShardUtils.getUserCount()), true)
-                        .addField("ID:", evt.getJDA().getSelfUser().getId(), true)
+                        .addField("Used RAM:", String.format("%.2f MiB", (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024.0d * 1024.0d)), true)
                         .addField("Commands this session:", String.valueOf(CommandRegistry.COMMAND_COUNT_SESSION), true)
                         .addField("Commands all time:", String.valueOf(CommandRegistry.COMMAND_COUNT_TOTAL), true)
-                        .addField("Used RAM:", ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB", true)
-                        .addField("Total shards:", String.valueOf(ShardUtils.getShardCount()), true)
                         .addField("", "**SHARD INFO**", false)
-                        .addField("Shard #:", String.valueOf(evt.getJDA().getShardInfo().getShardId()), true)
-                        .addField("Shard servers:", String.valueOf(evt.getJDA().getGuilds().size()), true)
-                        .addField("Shard users:", String.valueOf(evt.getJDA().getUsers().size()), true),
+                        .addField("Shard #:", String.format("%d/%d", evt.getJDA().getShardInfo().getShardId(), ShardUtils.getShardCount()), true)
+                        .addField("Shard servers:", String.valueOf(evt.getJDA().getGuildCache().size()), true)
+                        .addField("Shard users:", String.valueOf(evt.getJDA().getUserCache().size()), true)
+                        .addField("", "**AUDIO INFO**", false)
+                        .addField("Playing in:", playingChannels.size() + " servers", true)
+                        .addField("Playing to:", playingChannels.stream().mapToLong(channel -> channel.getMembers().size() - 1).sum() + " users", true),
                 evt.getChannel());
     }
 

@@ -84,15 +84,12 @@ public class ShardUtils {
         MANAGER.getGuilds().forEach(consumer);
     }
 
-    public int getGuildCount() {
-        return (int) MANAGER.getGuildCache().size();
+    public long getGuildCount() {
+        return MANAGER.getGuildCache().size();
     }
 
     public long getUserCount() {
-        return MANAGER == null ? -1L : MANAGER.getShards().stream()
-                .map(JDA::getUserCache)
-                .mapToLong(SnowflakeCacheView::size)
-                .sum();
+        return MANAGER.getUserCache().size();
     }
 
     public Stream<JDA> getShards() {

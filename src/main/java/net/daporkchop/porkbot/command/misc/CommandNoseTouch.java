@@ -75,7 +75,7 @@ public class CommandNoseTouch extends Command {
         Optional<String> optionalEmoji = optionalEmote.isPresent() ? Optional.empty()
                 : Arrays.stream(args).filter(s -> EMOJI_PATTERN.matcher(s).find()).findAny();
 
-        Set<Member> members = CommandSelectRandom.getMentionedMembers(evt, rawContent, false);
+        Set<Member> members = CommandSelectRandom.getMentionedMembers(evt, rawContent, true);
         if (members.isEmpty()) {
             channel.sendMessage("Must mention at least one role or member!").queue();
             return;

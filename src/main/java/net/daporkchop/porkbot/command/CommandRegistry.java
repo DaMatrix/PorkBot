@@ -29,7 +29,6 @@ import net.daporkchop.lib.binary.oio.writer.UTF8FileWriter;
 import net.daporkchop.lib.common.misc.file.PFiles;
 import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.daporkchop.porkbot.util.ObjectDB;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.io.File;
@@ -67,26 +66,16 @@ public class CommandRegistry {
     }
 
     public void load() {
-        JsonObject obj;
         File file = new File("command_info.json");
-        if (PFiles.checkFileExists(file)) {
-            try (Reader in = new UTF8FileReader(file)) {
-                obj = new JsonParser().parse(in).getAsJsonObject();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else if (PFiles.checkFileExists(file = new File(System.getProperty("user.dir") + File.separatorChar + "command_info.dat"))) {
-            //convert old format
-            ObjectDB old = new ObjectDB(file);
-            COMMAND_COUNT_TOTAL.set(old.getLong("totalCommands", 0L));
-            for (Command command : COMMANDS.values()) {
-                command.uses.set(old.getInteger(command.prefix + "_uses", 0));
-            }
-            save();
-            PFiles.rm(file);
+        if (!PFiles.checkFileExists(file)) {
             return;
-        } else {
-            return;
+        }
+
+        JsonObject obj;
+        try (Reader in = new UTF8FileReader(file)) {
+            obj = new JsonParser().parse(in).getAsJsonObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         COMMAND_COUNT_TOTAL.set(obj.get("totalCommands").getAsLong());

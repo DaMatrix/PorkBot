@@ -112,7 +112,7 @@ public final class ServerAudioManager {
     }
 
     public void checkTimedOut() {
-        if (this.player.getPlayingTrack() != null) {
+        if (this.isPlaying()) {
             this.player.checkCleanup(5000L);
             this.lastActive = System.currentTimeMillis();
         } else if (this.lastActive + 5000L < System.currentTimeMillis() && this.connectedChannel() != null) {
@@ -120,5 +120,9 @@ public final class ServerAudioManager {
             this.guild.getAudioManager().closeAudioConnection();
             this.lastAccessedFrom.sendMessage("Player was idle for too long, stopping.").queue();
         }
+    }
+
+    public boolean isPlaying()  {
+        return this.player.getPlayingTrack() != null;
     }
 }

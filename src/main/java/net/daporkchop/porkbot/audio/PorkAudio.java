@@ -60,6 +60,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,6 +121,12 @@ public class PorkAudio {
             }
 
             return manager;
+        }
+    }
+
+    public Collection<ServerAudioManager> getManagerSnapshot() {
+        synchronized (SERVERS) {
+            return new ArrayList<>(SERVERS.values());
         }
     }
 

@@ -63,6 +63,7 @@ public class CommandSelectRandom extends Command {
             members = new HashSet<>(channel.getMembers());
         }
 
+        members.remove(channel.getGuild().getMember(evt.getJDA().getSelfUser()));
         return members;
     }
 
