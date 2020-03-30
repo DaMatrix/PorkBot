@@ -57,6 +57,7 @@ import net.daporkchop.porkbot.command.misc.CommandShutdown;
 import net.daporkchop.porkbot.util.Config;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
+import net.daporkchop.porkbot.util.mcpinger.MCPing;
 
 import java.util.concurrent.TimeUnit;
 
@@ -72,6 +73,7 @@ public class PorkBot {
 
     public void start() {
         UUIDFetcher.init();
+        MCPing.boot();
 
         SCHEDULED_EXECUTOR.scheduleAtFixedRate((IORunnable) Config::save, 1L, 1L, TimeUnit.HOURS);
 
@@ -145,6 +147,8 @@ public class PorkBot {
         SCHEDULED_EXECUTOR.shutdownGracefully().syncUninterruptibly();
         Logging.logger.info("Saving command data...");
         Config.save();
+        Logging.logger.info("Shutting down Minecraft ping workers...");
+        MCPing.shutdown();
 
         Logging.logger.info("Exiting...");
         PorkUtil.sleep(1000L);

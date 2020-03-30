@@ -49,7 +49,7 @@ public final class JavaPEQuery extends Command {
 
         String[] ipPort = args[1].split(":");
 
-        MCPing.query(ipPort[0], ipPort.length == 1 ? this.defaultPort : Integer.parseInt(ipPort[1])).whenComplete((query, ex) -> {
+        MCPing.query(ipPort[0], ipPort.length == 1 ? this.defaultPort : Integer.parseInt(ipPort[1])).whenCompleteAsync((query, ex) -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle(String.format("**%s%s%s**", ipPort[0], ipPort.length > 1 ? ":" : "", ipPort.length > 1 ? ipPort[1] : ""));
 

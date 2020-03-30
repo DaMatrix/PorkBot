@@ -60,7 +60,7 @@ public final class JavaPing extends Command {
 
         String[] ipPort = args[1].split(":");
 
-        MCPing.pingPc(ipPort[0], ipPort.length == 1 ? 25565 : Integer.parseInt(ipPort[1])).whenComplete((java, ex) -> {
+        MCPing.pingPc(ipPort[0], ipPort.length == 1 ? 25565 : Integer.parseInt(ipPort[1])).whenCompleteAsync((java, ex) -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle(String.format("**%s%s%s**", ipPort[0], ipPort.length > 1 ? ":" : "", ipPort.length > 1 ? ipPort[1] : ""));
 
@@ -85,7 +85,7 @@ public final class JavaPing extends Command {
                     builder.setThumbnail("attachment://favicon.png");
                     try {
                         evt.getChannel().sendMessage(builder.build())
-                                .addFile(Base64.getDecoder().decode(java.favicon), "favicon.png")
+                                .addFile(java.favicon, "favicon.png")
                                 .queue();
                     } catch (PermissionException e) {
                         //we can't do anything about it

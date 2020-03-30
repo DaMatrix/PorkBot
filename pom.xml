@@ -67,6 +67,11 @@
         </dependency>
         <dependency>
             <groupId>net.daporkchop.lib</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>0.5.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.daporkchop.lib</groupId>
             <artifactId>minecraft-text</artifactId>
             <version>0.5.1-SNAPSHOT</version>
         </dependency>

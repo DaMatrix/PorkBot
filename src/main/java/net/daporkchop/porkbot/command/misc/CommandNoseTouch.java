@@ -39,6 +39,7 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEve
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -147,7 +148,18 @@ public class CommandNoseTouch extends Command {
         @Override
         public synchronized void run() {
             if (!this.completeFuture.isDone()) {
-                this.message.editMessage("Cancelled due to inactivity.").queue();
+                try {
+                    MessageBuilder builder = new MessageBuilder().append("Cancelled due to inactivity.\nRemaining: ");
+                    for (Iterator<Member> itr = this.members.iterator(); itr.hasNext(); ) {
+                        builder.append(itr.next());
+                        if (itr.hasNext()) {
+                            builder.append(", ");
+                        }
+                    }
+                    this.message.editMessage(builder.build()).queue();
+                } catch (Exception e)   {
+                    this.message.editMessage("Cancelled due to inactivity.").queue();
+                }
             }
         }
     }

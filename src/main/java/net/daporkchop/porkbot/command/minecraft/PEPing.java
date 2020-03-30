@@ -57,7 +57,7 @@ public final class PEPing extends Command {
 
         String[] ipPort = args[1].split(":");
 
-        MCPing.pingPe(ipPort[0], ipPort.length == 1 ? 19132 : Integer.parseInt(ipPort[1])).whenComplete((pe, ex) -> {
+        MCPing.pingPe(ipPort[0], ipPort.length == 1 ? 19132 : Integer.parseInt(ipPort[1])).whenCompleteAsync((pe, ex) -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle(String.format("**%s%s%s**", ipPort[0], ipPort.length > 1 ? ":" : "", ipPort.length > 1 ? ipPort[1] : ""));
 
