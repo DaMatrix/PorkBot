@@ -28,17 +28,12 @@ import com.google.common.cache.Weigher;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.lib.binary.oio.StreamUtil;
-import net.daporkchop.lib.http.Http;
-import net.daporkchop.lib.http.HttpMethod;
 import net.daporkchop.porkbot.command.Command;
-import net.daporkchop.porkbot.util.Constants;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.UUIDFetcher;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -83,17 +78,11 @@ public final class SkinCommand extends Command {
                                 .setTimestamp(Instant.now())
                                 .build();
 
-                        try {
-                            evt.getChannel().sendMessage(embed)
-                                    .addFile(face, fileNameFace)
-                                    .addFile(img, fileName)
-                                    .queue();
-                        } catch (PermissionException e) {
-                            //we can't do anything about it
-                            if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
-                                evt.getChannel().sendMessage("Lacking permission to embed links!").queue();
-                            }
-                        }
+                        MessageUtils.sendMessage(
+                                evt.getChannel().sendMessage(embed)
+                                        .addFile(face, fileNameFace)
+                                        .addFile(img, fileName),
+                                evt.getChannel());
                     }, ForkJoinPool.commonPool());
                 }
             });
@@ -135,7 +124,7 @@ public final class SkinCommand extends Command {
                 String url = String.format(this.format, uuid);
                 System.out.println(url);
                 HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-                try (InputStream in = connection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST ? connection.getInputStream() : connection.getErrorStream())    {
+                try (InputStream in = connection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST ? connection.getInputStream() : connection.getErrorStream()) {
                     return StreamUtil.toByteArray(in);
                 }
             } catch (IOException e) {

@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,43 +36,23 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 public class MessageUtils {
-    /**
-     * Sends a message to a channel
-     *
-     * @param s
-     * @param channel
-     */
     public static void sendMessage(String s, TextChannel channel) {
-        try {
-            if (false)  {
-                Thread.sleep(500);
-            }
-            channel.sendMessage(s).queue();
-        } catch (PermissionException | InterruptedException e) {
-            //we can't do anything about it
-        }
+        sendMessage(channel.sendMessage(s), channel);
     }
 
-    /**
-     * Sends a message to a channel
-     *
-     * @param builder
-     * @param channel
-     */
     public static void sendMessage(EmbedBuilder builder, TextChannel channel) {
+        builder.setTimestamp(Instant.now());
+        sendMessage(channel.sendMessage(builder.build()), channel);
+    }
+
+    public static void sendMessage(MessageAction action, TextChannel channel) {
         try {
-            builder.setTimestamp(Instant.now());
-            if (false)  {
-                Thread.sleep(500);
-            }
-            channel.sendMessage(builder.build()).queue();
+            action.queue();
         } catch (PermissionException e) {
             //we can't do anything about it
-            if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
-                channel.sendMessage("Lacking permission to embed links!").queue();
+            if (e.getPermission() != Permission.MESSAGE_WRITE) {
+                channel.sendMessage("Missing permission: "+ e.getPermission()).queue();
             }
-        } catch (InterruptedException e) {
-            //wtf java
         }
     }
 

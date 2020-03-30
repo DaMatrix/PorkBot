@@ -82,17 +82,10 @@ public final class JavaPing extends Command {
                 }
 
                 if (java.favicon != null && (this.flags & FLAG_FAVICON) != 0) {
-                    builder.setThumbnail("attachment://favicon.png");
-                    try {
-                        evt.getChannel().sendMessage(builder.build())
-                                .addFile(java.favicon, "favicon.png")
-                                .queue();
-                    } catch (PermissionException e) {
-                        //we can't do anything about it
-                        if (e.getPermission() == Permission.MESSAGE_EMBED_LINKS) {
-                            evt.getChannel().sendMessage("Lacking permission to embed links!").queue();
-                        }
-                    }
+                    MessageUtils.sendMessage(
+                            evt.getChannel().sendMessage(builder.setThumbnail("attachment://favicon.png").build())
+                                    .addFile(java.favicon, "favicon.png"),
+                            evt.getChannel());
                     return;
                 }
             } else {
