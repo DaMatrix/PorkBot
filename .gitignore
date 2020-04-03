@@ -7,10 +7,11 @@
 
 target/
 
-command_info\.dat
-command_info\.json
+command_info.dat
+command_info.json
 
-devkey\.txt
+devkey.txt
+dependency-reduced-pom.xml
 
 *.class
 *.jar
