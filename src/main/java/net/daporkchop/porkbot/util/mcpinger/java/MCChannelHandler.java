@@ -60,10 +60,10 @@ public class MCChannelHandler extends ChannelInboundHandlerAdapter {
 
         //handshake packet
         byte[] hostUTF = this.host.getBytes(StandardCharsets.UTF_8);
-        int handshakeLength = 1 + MCPacketFramer.varIntLength(-1) + MCPacketFramer.varIntLength(hostUTF.length) + hostUTF.length + 2 + 1;
+        int handshakeLength = 1 + MCPacketFramer.varIntLength(340) + MCPacketFramer.varIntLength(hostUTF.length) + hostUTF.length + 2 + 1;
         MCPacketFramer.writeVarInt(buf, handshakeLength);
         buf.writeByte(0); //packet id
-        MCPacketFramer.writeVarInt(buf, -1); //protocol version
+        MCPacketFramer.writeVarInt(buf, 340); //protocol version
         MCPacketFramer.writeVarInt(buf, hostUTF.length);
         buf.writeBytes(hostUTF); //host
         buf.writeShort(this.port); //port
