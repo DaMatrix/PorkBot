@@ -117,6 +117,9 @@ public final class PplstAudioSourceManager implements AudioSourceManager {
         Matcher matcher = LINE_PATTERN_MATCHER_CACHE.get().reset(body);
         while (matcher.find()) {
             String format = matcher.group(3);
+            if ("m4a".equalsIgnoreCase(format)) {
+                format = "mp4";
+            }
             MediaContainerProbe probe = this.registry.find(format);
             if (probe == null) {
                 MediaContainerHints hints = MediaContainerHints.from(null, format);
