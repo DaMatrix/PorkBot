@@ -62,10 +62,6 @@ public final class ServerAudioManager {
     }
 
     public synchronized boolean connect(VoiceChannel dstChannel, boolean errorMsg) {
-        if (dstChannel.getGuild() != this.guild) {
-            throw new IllegalArgumentException();
-        }
-
         AudioManager manager = this.guild.getAudioManager();
         if (!manager.isConnected() && !manager.isAttemptingToConnect()) {
             if (!dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_CONNECT))    {
