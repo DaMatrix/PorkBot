@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 import net.daporkchop.lib.common.function.io.IORunnable;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.logging.Logging;
-import net.daporkchop.porkbot.command.Command;
+import net.daporkchop.porkbot.audio.AudioCacheManager;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.audio.CommandOrdered;
 import net.daporkchop.porkbot.command.audio.CommandPause;
@@ -152,6 +152,8 @@ public class PorkBot {
         Config.save();
         Logging.logger.info("Shutting down Minecraft ping workers...");
         MCPing.shutdown();
+        Logging.logger.info("Closing track info database...");
+        AudioCacheManager.shutdown();
 
         Logging.logger.info("Exiting...");
         PorkUtil.sleep(1000L);

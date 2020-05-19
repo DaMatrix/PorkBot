@@ -20,48 +20,46 @@
 
 package net.daporkchop.porkbot.audio.load;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.track.AudioItem;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import net.daporkchop.porkbot.audio.PorkAudio;
-import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.util.Constants;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author DaPorkchop_
  */
-public class SearchLoadResultHandler extends FromURLLoadResultHandler {
-    protected final Member requester;
-
-    public SearchLoadResultHandler(TextChannel msgChannel, VoiceChannel dstChannel, ServerAudioManager manager, String input, @NonNull Member requester) {
-        super(msgChannel, dstChannel, manager, input);
-
-        this.requester = requester;
-    }
+@AllArgsConstructor
+public class FutureSearchLoadResultHandler implements AudioLoadResultHandler {
+    @NonNull
+    protected final CompletableFuture<AudioTrack[]> future;
 
     @Override
-    public void trackLoaded(@NonNull AudioTrack track) {
-        super.trackLoaded(track);
+    public void trackLoaded(AudioTrack track) {
+        this.future.complete(new AudioTrack[]{track});
     }
 
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
         if (!playlist.isSearchResult()) {
-            this.msgChannel.sendMessage("Obtained playlist isn't a search result?!?").queue();
+            this.future.completeExceptionally(new IllegalStateException("obtained playlist isn't a search result?!?"));
             return;
         }
+        this.future.complete(playlist.getTracks().stream().limit(Constants.MAX_SEARCH_RESULTS).toArray(AudioTrack[]::new));
+    }
 
-        List<AudioTrack> list = playlist.getTracks();
-        AudioTrack[] tracks = new AudioTrack[Math.min(Constants.MAX_SEARCH_RESULTS, list.size())];
-        for (int i = 0; i < tracks.length; i++) {
-            tracks[i] = list.get(i);
-        }
+    @Override
+    public void noMatches() {
+        this.future.complete(new AudioTrack[0]);
+    }
 
-        PorkAudio.handleSearchResults(tracks, this.manager, this.msgChannel, this.dstChannel, this.requester, PorkAudio.findPlatform(playlist), this.input);
+    @Override
+    public void loadFailed(FriendlyException exception) {
+        this.future.completeExceptionally(exception);
     }
 }

@@ -42,6 +42,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
+import net.daporkchop.ldbjni.LevelDB;
+import net.daporkchop.lib.common.misc.file.PFiles;
 import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.PorkBot;
@@ -59,7 +61,12 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.iq80.leveldb.CompressionType;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
@@ -106,11 +113,6 @@ public class PorkAudio {
             .expireAfterWrite(1L, TimeUnit.MINUTES)
             .build();
 
-    private final Cache<String, AudioTrack[]> SEARCH_CACHE = CacheBuilder.newBuilder()
-            .expireAfterWrite(7L, TimeUnit.DAYS)
-            .softValues()
-            .build();
-
     public ServerAudioManager getAudioManager(@NonNull Guild guild, boolean create) {
         synchronized (SERVERS) {
             ServerAudioManager manager = SERVERS.get(guild.getIdLong());
@@ -147,14 +149,9 @@ public class PorkAudio {
             return;
         }
 
-        String prefixed = platform.prefixed(query);
-
-        AudioTrack[] cachedTracks = SEARCH_CACHE.getIfPresent(prefixed);
-        if (cachedTracks != null) {
-            handleSearchResults(cachedTracks, manager, msgChannel, dstChannel, requester, platform, query);
-        } else {
-            PLAYER_MANAGER.loadItem(prefixed, new SearchLoadResultHandler(msgChannel, dstChannel, manager, query, requester, SEARCH_CACHE, prefixed));
-        }
+        AudioCacheManager.search(
+                new SearchQueryWithPlatform(platform, query),
+                new SearchLoadResultHandler(msgChannel, dstChannel, manager, query, requester));
     }
 
     public void handleSearchResults(@NonNull AudioTrack[] tracks, @NonNull ServerAudioManager manager, @NonNull TextChannel msgChannel, @NonNull VoiceChannel dstChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query) {
@@ -335,12 +332,12 @@ public class PorkAudio {
     @RequiredArgsConstructor
     private static final class WaitingSearchResults {
         @NonNull
-        private final AudioTrack[]       tracks;
+        private final AudioTrack[] tracks;
         @NonNull
-        private final Message            message;
+        private final Message message;
         @NonNull
         private final ServerAudioManager manager;
         @NonNull
-        private final VoiceChannel       dstChannel;
+        private final VoiceChannel dstChannel;
     }
 }

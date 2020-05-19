@@ -9,6 +9,7 @@ target/
 
 command_info.dat
 command_info.json
+track-info/
 
 devkey.txt
 dependency-reduced-pom.xml
