@@ -63,17 +63,22 @@
         <dependency>
             <groupId>net.daporkchop.lib</groupId>
             <artifactId>http</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.daporkchop.lib</groupId>
-            <artifactId>netty-common</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <artifactId>netty</artifactId>
+            <version>0.5.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.daporkchop.lib</groupId>
             <artifactId>minecraft-text</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.daporkchop</groupId>
+            <artifactId>leveldb-mcpe-jni</artifactId>
+            <version>0.0.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.dv8tion</groupId>

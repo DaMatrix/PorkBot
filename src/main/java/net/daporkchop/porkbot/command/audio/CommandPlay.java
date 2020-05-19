@@ -20,7 +20,8 @@
 
 package net.daporkchop.porkbot.command.audio;
 
-import net.daporkchop.lib.common.cache.Cache;
+import net.daporkchop.lib.common.ref.Ref;
+import net.daporkchop.lib.common.ref.ThreadRef;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.SearchPlatform;
@@ -37,8 +38,8 @@ import java.util.regex.Pattern;
  * @author DaPorkchop_
  */
 public class CommandPlay extends Command {
-    private static final Pattern        SEARCH_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (?>(?i)(" + String.join("|", SearchPlatform.getAllPlatformNamesAndAliases()) + ")(?-i) )?(.+)");
-    private static final Cache<Matcher> SEARCH_PATTERN_MATCHER_CACHE = Cache.soft(() -> SEARCH_PATTERN.matcher(""));
+    private static final Pattern SEARCH_PATTERN = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (?>(?i)(" + String.join("|", SearchPlatform.getAllPlatformNamesAndAliases()) + ")(?-i) )?(.+)");
+    private static final Ref<Matcher> SEARCH_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> SEARCH_PATTERN.matcher(""));
 
     public CommandPlay() {
         super("play");
@@ -57,7 +58,7 @@ public class CommandPlay extends Command {
             String url = rawContent.substring(Constants.COMMAND_PREFIX.length() + "play ".length());
             try {
                 url = Constants.escapeUrl(url);
-            } catch (Exception e)   {
+            } catch (Exception e) {
                 evt.getChannel().sendMessage("Invalid URL!").queue();
                 return;
             }
@@ -69,7 +70,7 @@ public class CommandPlay extends Command {
             }
         } else if ((matcher = SEARCH_PATTERN_MATCHER_CACHE.get()).reset(rawContent).matches()) {
             SearchPlatform platform = SearchPlatform.from(PorkUtil.fallbackIfNull(matcher.group(1), SearchPlatform.YOUTUBE.name()));
-            if (platform == null)   {
+            if (platform == null) {
                 evt.getChannel().sendMessage("Unknown platform: `" + matcher.group(1) + '`').queue();
             } else {
                 PorkAudio.addTrackBySearch(evt.getGuild(), evt.getChannel(), evt.getMember(), platform, matcher.group(2), dstChannel);
@@ -77,7 +78,6 @@ public class CommandPlay extends Command {
         } else {
             throw new IllegalStateException();
         }
-
     }
 
     @Override

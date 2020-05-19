@@ -20,30 +20,20 @@
 
 package net.daporkchop.porkbot.command.audio;
 
-import net.daporkchop.lib.binary.oio.StreamUtil;
-import net.daporkchop.lib.common.cache.Cache;
-import net.daporkchop.lib.common.function.PFunctions;
-import net.daporkchop.lib.common.util.PorkUtil;
+import net.daporkchop.lib.common.ref.Ref;
+import net.daporkchop.lib.common.ref.ThreadRef;
 import net.daporkchop.lib.http.Http;
 import net.daporkchop.porkbot.audio.PorkAudio;
-import net.daporkchop.porkbot.audio.SearchPlatform;
 import net.daporkchop.porkbot.audio.ServerAudioManager;
 import net.daporkchop.porkbot.audio.track.FutureTrack;
 import net.daporkchop.porkbot.audio.track.LateResolvingTrack;
 import net.daporkchop.porkbot.audio.track.LateResolvingTrackGroup;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.Constants;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.regex.Matcher;
@@ -53,8 +43,8 @@ import java.util.regex.Pattern;
  * @author DaPorkchop_
  */
 public class CommandPlayList extends Command {
-    private static final Pattern        URL_PATTERN               = Pattern.compile("^(https?://.+)$", Pattern.MULTILINE);
-    private static final Cache<Matcher> URL_PATTERN_MATCHER_CACHE = Cache.soft(() -> URL_PATTERN.matcher(""));
+    private static final Pattern URL_PATTERN = Pattern.compile("^(https?://.+)$", Pattern.MULTILINE);
+    private static final Ref<Matcher> URL_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> URL_PATTERN.matcher(""));
 
     public CommandPlayList() {
         super("playlist");
@@ -75,12 +65,12 @@ public class CommandPlayList extends Command {
                 matcher.reset(Http.getString(args[1]));
 
                 ServerAudioManager manager = PorkAudio.getAudioManager(evt.getGuild(), true);
-                if (!manager.lastAccessedFrom(evt.getChannel()).connect(dstChannel, true))  {
+                if (!manager.lastAccessedFrom(evt.getChannel()).connect(dstChannel, true)) {
                     return;
                 }
 
                 Queue<LateResolvingTrack> tracks = new LinkedList<>();
-                while (matcher.find())  {
+                while (matcher.find()) {
                     tracks.add(new LateResolvingTrack(Constants.escapeUrl(matcher.group(1)), dstChannel));
                 }
 
@@ -89,7 +79,7 @@ public class CommandPlayList extends Command {
                 new LateResolvingTrackGroup(tracks).run();
 
                 evt.getChannel().sendMessage("Enqueued " + tracks.size() + " tracks!").queue();
-            } catch (Exception e)   {
+            } catch (Exception e) {
                 evt.getChannel().sendMessage("Unable to fetch or parse list!").queue();
             }
         } else {

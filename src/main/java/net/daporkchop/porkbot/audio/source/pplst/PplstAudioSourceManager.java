@@ -37,7 +37,8 @@ import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.info.AudioTrackInfoBuilder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import net.daporkchop.lib.common.cache.Cache;
+import net.daporkchop.lib.common.ref.Ref;
+import net.daporkchop.lib.common.ref.ThreadRef;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.request.Request;
 import net.daporkchop.porkbot.util.Constants;
@@ -58,13 +59,13 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public final class PplstAudioSourceManager implements AudioSourceManager {
     private static final Pattern        FILENAME_PATTERN               = Pattern.compile("^https?://.*/(.*?)\\.pplst$");
-    static final Cache<Matcher> FILENAME_PATTERN_MATCHER_CACHE = Cache.soft(() -> FILENAME_PATTERN.matcher(""));
+    static final Ref<Matcher> FILENAME_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> FILENAME_PATTERN.matcher(""));
 
     private static final Pattern        PPLST_PATTERN               = Pattern.compile("^pplst(?>,name=\"(.*?)\")?$", Pattern.MULTILINE);
-    static final Cache<Matcher> PPLST_PATTERN_MATCHER_CACHE = Cache.soft(() -> PPLST_PATTERN.matcher(""));
+    static final Ref<Matcher> PPLST_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> PPLST_PATTERN.matcher(""));
 
     private static final Pattern        LINE_PATTERN               = Pattern.compile("^track(?>,album=\"(.*?)\")?(?>,artist=\"(.*?)\")?,format=\"(.*?)\",length=\"([0-9]+\\.[0-9]+)\"(?>,name=\"(.*?)\")?,path=\"(.*?)\"$", Pattern.MULTILINE);
-    static final Cache<Matcher> LINE_PATTERN_MATCHER_CACHE = Cache.soft(() -> LINE_PATTERN.matcher(""));
+    static final Ref<Matcher> LINE_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> LINE_PATTERN.matcher(""));
 
     @NonNull
     private final MediaContainerRegistry registry;

@@ -23,6 +23,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonElement;
 import lombok.NonNull;
+import net.daporkchop.lib.common.misc.string.PUnsafeStrings;
 import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.Http;
@@ -34,18 +35,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public final class UUIDFetcher extends Thread {
-    private static final int    PROFILES_PER_REQUEST = 10;
-    private static final String PROFILE_URL          = "https://api.mojang.com/profiles/minecraft";
-    private static final String EMPTY_UUID           = "8667ba71b85a4004af54457a9734eed7";
+    private static final int PROFILES_PER_REQUEST = 10;
+    private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
+    private static final String EMPTY_UUID = "8667ba71b85a4004af54457a9734eed7";
 
     private static final Cache<String, String> CACHE = CacheBuilder.newBuilder()
             .maximumSize(5000L)
@@ -56,7 +55,7 @@ public final class UUIDFetcher extends Thread {
 
     public static UUID getUUID(@NonNull String id) {
         if (id.length() == 32) {
-            char[] old = PorkUtil.unwrap(id);
+            char[] old = PUnsafeStrings.unwrap(id);
             try (Handle<StringBuilder> handle = PorkUtil.STRINGBUILDER_POOL.get()) {
                 StringBuilder builder = handle.value();
                 builder.setLength(0);
@@ -69,7 +68,7 @@ public final class UUIDFetcher extends Thread {
 
                 return UUID.fromString(builder.toString());
             }
-        } else if (id.length() == 32 + 4)   {
+        } else if (id.length() == 32 + 4) {
             return UUID.fromString(id);
         } else {
             throw new IllegalArgumentException(id);

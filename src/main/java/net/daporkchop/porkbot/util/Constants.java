@@ -24,19 +24,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
-import net.daporkchop.lib.common.cache.Cache;
 import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.pool.selection.SelectionPool;
+import net.daporkchop.lib.common.ref.Ref;
+import net.daporkchop.lib.common.ref.ThreadRef;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.HttpClient;
 import net.daporkchop.lib.http.impl.java.JavaHttpClientBuilder;
 import net.daporkchop.lib.http.util.URLEncoding;
-import net.daporkchop.lib.http.util.exception.HttpException;
 import net.dv8tion.jda.api.entities.Message;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -52,15 +50,15 @@ public class Constants {
 
     public final long DELETE_DELAY = 10L;
 
-    public final Gson       GSON        = new Gson();
+    public final Gson GSON = new Gson();
     public final JsonParser JSON_PARSER = new JsonParser();
 
     public final String UUID_CAPTURE = "([0-9A-Fa-f]{8}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{4}-?[0-9A-Fa-f]{12})";
 
     public final String COMMAND_PREFIX = DEV_MODE ? ",," : "..";
 
-    public final Pattern        ESCAPE_PATTERN       = Pattern.compile("([*_~`()\\[\\]])");
-    public final Cache<Matcher> ESCAPE_MATCHER_CACHE = Cache.soft(() -> ESCAPE_PATTERN.matcher(""));
+    public final Pattern ESCAPE_PATTERN = Pattern.compile("([*_~`()\\[\\]])");
+    public final Ref<Matcher> ESCAPE_MATCHER_CACHE = ThreadRef.soft(() -> ESCAPE_PATTERN.matcher(""));
 
     public final HttpClient BLOCKING_HTTP = new JavaHttpClientBuilder()
             .blockingRequests(true)
@@ -68,7 +66,7 @@ public class Constants {
             .build();
 
     public final int MAX_SEARCH_RESULTS = 5;
-    public final int MAX_NAME_LENGTH    = 50;
+    public final int MAX_NAME_LENGTH = 50;
 
     public final Consumer<Message> DELETE_LATER = message -> message.delete().queueAfter(DELETE_DELAY, TimeUnit.SECONDS);
     public static final Pattern EMOJI_PATTERN = Pattern.compile("([\\u20a0-\\u32ff\\ud83c\\udc00-\\ud83d\\udeff\\udbb9\\udce5-\\udbb9\\udcee])");
