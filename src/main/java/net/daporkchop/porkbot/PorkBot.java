@@ -27,11 +27,14 @@ import lombok.NoArgsConstructor;
 import net.daporkchop.lib.common.function.io.IORunnable;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.logging.Logging;
+import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.command.CommandRegistry;
 import net.daporkchop.porkbot.command.audio.CommandOrdered;
+import net.daporkchop.porkbot.command.audio.CommandPause;
 import net.daporkchop.porkbot.command.audio.CommandPlay;
 import net.daporkchop.porkbot.command.audio.CommandPlayList;
 import net.daporkchop.porkbot.command.audio.CommandQueue;
+import net.daporkchop.porkbot.command.audio.CommandResume;
 import net.daporkchop.porkbot.command.audio.CommandShuffle;
 import net.daporkchop.porkbot.command.audio.CommandSkip;
 import net.daporkchop.porkbot.command.audio.CommandStop;
@@ -122,9 +125,11 @@ public class PorkBot {
 
         //audio
         CommandRegistry.registerCommand(new CommandOrdered());
+        CommandRegistry.registerCommand(new CommandPause());
         CommandRegistry.registerCommand(new CommandPlay());
         CommandRegistry.registerCommand(new CommandPlayList());
         CommandRegistry.registerCommand(new CommandQueue());
+        CommandRegistry.registerCommand(new CommandResume());
         CommandRegistry.registerCommand(new CommandShuffle());
         CommandRegistry.registerCommand(new CommandSkip());
         CommandRegistry.registerCommand(new CommandStop());

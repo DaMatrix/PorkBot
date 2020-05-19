@@ -96,6 +96,16 @@ public final class ServerAudioManager {
         }
     }
 
+    public synchronized void pause()    {
+        this.player.setPaused(true);
+        //TODO: inform scheduler and update message
+    }
+
+    public synchronized void resume()    {
+        this.player.setPaused(false);
+        //TODO: inform scheduler and update message
+    }
+
     public VoiceChannel connectedChannel()  {
         AudioManager manager = this.guild.getAudioManager();
         VoiceChannel channel = manager.getQueuedAudioConnection();

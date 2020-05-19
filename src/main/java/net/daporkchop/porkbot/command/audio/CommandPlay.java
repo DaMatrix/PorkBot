@@ -37,9 +37,6 @@ import java.util.regex.Pattern;
  * @author DaPorkchop_
  */
 public class CommandPlay extends Command {
-    private static final Pattern        URL_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (https?://[0-9a-zA-Z-._~:/?#\\[\\]@!$&'()*+,;=%]+)");
-    private static final Cache<Matcher> URL_PATTERN_MATCHER_CACHE = Cache.soft(() -> URL_PATTERN.matcher(""));
-
     private static final Pattern        SEARCH_PATTERN               = Pattern.compile('^' + Pattern.quote(Constants.COMMAND_PREFIX) + "play (?>(?i)(" + String.join("|", SearchPlatform.getAllPlatformNamesAndAliases()) + ")(?-i) )?(.+)");
     private static final Cache<Matcher> SEARCH_PATTERN_MATCHER_CACHE = Cache.soft(() -> SEARCH_PATTERN.matcher(""));
 
@@ -56,8 +53,16 @@ public class CommandPlay extends Command {
             this.sendErrorMessage(evt.getChannel(), "No track URL or search terms given!");
         } else if ((dstChannel = evt.getMember().getVoiceState().getChannel()) == null) {
             evt.getChannel().sendMessage("You must be in a voice channel to play audio!").queue();
-        } else if ((matcher = URL_PATTERN_MATCHER_CACHE.get().reset(rawContent)).matches()) {
-            PorkAudio.addTrackByURL(evt.getGuild(), evt.getChannel(), evt.getMember(), matcher.group(1), dstChannel);
+        } else if (rawContent.startsWith(Constants.COMMAND_PREFIX + "play http://") || rawContent.startsWith(Constants.COMMAND_PREFIX + "play https://")) {
+            String url = rawContent.substring(Constants.COMMAND_PREFIX.length() + "play ".length());
+            try {
+                url = Constants.escapeUrl(url);
+            } catch (Exception e)   {
+                evt.getChannel().sendMessage("Invalid URL!").queue();
+                return;
+            }
+
+            PorkAudio.addTrackByURL(evt.getGuild(), evt.getChannel(), evt.getMember(), url, dstChannel);
 
             if (evt.getGuild().getMember(evt.getJDA().getSelfUser()).hasPermission(evt.getChannel(), Permission.MESSAGE_MANAGE)) {
                 evt.getMessage().suppressEmbeds(true).queue();

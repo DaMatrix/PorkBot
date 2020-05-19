@@ -83,6 +83,7 @@ public final class TrackScheduler extends AudioEventAdapter {
                 next.whenResolved((track, e) -> {
                     synchronized (this.manager) {
                         if (e == null && this.manager.connect(next.requestedIn(), false)) {
+                            this.player.setPaused(false);
                             this.player.startTrack(track, false);
                         } else {
                             //use executor to avoid stack overflow
@@ -92,6 +93,7 @@ public final class TrackScheduler extends AudioEventAdapter {
                 });
                 return true;
             } else {
+                this.player.setPaused(false);
                 this.player.startTrack(null, false);
                 return false;
             }

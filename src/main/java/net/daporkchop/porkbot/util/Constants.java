@@ -30,6 +30,8 @@ import net.daporkchop.lib.common.pool.selection.SelectionPool;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.http.HttpClient;
 import net.daporkchop.lib.http.impl.java.JavaHttpClientBuilder;
+import net.daporkchop.lib.http.util.URLEncoding;
+import net.daporkchop.lib.http.util.exception.HttpException;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.net.MalformedURLException;
@@ -107,9 +109,10 @@ public class Constants {
 
     public String escapeUrl(@NonNull String path) {
         try {
+            path = URLEncoding.decode(path);
             URL url = new URL(path);
             return new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef()).toASCIIString();
-        } catch (MalformedURLException | URISyntaxException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException(path, e);
         }
     }

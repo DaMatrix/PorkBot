@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Consumer;
 
 @UtilityClass
 public class CommandRegistry {
@@ -60,7 +61,7 @@ public class CommandRegistry {
         String[] split = rawContent.split(" ");
         Command cmd = COMMANDS.getOrDefault(split[0].substring(Constants.COMMAND_PREFIX.length()), null);
         if (cmd != null) {
-            evt.getChannel().sendTyping().queue(v -> {
+            Consumer<Void> callback = v -> {
                 try {
                     cmd.execute(evt, split, rawContent);
                     Config.COMMAND_COUNT_SESSION.incrementAndGet();
@@ -70,7 +71,13 @@ public class CommandRegistry {
                     e.printStackTrace();
                     MessageUtils.sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`", evt.getChannel());
                 }
-            });
+            };
+
+            if (cmd.shouldSendTyping()) {
+                evt.getChannel().sendTyping().queue(callback);
+            } else {
+                callback.accept(null);
+            }
         }
     }
 }

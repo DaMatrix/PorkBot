@@ -76,4 +76,8 @@ public abstract class Command {
         MessageUtils.sendMessage(String.format("%sUsage: `%s`\nExample: `%s`", message == null ? "" : String.format("%s\n", message), this.getUsage(), this.getUsageExample()), channel);
         //MessageUtils.sendMessage((message == null ? "" : message + "\n") + "Usage: `" + getUsage() + "`\nExample: `" + getUsageExample() + "`", channel);
     }
+
+    public boolean shouldSendTyping()    {
+        return true;
+    }
 }

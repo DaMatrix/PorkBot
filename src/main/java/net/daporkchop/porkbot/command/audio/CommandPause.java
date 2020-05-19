@@ -29,9 +29,9 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 /**
  * @author DaPorkchop_
  */
-public class CommandSkip extends Command {
-    public CommandSkip() {
-        super("skip");
+public class CommandPause extends Command {
+    public CommandPause() {
+        super("pause");
     }
 
     @Override
@@ -46,8 +46,10 @@ public class CommandSkip extends Command {
                     evt.getChannel().sendMessage("Not playing!").queue();
                 } else if (manager.connectedChannel() != evt.getMember().getVoiceState().getChannel()) {
                     evt.getChannel().sendMessage("Must be in the same voice channel!").queue();
+                } else if (manager.player().isPaused()) {
+                    evt.getChannel().sendMessage("Already paused!").queue();
                 } else {
-                    manager.lastAccessedFrom(evt.getChannel()).scheduler().next();
+                    manager.pause();
 
                     if (evt.getGuild().getMember(evt.getJDA().getSelfUser()).hasPermission(evt.getChannel(), Permission.MESSAGE_MANAGE)) {
                         evt.getMessage().delete().queue();

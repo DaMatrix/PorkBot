@@ -99,7 +99,8 @@ public class CommandQueue extends Command {
                                 .mapToLong(i -> i.length)
                                 .filter(l -> l != Long.MAX_VALUE && l >= 0L)
                                 .sum()), true)
-                        .addField("Shuffled:", manager.shuffled() ? "Yes" : "No", true);
+                        .addField("Shuffled:", manager.shuffled() ? "Yes" : "No", true)
+                        .addField("Paused:", manager.player().isPaused() ? "Yes" : "No", true);
             }
         }
 
