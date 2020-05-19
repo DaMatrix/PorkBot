@@ -36,6 +36,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,12 +74,14 @@ public class CommandPlayList extends Command {
                 while (matcher.find()) {
                     tracks.add(new LateResolvingTrack(Constants.escapeUrl(matcher.group(1)), dstChannel));
                 }
-
+                int size = tracks.size();
                 manager.scheduler().enqueueAll((Collection<FutureTrack>) (Object) tracks);
 
-                new LateResolvingTrackGroup(tracks).run();
-
-                evt.getChannel().sendMessage("Enqueued " + tracks.size() + " tracks!").queue();
+                CompletableFuture<Integer> future = new CompletableFuture<>();
+                new LateResolvingTrackGroup(tracks, future).run();
+                evt.getChannel().sendMessage("Loading " + size + " tracks...").queue(msg -> {
+                    future.thenAccept(successful -> msg.editMessage("Successfully loaded " + successful + '/' + size + " tracks!").queue());
+                });
             } catch (Exception e) {
                 evt.getChannel().sendMessage("Unable to fetch or parse list!").queue();
             }

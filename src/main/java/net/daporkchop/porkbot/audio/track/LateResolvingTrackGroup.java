@@ -28,6 +28,7 @@ import net.daporkchop.porkbot.PorkBot;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 /**
@@ -37,10 +38,14 @@ import java.util.function.BiConsumer;
 public final class LateResolvingTrackGroup implements Runnable {
     @NonNull
     private final Queue<LateResolvingTrack> tracks;
+    @NonNull
+    private final CompletableFuture<Integer> future;
+    private int successful = 0;
 
     @Override
     public synchronized void run()    {
         if (this.tracks.isEmpty())  {
+            this.future.complete(this.successful);
             return;
         }
 
@@ -50,6 +55,9 @@ public final class LateResolvingTrackGroup implements Runnable {
 
         track.start();
         track.whenResolved((realTrack, t) -> {
+            if (t == null)  {
+                this.successful++;
+            }
             this.tracks.remove(track);
 
             PorkBot.SCHEDULED_EXECUTOR.submit(this);
