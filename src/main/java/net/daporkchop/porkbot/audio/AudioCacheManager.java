@@ -24,18 +24,24 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
+import com.sedmelluq.discord.lavaplayer.track.AudioItem;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.DecodedTrackHolder;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import net.daporkchop.ldbjni.LevelDB;
+import net.daporkchop.lib.common.function.io.IOBiConsumer;
 import net.daporkchop.lib.common.function.io.IOConsumer;
 import net.daporkchop.lib.common.function.io.IORunnable;
 import net.daporkchop.lib.common.misc.file.PFiles;
+import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.audio.load.FutureSearchLoadResultHandler;
+import net.daporkchop.porkbot.audio.load.FutureURLLoadResultHandler;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -50,8 +56,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author DaPorkchop_
@@ -108,6 +116,36 @@ public class AudioCacheManager {
                 }
             });
 
+    private final LoadingCache<String, CompletableFuture<AudioItem>> URL_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(5L, TimeUnit.MINUTES)
+            .softValues()
+            .build(new CacheLoader<String, CompletableFuture<AudioItem>>() {
+                @Override
+                public CompletableFuture<AudioItem> load(String key) throws Exception {
+                    byte[] encodedKey = ("url_" + key).getBytes(StandardCharsets.UTF_8);
+                    byte[] encodedValue = TRACK_INFO_DB.get(encodedKey);
+
+                    AudioItem result;
+                    if (encodedValue == null || (result = decodeItem(encodedValue)) == null) {
+                        //value was not found in DB or deserialization failed, resolve now
+                        CompletableFuture<AudioItem> future = new CompletableFuture<>();
+                        PorkAudio.PLAYER_MANAGER.loadItem(key, new FutureURLLoadResultHandler(future));
+
+                        //save new results
+                        future.whenCompleteAsync((IOBiConsumer<AudioItem, Throwable>) (item, t) -> {
+                            if (t == null && item != null) {
+                                TRACK_INFO_DB.put(encodedKey, encodeItem(item));
+                            }
+                        });
+
+                        System.out.println("Info fetched from service: " + key);
+                        return future;
+                    }
+                    System.out.println("Info loaded from disk cache: " + key);
+                    return CompletableFuture.completedFuture(result);
+                }
+            });
+
     public void shutdown() {
         try {
             TRACK_INFO_DB.close();
@@ -136,6 +174,27 @@ public class AudioCacheManager {
         });
     }
 
+    public CompletableFuture<AudioItem> resolve(@NonNull String url) {
+        return URL_CACHE.getUnchecked(url);
+    }
+
+    public void resolve(@NonNull String url, @NonNull AudioLoadResultHandler handler) {
+        resolve(url).whenComplete((item, t) -> {
+            if (t != null) {
+                handler.loadFailed((FriendlyException) t);
+            } else if (item == null) {
+                handler.noMatches();
+            } else if (item instanceof AudioTrack) {
+                handler.trackLoaded(((AudioTrack) item).makeClone());
+            } else if (item instanceof AudioPlaylist) {
+                AudioPlaylist plist = (AudioPlaylist) item;
+                handler.playlistLoaded(new BasicAudioPlaylist(plist.getName(), plist.getTracks().stream().map(AudioTrack::makeClone).collect(Collectors.toList()), null, false));
+            } else {
+                throw new IllegalArgumentException(Objects.toString(item));
+            }
+        });
+    }
+
     private byte[] encodeSearches(AudioTrack[] tracks) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         MessageOutput out = new MessageOutput(baos);
@@ -157,9 +216,9 @@ public class AudioCacheManager {
         try {
             MessageInput in = new MessageInput(new ByteArrayInputStream(data));
             DataInput dataInput = in.nextMessage();
-            if (dataInput.readInt() != 0)    { //invalid version
+            if (dataInput.readInt() != 0) { //invalid version
                 return null;
-            } else if (dataInput.readLong() + SEARCH_EXPIRE_TIME < System.currentTimeMillis())  { //expired
+            } else if (dataInput.readLong() + SEARCH_EXPIRE_TIME < System.currentTimeMillis()) { //expired
                 return null;
             }
             in.skipRemainingBytes();
@@ -173,6 +232,74 @@ public class AudioCacheManager {
                 tracks.add(holder.decodedTrack);
             }
             return tracks.toArray(new AudioTrack[tracks.size()]);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private byte[] encodeItem(AudioItem item) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        MessageOutput out = new MessageOutput(baos);
+
+        //version and timestamp
+        DataOutput dataOutput = out.startMessage();
+        dataOutput.writeInt(0);
+        dataOutput.writeLong(System.currentTimeMillis());
+        dataOutput.writeBoolean(item instanceof AudioPlaylist);
+        out.commitMessage();
+
+        if (item instanceof AudioPlaylist) {
+            AudioPlaylist plist = (AudioPlaylist) item;
+            dataOutput = out.startMessage();
+            dataOutput.writeUTF(PorkUtil.fallbackIfNull(plist.getName(), null));
+            out.commitMessage();
+
+            for (AudioTrack track : plist.getTracks()) {
+                PorkAudio.PLAYER_MANAGER.encodeTrack(out, track);
+            }
+        } else if (item instanceof AudioTrack) {
+            PorkAudio.PLAYER_MANAGER.encodeTrack(out, (AudioTrack) item);
+        } else {
+            throw new IllegalArgumentException(Objects.toString(item));
+        }
+        out.finish();
+        return baos.toByteArray();
+    }
+
+    private AudioItem decodeItem(byte[] data) {
+        try {
+            MessageInput in = new MessageInput(new ByteArrayInputStream(data));
+            DataInput dataInput = in.nextMessage();
+            if (dataInput.readInt() != 0) { //invalid version
+                return null;
+            } else if (dataInput.readLong() + SEARCH_EXPIRE_TIME < System.currentTimeMillis()) { //expired
+                return null;
+            }
+            boolean playlist = dataInput.readBoolean();
+            in.skipRemainingBytes();
+
+            if (playlist) {
+                dataInput = in.nextMessage();
+                String name = dataInput.readUTF();
+                in.skipRemainingBytes();
+
+                List<AudioTrack> tracks = new ArrayList<>();
+                for (DecodedTrackHolder holder = PorkAudio.PLAYER_MANAGER.decodeTrack(in); holder != null; holder = PorkAudio.PLAYER_MANAGER.decodeTrack(in)) {
+                    if (holder.decodedTrack == null) {
+                        //invalid version or other deserialization issue
+                        return null;
+                    }
+                    tracks.add(holder.decodedTrack);
+                }
+                return new BasicAudioPlaylist(name, tracks, null, false);
+            } else {
+                DecodedTrackHolder holder = PorkAudio.PLAYER_MANAGER.decodeTrack(in);
+                if (holder == null || holder.decodedTrack == null) {
+                    //invalid version or other deserialization issue
+                    return null;
+                }
+                return holder.decodedTrack;
+            }
         } catch (Exception e) {
             return null;
         }

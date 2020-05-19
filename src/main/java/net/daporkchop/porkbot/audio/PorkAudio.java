@@ -139,7 +139,7 @@ public class PorkAudio {
             return;
         }
 
-        PLAYER_MANAGER.loadItem(url, new FromURLLoadResultHandler(msgChannel, dstChannel, manager, url));
+        AudioCacheManager.resolve(url, new FromURLLoadResultHandler(msgChannel, dstChannel, manager, url));
     }
 
     public void addTrackBySearch(@NonNull Guild guild, @NonNull TextChannel msgChannel, @NonNull Member requester, @NonNull SearchPlatform platform, @NonNull String query, @NonNull VoiceChannel dstChannel) {

@@ -29,6 +29,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import net.daporkchop.lib.unsafe.PUnsafe;
+import net.daporkchop.porkbot.audio.AudioCacheManager;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
@@ -59,7 +60,7 @@ public final class LateResolvingTrack implements FutureTrack, AudioLoadResultHan
         }
 
         //PorkAudio.PLAYER_MANAGER.loadItemOrdered(PorkAudio.getAudioManager(requestedIn.getGuild(), true), url, this);
-        PorkAudio.PLAYER_MANAGER.loadItem(this.url, this);
+        AudioCacheManager.resolve(this.url, this);
 
         this.url = null;
     }
