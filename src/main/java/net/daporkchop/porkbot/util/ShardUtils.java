@@ -24,14 +24,17 @@ import lombok.experimental.UtilityClass;
 import net.daporkchop.lib.binary.oio.StreamUtil;
 import net.daporkchop.lib.binary.oio.appendable.PAppendable;
 import net.daporkchop.lib.binary.oio.writer.UTF8FileWriter;
+import net.daporkchop.lib.common.function.throwing.EConsumer;
 import net.daporkchop.lib.common.misc.file.PFiles;
 import net.daporkchop.lib.logging.Logging;
 import net.daporkchop.porkbot.PorkListener;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.Compression;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 
@@ -59,11 +62,18 @@ public class ShardUtils {
         Logging.logger.info("Starting shards...");
         try {
             MANAGER = new DefaultShardManagerBuilder().setToken(loadToken())
+                    .setCompression(Compression.NONE)
                     .setShardsTotal(-1)
                     .addEventListeners(new PorkListener())
-                    .setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"))
+                    .setStatus(OnlineStatus.IDLE)
+                    .setActivity(Activity.of(Activity.ActivityType.DEFAULT, "starting..."))
                     .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE, CacheFlag.EMOTE))
                     .build();
+
+            MANAGER.getShards().forEach((EConsumer<JDA>) JDA::awaitReady);
+
+            MANAGER.setStatus(OnlineStatus.ONLINE);
+            MANAGER.setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
         } catch (Exception e) {
             throw new RuntimeException("Unable to start ShardManager!", e);
         }

@@ -25,6 +25,9 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackState;
+import com.sedmelluq.discord.lavaplayer.track.BaseAudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.playback.AudioTrackExecutor;
+import com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.porkbot.PorkBot;
@@ -32,6 +35,7 @@ import net.daporkchop.porkbot.audio.track.FutureTrack;
 import net.daporkchop.porkbot.util.Config;
 import net.dv8tion.jda.api.entities.Message;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -157,6 +161,17 @@ public final class TrackScheduler extends AudioEventAdapter {
         if (endReason != AudioTrackEndReason.LOAD_FAILED) {
             Config.TIME_PLAYED_TOTAL.getAndAdd(track.getPosition());
             Config.TRACKS_PLAYED_TOTAL.getAndIncrement();
+        } else if (track instanceof BaseAudioTrack) {
+            AudioTrackExecutor executor = ((BaseAudioTrack) track).getActiveExecutor();
+            if (executor instanceof LocalAudioTrackExecutor)    {
+                try {
+                    Field field = LocalAudioTrackExecutor.class.getDeclaredField("trackException");
+                    field.setAccessible(true);
+                    ((Throwable) field.get(executor)).printStackTrace();
+                } catch (Exception e)   {
+                    e.printStackTrace();
+                }
+            }
         }
 
         synchronized (this.manager) {

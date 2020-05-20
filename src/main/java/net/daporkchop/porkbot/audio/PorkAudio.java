@@ -36,14 +36,14 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
+import com.sedmelluq.discord.lavaplayer.tools.http.ExtendedHttpClientBuilder;
+import com.sedmelluq.discord.lavaplayer.tools.http.SimpleHttpClientConnectionManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
-import net.daporkchop.ldbjni.LevelDB;
-import net.daporkchop.lib.common.misc.file.PFiles;
 import net.daporkchop.lib.common.pool.handle.Handle;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.PorkBot;
@@ -61,14 +61,29 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
-import org.iq80.leveldb.CompressionType;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.DnsResolver;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.conn.DefaultHttpClientConnectionOperator;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContexts;
 
-import java.io.File;
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
@@ -86,6 +101,66 @@ public class PorkAudio {
 
     private final Map<Long, ServerAudioManager> SERVERS = new HashMap<>();
 
+    //private static final InetSocketAddress PROXY_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 1081);
+    private static final InetSocketAddress PROXY_ADDR = new InetSocketAddress("10.0.0.20", 1081);
+
+    static class FakeDnsResolver implements DnsResolver {
+        @Override
+        public InetAddress[] resolve(String host) throws UnknownHostException {
+            // Return some fake DNS record for every request, we won't be using it
+            return new InetAddress[]{
+                    InetAddress.getByAddress(new byte[]{
+                            1,
+                            1,
+                            1,
+                            1
+                    })
+            };
+        }
+    }
+
+    static class MyConnectionSocketFactory extends PlainConnectionSocketFactory {
+        @Override
+        public Socket createSocket(final HttpContext context) throws IOException {
+            //InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
+            Proxy proxy = new Proxy(Proxy.Type.SOCKS, PROXY_ADDR);
+            return new Socket(proxy);
+        }
+
+        @Override
+        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+                                    InetSocketAddress localAddress, HttpContext context) throws IOException {
+            // Convert address to unresolved
+            InetSocketAddress unresolvedRemote = InetSocketAddress
+                    .createUnresolved(host.getHostName(), remoteAddress.getPort());
+            return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
+        }
+    }
+
+    static class MySSLConnectionSocketFactory extends SSLConnectionSocketFactory {
+        @SuppressWarnings("deprecation")
+        public MySSLConnectionSocketFactory(final SSLContext sslContext) {
+            // You may need this verifier if target site's certificate is not secure
+            super(sslContext, BrowserCompatHostnameVerifier.INSTANCE);
+        }
+
+        @Override
+        public Socket createSocket(final HttpContext context) throws IOException {
+            //InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
+            Proxy proxy = new Proxy(Proxy.Type.SOCKS, PROXY_ADDR);
+            return new Socket(proxy);
+        }
+
+        @Override
+        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+                                    InetSocketAddress localAddress, HttpContext context) throws IOException {
+            // Convert address to unresolved
+            InetSocketAddress unresolvedRemote = InetSocketAddress
+                    .createUnresolved(host.getHostName(), remoteAddress.getPort());
+            return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
+        }
+    }
+
     static {
         //register audio sources
         {
@@ -102,6 +177,17 @@ public class PorkAudio {
             PLAYER_MANAGER.registerSourceManager(new PorkCloudAudioSourceManager(pplstAudioSourceManager));
             PLAYER_MANAGER.registerSourceManager(httpAudioSourceManager);
         }
+
+        Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", new MyConnectionSocketFactory())
+                .register("https", new MySSLConnectionSocketFactory(SSLContexts.createSystemDefault())).build();
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(reg, new FakeDnsResolver());
+
+        PLAYER_MANAGER.setHttpBuilderConfigurator(builder ->
+                ((ExtendedHttpClientBuilder) builder).setConnectionManagerFactory((op, factory) -> cm
+                        /*new SimpleHttpClientConnectionManager(
+                                new DefaultHttpClientConnectionOperator(reg, null, new FakeDnsResolver()),
+                                factory)*/));
 
         PLAYER_MANAGER.setHttpRequestConfigurator(config -> RequestConfig.copy(config)
                 .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
