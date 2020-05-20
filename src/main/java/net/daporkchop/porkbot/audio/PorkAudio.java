@@ -61,6 +61,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -100,6 +102,10 @@ public class PorkAudio {
             PLAYER_MANAGER.registerSourceManager(new PorkCloudAudioSourceManager(pplstAudioSourceManager));
             PLAYER_MANAGER.registerSourceManager(httpAudioSourceManager);
         }
+
+        PLAYER_MANAGER.setHttpRequestConfigurator(config -> RequestConfig.copy(config)
+                .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+                .build());
 
         //clean up idle audio managers automatically
         PorkBot.SCHEDULED_EXECUTOR.scheduleWithFixedDelay(() -> {
