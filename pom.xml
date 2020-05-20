@@ -26,7 +26,7 @@
     <name>PorkBot</name>
     <groupId>net.daporkchop</groupId>
     <artifactId>porkbot</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
