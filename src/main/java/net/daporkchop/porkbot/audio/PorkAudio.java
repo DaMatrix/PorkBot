@@ -39,10 +39,6 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotator;
-import com.sedmelluq.lava.extensions.youtuberotator.planner.AbstractRoutePlanner;
-import com.sedmelluq.lava.extensions.youtuberotator.tools.Tuple;
-import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv4Block;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
@@ -63,48 +59,15 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.ProtocolException;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.DnsResolver;
-import org.apache.http.conn.UnsupportedSchemeException;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.conn.DefaultSchemePortResolver;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.Args;
 
-import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ProxySelector;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -118,194 +81,10 @@ public class PorkAudio {
 
     private final Map<Long, ServerAudioManager> SERVERS = new HashMap<>();
 
-    //private static final InetSocketAddress PROXY_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 1081);
-    private static final InetSocketAddress PROXY_ADDR = new InetSocketAddress("10.0.0.20", 1081);
-
-    static class FakeDnsResolver implements DnsResolver {
-        @Override
-        public InetAddress[] resolve(String host) throws UnknownHostException {
-            // Return some fake DNS record for every request, we won't be using it
-            return new InetAddress[]{
-                    InetAddress.getByAddress(new byte[]{
-                            1,
-                            1,
-                            1,
-                            1
-                    })
-            };
-        }
-    }
-
-    static class MyConnectionSocketFactory extends PlainConnectionSocketFactory {
-        @Override
-        public Socket createSocket(final HttpContext context) throws IOException {
-            //InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
-            Proxy proxy = new Proxy(Proxy.Type.SOCKS, PROXY_ADDR);
-            return new Socket(proxy);
-        }
-
-        @Override
-        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-                                    InetSocketAddress localAddress, HttpContext context) throws IOException {
-            // Convert address to unresolved
-            InetSocketAddress unresolvedRemote = InetSocketAddress
-                    .createUnresolved(host.getHostName(), remoteAddress.getPort());
-            return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
-        }
-    }
-
-    static class MySSLConnectionSocketFactory extends SSLConnectionSocketFactory {
-        @SuppressWarnings("deprecation")
-        public MySSLConnectionSocketFactory(final SSLContext sslContext) {
-            // You may need this verifier if target site's certificate is not secure
-            super(sslContext, BrowserCompatHostnameVerifier.INSTANCE);
-        }
-
-        @Override
-        public Socket createSocket(final HttpContext context) throws IOException {
-            //InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
-            Proxy proxy = new Proxy(Proxy.Type.SOCKS, PROXY_ADDR);
-            return new Socket(proxy);
-        }
-
-        @Override
-        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-                                    InetSocketAddress localAddress, HttpContext context) throws IOException {
-            // Convert address to unresolved
-            InetSocketAddress unresolvedRemote = InetSocketAddress
-                    .createUnresolved(host.getHostName(), remoteAddress.getPort());
-            return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
-        }
-    }
-
     static {
         //register audio sources
         {
-            YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(true);
-            YoutubeIpRotator.setup(youtube, new AbstractRoutePlanner(Collections.singletonList(new Ipv4Block("127.0.0.1")), true) {
-                ProxySelector proxySelector = new ProxySelector() {
-                    @Override
-                    public List<Proxy> select(URI uri) {
-                        return Collections.singletonList(new Proxy(Proxy.Type.SOCKS, PROXY_ADDR));
-                    }
-
-                    @Override
-                    public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
-                    }
-                };
-
-                @Override
-                public HttpRoute determineRoute(
-                        final HttpHost host,
-                        final HttpRequest request,
-                        final HttpContext context) throws HttpException {
-                    Args.notNull(request, "Request");
-                    if (host == null) {
-                        throw new ProtocolException("Target host is not specified");
-                    }
-                    final HttpClientContext clientContext = HttpClientContext.adapt(context);
-                    final RequestConfig config = clientContext.getRequestConfig();
-                    final InetAddress local = config.getLocalAddress();
-                    HttpHost proxy = config.getProxy();
-                    if (proxy == null) {
-                        proxy = determineProxy(host, request, context);
-                    }
-
-                    final HttpHost target;
-                    if (host.getPort() <= 0) {
-                        try {
-                            target = new HttpHost(
-                                    host.getHostName(),
-                                    DefaultSchemePortResolver.INSTANCE.resolve(host),
-                                    host.getSchemeName());
-                        } catch (final UnsupportedSchemeException ex) {
-                            throw new HttpException(ex.getMessage());
-                        }
-                    } else {
-                        target = host;
-                    }
-                    final boolean secure = target.getSchemeName().equalsIgnoreCase("https");
-                    return proxy == null
-                           ? new HttpRoute(target, local, secure)
-                           : new HttpRoute(target, local, proxy, secure);
-                }
-
-                protected HttpHost determineProxy(
-                        final HttpHost target,
-                        final HttpRequest request,
-                        final HttpContext context) throws HttpException {
-                    final URI targetURI;
-                    try {
-                        targetURI = new URI(target.toURI());
-                    } catch (final URISyntaxException ex) {
-                        throw new HttpException("Cannot convert host to URI: " + target, ex);
-                    }
-                    ProxySelector proxySelectorInstance = this.proxySelector;
-                    if (proxySelectorInstance == null) {
-                        proxySelectorInstance = ProxySelector.getDefault();
-                    }
-                    if (proxySelectorInstance == null) {
-                        //The proxy selector can be "unset", so we must be able to deal with a null selector
-                        return null;
-                    }
-                    final List<Proxy> proxies = proxySelectorInstance.select(targetURI);
-                    final Proxy p = chooseProxy(proxies);
-                    HttpHost result = null;
-                    if (p.type() == Proxy.Type.HTTP) {
-                        // convert the socket address to an HttpHost
-                        if (!(p.address() instanceof InetSocketAddress)) {
-                            throw new HttpException("Unable to handle non-Inet proxy address: " + p.address());
-                        }
-                        final InetSocketAddress isa = (InetSocketAddress) p.address();
-                        // assume default scheme (http)
-                        result = new HttpHost(getHost(isa), isa.getPort());
-                    }
-
-                    return result;
-                }
-
-                private String getHost(final InetSocketAddress isa) {
-
-                    //@@@ Will this work with literal IPv6 addresses, or do we
-                    //@@@ need to wrap these in [] for the string representation?
-                    //@@@ Having it in this method at least allows for easy workarounds.
-                    return isa.isUnresolved() ?
-                           isa.getHostName() : isa.getAddress().getHostAddress();
-                }
-
-                private Proxy chooseProxy(final List<Proxy> proxies) {
-                    Proxy result = null;
-                    // check the list for one we can use
-                    for (int i = 0; (result == null) && (i < proxies.size()); i++) {
-                        final Proxy p = proxies.get(i);
-                        switch (p.type()) {
-
-                            case DIRECT:
-                            case HTTP:
-                                result = p;
-                                break;
-
-                            case SOCKS:
-                                // SOCKS hosts are not handled on the route level.
-                                // The socket may make use of the SOCKS host though.
-                                break;
-                        }
-                    }
-                    if (result == null) {
-                        //@@@ log as warning or info that only a socks proxy is available?
-                        // result can only be null if all proxies are socks proxies
-                        // socks proxies are not handled on the route planning level
-                        result = Proxy.NO_PROXY;
-                    }
-                    return result;
-                }
-
-                @Override
-                protected Tuple<InetAddress, InetAddress> determineAddressPair(Tuple<Inet4Address, Inet6Address> remoteAddresses) throws HttpException {
-                    return null;
-                }
-            }, 1);
-            PLAYER_MANAGER.registerSourceManager(youtube);
+            PLAYER_MANAGER.registerSourceManager(new YoutubeAudioSourceManager(true));
             PLAYER_MANAGER.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
             PLAYER_MANAGER.registerSourceManager(new BandcampAudioSourceManager());
             PLAYER_MANAGER.registerSourceManager(new VimeoAudioSourceManager());
@@ -319,29 +98,12 @@ public class PorkAudio {
             PLAYER_MANAGER.registerSourceManager(httpAudioSourceManager);
         }
 
-        Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", new MyConnectionSocketFactory())
-                .register("https", new MySSLConnectionSocketFactory(SSLContexts.createSystemDefault())).build();
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(reg, new FakeDnsResolver());
-
-        PLAYER_MANAGER.setHttpBuilderConfigurator(builder ->
-                        builder.setRoutePlanner(new SystemDefaultRoutePlanner(new ProxySelector() {
-                            @Override
-                            public List<Proxy> select(URI uri) {
-                                return Collections.singletonList(new Proxy(Proxy.Type.SOCKS, PROXY_ADDR));
-                            }
-
-                            @Override
-                            public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
-                            }
-                        }))
-                //((ExtendedHttpClientBuilder) builder).setConnectionManagerFactory((op, factory) -> cm
-                        /*new SimpleHttpClientConnectionManager(
-                                new DefaultHttpClientConnectionOperator(reg, null, new FakeDnsResolver()),
-                                factory)*/);
+        PLAYER_MANAGER.setHttpBuilderConfigurator(builder -> builder
+                .setKeepAliveStrategy((response, context) -> 1L)); //disable keepalive
 
         PLAYER_MANAGER.setHttpRequestConfigurator(config -> RequestConfig.copy(config)
                 .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+                .setProxy(HttpHost.create("http://localhost:1081"))
                 .build());
 
         //clean up idle audio managers automatically
