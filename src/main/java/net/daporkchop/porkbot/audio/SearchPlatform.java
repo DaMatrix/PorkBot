@@ -20,7 +20,6 @@
 
 package net.daporkchop.porkbot.audio;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -37,12 +36,12 @@ import java.util.TreeMap;
 public final class SearchPlatform {
     private static final Map<String, SearchPlatform> PLATFORM_LOOKUP = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-    public static final SearchPlatform BANDCAMP   = new SearchPlatform(0xFF1DA0C3, "bandcamp", "bandcamp");
+    public static final SearchPlatform BANDCAMP = new SearchPlatform(0xFF1DA0C3, "bandcamp", "bandcamp");
     public static final SearchPlatform DAPORKCHOP = new SearchPlatform(0xFFFF7777, "porksearch:", "DaPorkchop_'s music folder", "minecraft-porkchop_raw", "porkcloud", "porkc", "pkc");
-    public static final SearchPlatform INTERNET   = new SearchPlatform(0xFF3B88C3, "Web URL", "globe-wireframe");
+    public static final SearchPlatform INTERNET = new SearchPlatform(0xFF3B88C3, "Web URL", "globe-wireframe");
     public static final SearchPlatform SOUNDCLOUD = new SearchPlatform(0xFFF7620E, "scsearch:", "SoundCloud", "soundcloud", "sc", "soundc");
-    public static final SearchPlatform TWITCH     = new SearchPlatform(0xFF6C2498, "Twitch", "twitch");
-    public static final SearchPlatform YOUTUBE    = new SearchPlatform(0xFFDD473A, "ytsearch:", "YouTube", "youtube", "yt", "youtb", "yout");
+    public static final SearchPlatform TWITCH = new SearchPlatform(0xFF6C2498, "Twitch", "twitch");
+    public static final SearchPlatform YOUTUBE = new SearchPlatform(0xFFDD473A, "ytsearch:", "YouTube", "youtube", "yt", "youtb", "yout");
 
     public static SearchPlatform from(@NonNull String name) {
         return PLATFORM_LOOKUP.get(name);
@@ -52,7 +51,7 @@ public final class SearchPlatform {
         return PLATFORM_LOOKUP.keySet().toArray(new String[PLATFORM_LOOKUP.size()]);
     }
 
-    private final int    color;
+    private final int color;
     private final String prefix;
     private final String icon;
     private final String name;

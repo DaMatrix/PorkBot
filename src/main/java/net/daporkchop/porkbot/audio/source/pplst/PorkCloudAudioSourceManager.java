@@ -20,7 +20,6 @@
 
 package net.daporkchop.porkbot.audio.source.pplst;
 
-import com.google.common.collect.Comparators;
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerDescriptor;
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerProbe;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -48,7 +47,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -82,18 +80,18 @@ public final class PorkCloudAudioSourceManager implements AudioSourceManager {
         this.pplstSourceManager.loadPPLST(URL, null, (info, probe) -> tracks.add(new Track(info, probe)));
         Set<String> words = Collections.newSetFromMap(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
         Matcher matcher = SEARCH_PATTERN.matcher(reference.identifier);
-        while (matcher.find())  {
+        while (matcher.find()) {
             words.add(matcher.group(1));
         }
 
-        for (Track track : tracks)  {
-            for (String s : track.author().split(" "))  {
-                if (words.contains(s))   {
+        for (Track track : tracks) {
+            for (String s : track.author().split(" ")) {
+                if (words.contains(s)) {
                     track.increment();
                 }
             }
-            for (String s : track.title().split(" "))  {
-                if (words.contains(s))   {
+            for (String s : track.title().split(" ")) {
+                if (words.contains(s)) {
                     track.increment();
                 }
             }
@@ -127,7 +125,7 @@ public final class PorkCloudAudioSourceManager implements AudioSourceManager {
     public void shutdown() {
     }
 
-    public static class PorkCloudAudioTrack extends HttpAudioTrack  {
+    public static class PorkCloudAudioTrack extends HttpAudioTrack {
         private static final long CONTAINERTRACKFACTORY_OFFSET = PUnsafe.pork_getOffset(HttpAudioTrack.class, "containerTrackFactory");
         private static final long SOURCEMANAGER_OFFSET = PUnsafe.pork_getOffset(HttpAudioTrack.class, "sourceManager");
 
@@ -143,7 +141,7 @@ public final class PorkCloudAudioSourceManager implements AudioSourceManager {
 
     @RequiredArgsConstructor
     @Accessors(fluent = true)
-    private static final class Track    {
+    private static final class Track {
         @NonNull
         private final AudioTrackInfo info;
         @NonNull
@@ -156,11 +154,11 @@ public final class PorkCloudAudioSourceManager implements AudioSourceManager {
             this.references++;
         }
 
-        public String author()   {
+        public String author() {
             return this.info.author;
         }
 
-        public String title()   {
+        public String title() {
             return this.info.title;
         }
     }

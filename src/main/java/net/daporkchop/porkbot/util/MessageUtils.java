@@ -28,11 +28,6 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.sql.Timestamp;
 import java.time.Instant;
 
 public class MessageUtils {
@@ -51,7 +46,7 @@ public class MessageUtils {
         } catch (PermissionException e) {
             //we can't do anything about it
             if (e.getPermission() != Permission.MESSAGE_WRITE) {
-                channel.sendMessage("Missing permission: "+ e.getPermission()).queue();
+                channel.sendMessage("Missing permission: " + e.getPermission()).queue();
             }
         }
     }
@@ -64,7 +59,7 @@ public class MessageUtils {
      */
     public static void sendMessage(MessageBuilder builder, TextChannel channel) {
         try {
-            if (false)  {
+            if (false) {
                 Thread.sleep(500);
             }
             channel.sendMessage(builder.build()).queue();
@@ -88,5 +83,4 @@ public class MessageUtils {
         e.printStackTrace();
         sendMessage("Error running command: `" + evt.getMessage().getContentRaw() + "`:\n`" + e.getClass().getCanonicalName() + "`: " + e.getMessage(), evt.getChannel());
     }
-
 }

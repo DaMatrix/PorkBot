@@ -41,24 +41,24 @@ import java.util.concurrent.CompletableFuture;
 public class JavaPing {
     public final RuntimeException NO_RESPONSE = new RuntimeException("no response!");
 
-    private final   EventLoopGroupPool TCP_GROUP_POOL = PorkNettyHelper.getPoolTCP();
-    private final   EventLoopGroup     TCP_GROUP      = TCP_GROUP_POOL.get();
-    private final Bootstrap          BOOTSTRAP      = new Bootstrap().group(TCP_GROUP)
+    private final EventLoopGroupPool TCP_GROUP_POOL = PorkNettyHelper.getPoolTCP();
+    private final EventLoopGroup TCP_GROUP = TCP_GROUP_POOL.get();
+    private final Bootstrap BOOTSTRAP = new Bootstrap().group(TCP_GROUP)
             .option(ChannelOption.TCP_NODELAY, true)
             .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
             .channelFactory(TCP_GROUP_POOL.transport().channelFactorySocketClient());
 
     final ChannelGroup CHANNELS = new DefaultChannelGroup(TCP_GROUP.next(), true);
 
-    public void boot()  {
+    public void boot() {
     }
 
-    public void shutdown()  {
+    public void shutdown() {
         CHANNELS.close();
         TCP_GROUP_POOL.release(TCP_GROUP);
     }
 
-    public CompletableFuture<JsonObject> ping(String host, int port, InetSocketAddress address)    {
+    public CompletableFuture<JsonObject> ping(String host, int port, InetSocketAddress address) {
         CompletableFuture<JsonObject> future = new CompletableFuture<>();
         BOOTSTRAP.clone()
                 .handler(new MCChannelInitializer(host, port, future))

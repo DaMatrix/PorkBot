@@ -58,13 +58,13 @@ import java.util.regex.Pattern;
  */
 @RequiredArgsConstructor
 public final class PplstAudioSourceManager implements AudioSourceManager {
-    private static final Pattern        FILENAME_PATTERN               = Pattern.compile("^https?://.*/(.*?)\\.pplst$");
+    private static final Pattern FILENAME_PATTERN = Pattern.compile("^https?://.*/(.*?)\\.pplst$");
     static final Ref<Matcher> FILENAME_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> FILENAME_PATTERN.matcher(""));
 
-    private static final Pattern        PPLST_PATTERN               = Pattern.compile("^pplst(?>,name=\"(.*?)\")?$", Pattern.MULTILINE);
+    private static final Pattern PPLST_PATTERN = Pattern.compile("^pplst(?>,name=\"(.*?)\")?$", Pattern.MULTILINE);
     static final Ref<Matcher> PPLST_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> PPLST_PATTERN.matcher(""));
 
-    private static final Pattern        LINE_PATTERN               = Pattern.compile("^track(?>,album=\"(.*?)\")?(?>,artist=\"(.*?)\")?,format=\"(.*?)\",length=\"([0-9]+\\.[0-9]+)\"(?>,name=\"(.*?)\")?,path=\"(.*?)\"$", Pattern.MULTILINE);
+    private static final Pattern LINE_PATTERN = Pattern.compile("^track(?>,album=\"(.*?)\")?(?>,artist=\"(.*?)\")?,format=\"(.*?)\",length=\"([0-9]+\\.[0-9]+)\"(?>,name=\"(.*?)\")?,path=\"(.*?)\"$", Pattern.MULTILINE);
     static final Ref<Matcher> LINE_PATTERN_MATCHER_CACHE = ThreadRef.soft(() -> LINE_PATTERN.matcher(""));
 
     @NonNull
@@ -92,7 +92,7 @@ public final class PplstAudioSourceManager implements AudioSourceManager {
         return new BasicAudioPlaylist(playlistName.get(), tracks, null, false);
     }
 
-    public void loadPPLST(@NonNull String identifier, AtomicReference<String> playlistName, @NonNull BiConsumer<AudioTrackInfo, MediaContainerProbe> callback)    {
+    public void loadPPLST(@NonNull String identifier, AtomicReference<String> playlistName, @NonNull BiConsumer<AudioTrackInfo, MediaContainerProbe> callback) {
         Request<String> request = Constants.BLOCKING_HTTP.request(identifier)
                 .aggregateToString()
                 .maxLength(1 << 22) // 4 MiB
@@ -124,8 +124,8 @@ public final class PplstAudioSourceManager implements AudioSourceManager {
             MediaContainerProbe probe = this.registry.find(format);
             if (probe == null) {
                 MediaContainerHints hints = MediaContainerHints.from(null, format);
-                for (MediaContainerProbe testProbe : this.registry.getAll())    {
-                    if (testProbe.matchesHints(hints))  {
+                for (MediaContainerProbe testProbe : this.registry.getAll()) {
+                    if (testProbe.matchesHints(hints)) {
                         probe = testProbe;
                         break;
                     }
@@ -140,7 +140,7 @@ public final class PplstAudioSourceManager implements AudioSourceManager {
             try {
                 //escape string correctly
                 path = Constants.escapeUrl(path);
-            } catch (IllegalArgumentException e)   {
+            } catch (IllegalArgumentException e) {
                 continue; //invalid path
             }
 

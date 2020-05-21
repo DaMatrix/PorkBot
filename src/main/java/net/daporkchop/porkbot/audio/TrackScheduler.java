@@ -47,13 +47,13 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public final class TrackScheduler extends AudioEventAdapter {
     @NonNull
-    private final AudioPlayer        player;
+    private final AudioPlayer player;
     @NonNull
     private final ServerAudioManager manager;
 
     private final LinkedList<FutureTrack> queue = new LinkedList<>();
 
-    public int queueSize()  {
+    public int queueSize() {
         return this.queue.size();
     }
 
@@ -80,8 +80,8 @@ public final class TrackScheduler extends AudioEventAdapter {
     public boolean next() {
         synchronized (this.manager) {
             FutureTrack next = this.manager.shuffled()
-                    ? this.queue.remove(ThreadLocalRandom.current().nextInt(this.queue.size())) //probably not the smartest thing to be doing on a linked list, but most people won't be using shuffling anyway
-                    : this.queue.poll();
+                               ? this.queue.remove(ThreadLocalRandom.current().nextInt(this.queue.size())) //probably not the smartest thing to be doing on a linked list, but most people won't be using shuffling anyway
+                               : this.queue.poll();
 
             if (next != null) {
                 next.whenResolved((track, e) -> {
@@ -163,12 +163,12 @@ public final class TrackScheduler extends AudioEventAdapter {
             Config.TRACKS_PLAYED_TOTAL.getAndIncrement();
         } else if (track instanceof BaseAudioTrack) {
             AudioTrackExecutor executor = ((BaseAudioTrack) track).getActiveExecutor();
-            if (executor instanceof LocalAudioTrackExecutor)    {
+            if (executor instanceof LocalAudioTrackExecutor) {
                 try {
                     Field field = LocalAudioTrackExecutor.class.getDeclaredField("trackException");
                     field.setAccessible(true);
                     ((Throwable) field.get(executor)).printStackTrace();
-                } catch (Exception e)   {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

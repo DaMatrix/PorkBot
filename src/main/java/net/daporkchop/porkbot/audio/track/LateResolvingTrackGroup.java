@@ -20,16 +20,13 @@
 
 package net.daporkchop.porkbot.audio.track;
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.porkbot.PorkBot;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 /**
  * @author DaPorkchop_
@@ -43,8 +40,8 @@ public final class LateResolvingTrackGroup implements Runnable {
     private int successful = 0;
 
     @Override
-    public synchronized void run()    {
-        if (this.tracks.isEmpty())  {
+    public synchronized void run() {
+        if (this.tracks.isEmpty()) {
             this.future.complete(this.successful);
             return;
         }
@@ -55,7 +52,7 @@ public final class LateResolvingTrackGroup implements Runnable {
 
         track.start();
         track.whenResolved((realTrack, t) -> {
-            if (t == null)  {
+            if (t == null) {
                 this.successful++;
             }
             this.tracks.remove(track);

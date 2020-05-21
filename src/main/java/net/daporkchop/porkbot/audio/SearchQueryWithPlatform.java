@@ -41,7 +41,7 @@ public final class SearchQueryWithPlatform {
     protected final String query;
 
     @Override
-    public String toString()  {
+    public String toString() {
         return PStrings.fastFormat("search_%s_%s", this.platform.name(), this.query);
     }
 }

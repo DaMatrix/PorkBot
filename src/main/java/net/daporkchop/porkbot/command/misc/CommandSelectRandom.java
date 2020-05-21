@@ -45,8 +45,8 @@ public class CommandSelectRandom extends Command {
 
         Set<Role> roles = new HashSet<>(evt.getMessage().getMentionedRoles());
         Set<Member> members = rawContent.contains("@here")
-                ? channel.getMembers().stream().filter(m -> m.getOnlineStatus() == OnlineStatus.ONLINE).collect(Collectors.toSet())
-                : new HashSet<>(rawContent.contains("@everyone") ? channel.getMembers() : evt.getMessage().getMentionedMembers());
+                              ? channel.getMembers().stream().filter(m -> m.getOnlineStatus() == OnlineStatus.ONLINE).collect(Collectors.toSet())
+                              : new HashSet<>(rawContent.contains("@everyone") ? channel.getMembers() : evt.getMessage().getMentionedMembers());
 
         if (!roles.isEmpty()) {
             for (Member member : channel.getMembers()) {

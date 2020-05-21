@@ -39,8 +39,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class MCChannelHandler extends ChannelInboundHandlerAdapter {
     @NonNull
-    protected final String                        host;
-    protected final int                           port;
+    protected final String host;
+    protected final int port;
     @NonNull
     protected final CompletableFuture<JsonObject> future;
 

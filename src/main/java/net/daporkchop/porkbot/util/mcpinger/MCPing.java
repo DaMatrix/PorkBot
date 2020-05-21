@@ -208,11 +208,11 @@ public class MCPing {
     @ToString
     protected static abstract class Ping<P extends Ping<P>> {
         public String motd;
-        public int    onlinePlayers;
-        public int    maxPlayers;
+        public int onlinePlayers;
+        public int maxPlayers;
 
         public String version;
-        public int    protocol;
+        public int protocol;
 
         public long latency;
 
@@ -274,8 +274,8 @@ public class MCPing {
     @Accessors(fluent = true, chain = true)
     public static final class Query extends Ping<Query> {
         public String[] playerSample;
-        public String   plugins;
-        public String   mapName;
-        public String   gamemode;
+        public String plugins;
+        public String mapName;
+        public String gamemode;
     }
 }

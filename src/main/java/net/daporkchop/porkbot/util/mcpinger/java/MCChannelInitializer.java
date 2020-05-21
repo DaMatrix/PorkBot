@@ -34,8 +34,8 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class MCChannelInitializer extends ChannelInitializer<Channel> {
     @NonNull
-    protected final String                        host;
-    protected final int                        port;
+    protected final String host;
+    protected final int port;
     @NonNull
     protected final CompletableFuture<JsonObject> future;
 

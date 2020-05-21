@@ -41,8 +41,8 @@ public final class ServerAudioManager {
     @Getter(AccessLevel.NONE)
     private long lastActive = 0L;
 
-    private final Guild          guild;
-    private final AudioPlayer    player;
+    private final Guild guild;
+    private final AudioPlayer player;
     private final TrackScheduler scheduler;
 
     @Setter
@@ -64,13 +64,13 @@ public final class ServerAudioManager {
     public synchronized boolean connect(VoiceChannel dstChannel, boolean errorMsg) {
         AudioManager manager = this.guild.getAudioManager();
         if (!manager.isConnected() && !manager.isAttemptingToConnect()) {
-            if (!dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_CONNECT))    {
-                if (errorMsg && this.lastAccessedFrom != null)   {
+            if (!dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_CONNECT)) {
+                if (errorMsg && this.lastAccessedFrom != null) {
                     this.lastAccessedFrom.sendMessage("No permission to join channel `" + dstChannel.getName() + '`').queue();
                 }
                 return false;
-            } else if (!dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_SPEAK))    {
-                if (errorMsg && this.lastAccessedFrom != null)   {
+            } else if (!dstChannel.getGuild().getMember(dstChannel.getJDA().getSelfUser()).hasPermission(dstChannel, Permission.VOICE_SPEAK)) {
+                if (errorMsg && this.lastAccessedFrom != null) {
                     this.lastAccessedFrom.sendMessage("No permission to speak in channel `" + dstChannel.getName() + '`').queue();
                 }
                 return false;
@@ -82,37 +82,37 @@ public final class ServerAudioManager {
         return true;
     }
 
-    synchronized void doDisconnect()   {
+    synchronized void doDisconnect() {
         AudioManager manager = this.guild.getAudioManager();
         if (manager.isConnected() || manager.isAttemptingToConnect()) {
             manager.closeAudioConnection();
         }
     }
 
-    public synchronized void handleAllLeft()    {
+    public synchronized void handleAllLeft() {
         this.scheduler.skipAll();
-        if (this.lastAccessedFrom != null)  {
+        if (this.lastAccessedFrom != null) {
             this.lastAccessedFrom.sendMessage("All users have left the voice channel, stopping.").queue();
         }
     }
 
-    public synchronized void pause()    {
+    public synchronized void pause() {
         this.player.setPaused(true);
         //TODO: inform scheduler and update message
     }
 
-    public synchronized void resume()    {
+    public synchronized void resume() {
         this.player.setPaused(false);
         //TODO: inform scheduler and update message
     }
 
-    public VoiceChannel connectedChannel()  {
+    public VoiceChannel connectedChannel() {
         AudioManager manager = this.guild.getAudioManager();
         VoiceChannel channel = manager.getQueuedAudioConnection();
         return channel == null ? manager.getConnectedChannel() : channel;
     }
 
-    public boolean couldConnectToIfNeeded(@NonNull VoiceChannel dstChannel)  {
+    public boolean couldConnectToIfNeeded(@NonNull VoiceChannel dstChannel) {
         VoiceChannel connected = this.connectedChannel();
         return connected == null || connected == dstChannel;
     }
@@ -128,7 +128,7 @@ public final class ServerAudioManager {
         }
     }
 
-    public boolean isPlaying()  {
+    public boolean isPlaying() {
         return this.player.getPlayingTrack() != null;
     }
 }

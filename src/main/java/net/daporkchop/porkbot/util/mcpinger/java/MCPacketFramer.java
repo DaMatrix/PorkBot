@@ -36,7 +36,7 @@ public class MCPacketFramer extends ByteToMessageDecoder {
         int result = 0;
         byte read;
         do {
-            if (!buf.isReadable())  {
+            if (!buf.isReadable()) {
                 return -1;
             }
             read = buf.readByte();
@@ -77,7 +77,7 @@ public class MCPacketFramer extends ByteToMessageDecoder {
         in.markReaderIndex();
         while (in.isReadable()) {
             int size = readVarInt(in);
-            if (in.isReadable(size))    {
+            if (in.isReadable(size)) {
                 ByteBuf buf = in.alloc().ioBuffer(size, size);
                 in.readBytes(buf).markReaderIndex();
                 out.add(buf);

@@ -63,7 +63,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
@@ -80,28 +79,43 @@ public class PorkAudio {
     public final AudioPlayerManager PLAYER_MANAGER = new DefaultAudioPlayerManager();
 
     private final Map<Long, ServerAudioManager> SERVERS = new HashMap<>();
+    private final Cache<UUID, WaitingSearchResults> WAITING_SEARCHES = CacheBuilder.newBuilder()
+            .expireAfterWrite(1L, TimeUnit.MINUTES)
+            .build();
+
+    private final YoutubeAudioSourceManager YOUTUBE_AUDIO_SOURCE_MANAGER = new YoutubeAudioSourceManager(true);
+    private final SoundCloudAudioSourceManager SOUND_CLOUD_AUDIO_SOURCE_MANAGER = SoundCloudAudioSourceManager.createDefault();
+    private final BandcampAudioSourceManager BANDCAMP_AUDIO_SOURCE_MANAGER = new BandcampAudioSourceManager();
+    private final VimeoAudioSourceManager VIMEO_AUDIO_SOURCE_MANAGER = new VimeoAudioSourceManager();
+    private final TwitchStreamAudioSourceManager TWITCH_AUDIO_SOURCE_MANAGER = new TwitchStreamAudioSourceManager();
+    private final BeamAudioSourceManager BEAM_AUDIO_SOURCE_MANAGER = new BeamAudioSourceManager();
+    private final HttpAudioSourceManager HTTP_AUDIO_SOURCE_MANAGER = new HttpAudioSourceManager();
+    private final PplstAudioSourceManager PPLST_AUDIO_SOURCE_MANAGER = new PplstAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY, HTTP_AUDIO_SOURCE_MANAGER);
+    private final PorkCloudAudioSourceManager PORKCLOUD_AUDIO_SOURCE_MANAGER = new PorkCloudAudioSourceManager(PPLST_AUDIO_SOURCE_MANAGER);
 
     static {
         //register audio sources
         {
-            PLAYER_MANAGER.registerSourceManager(new YoutubeAudioSourceManager(true));
-            PLAYER_MANAGER.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
-            PLAYER_MANAGER.registerSourceManager(new BandcampAudioSourceManager());
-            PLAYER_MANAGER.registerSourceManager(new VimeoAudioSourceManager());
-            PLAYER_MANAGER.registerSourceManager(new TwitchStreamAudioSourceManager());
-            PLAYER_MANAGER.registerSourceManager(new BeamAudioSourceManager());
+            PLAYER_MANAGER.registerSourceManager(YOUTUBE_AUDIO_SOURCE_MANAGER);
+            PLAYER_MANAGER.registerSourceManager(SOUND_CLOUD_AUDIO_SOURCE_MANAGER);
+            PLAYER_MANAGER.registerSourceManager(BANDCAMP_AUDIO_SOURCE_MANAGER);
+            PLAYER_MANAGER.registerSourceManager(VIMEO_AUDIO_SOURCE_MANAGER);
+            PLAYER_MANAGER.registerSourceManager(TWITCH_AUDIO_SOURCE_MANAGER);
+            PLAYER_MANAGER.registerSourceManager(BEAM_AUDIO_SOURCE_MANAGER);
 
-            HttpAudioSourceManager httpAudioSourceManager = new HttpAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY);
-            PplstAudioSourceManager pplstAudioSourceManager = new PplstAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY, httpAudioSourceManager);
-            PLAYER_MANAGER.registerSourceManager(pplstAudioSourceManager);
-            PLAYER_MANAGER.registerSourceManager(new PorkCloudAudioSourceManager(pplstAudioSourceManager));
-            PLAYER_MANAGER.registerSourceManager(httpAudioSourceManager);
+            PLAYER_MANAGER.registerSourceManager(PPLST_AUDIO_SOURCE_MANAGER);
+            PLAYER_MANAGER.registerSourceManager(PORKCLOUD_AUDIO_SOURCE_MANAGER);
+            PLAYER_MANAGER.registerSourceManager(HTTP_AUDIO_SOURCE_MANAGER);
         }
 
         PLAYER_MANAGER.setHttpBuilderConfigurator(builder -> builder
                 .setKeepAliveStrategy((response, context) -> 1L)); //disable keepalive
 
         PLAYER_MANAGER.setHttpRequestConfigurator(config -> RequestConfig.copy(config)
+                .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+                .build());
+
+        YOUTUBE_AUDIO_SOURCE_MANAGER.configureRequests(config -> RequestConfig.copy(config)
                 .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
                 .setProxy(HttpHost.create("http://localhost:1081"))
                 .build());
@@ -113,10 +127,6 @@ public class PorkAudio {
             }
         }, 10L, 10L, TimeUnit.SECONDS);
     }
-
-    private final Cache<UUID, WaitingSearchResults> WAITING_SEARCHES = CacheBuilder.newBuilder()
-            .expireAfterWrite(1L, TimeUnit.MINUTES)
-            .build();
 
     public ServerAudioManager getAudioManager(@NonNull Guild guild, boolean create) {
         synchronized (SERVERS) {

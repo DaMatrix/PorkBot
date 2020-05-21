@@ -30,7 +30,6 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import net.daporkchop.lib.unsafe.PUnsafe;
 import net.daporkchop.porkbot.audio.AudioCacheManager;
-import net.daporkchop.porkbot.audio.PorkAudio;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
 import java.util.LinkedList;
@@ -43,9 +42,9 @@ import java.util.function.BiConsumer;
 @Accessors(fluent = true)
 public final class LateResolvingTrack implements FutureTrack, AudioLoadResultHandler {
     @Getter
-    private final VoiceChannel                            requestedIn;
-    private       List<BiConsumer<AudioTrack, Throwable>> listeners;
-    private       Object                                  track;
+    private final VoiceChannel requestedIn;
+    private List<BiConsumer<AudioTrack, Throwable>> listeners;
+    private Object track;
 
     private String url;
 
@@ -72,8 +71,8 @@ public final class LateResolvingTrack implements FutureTrack, AudioLoadResultHan
     @Override
     public synchronized AudioTrackInfo getInfo() {
         return this.track instanceof AudioTrack
-                ? ((AudioTrack) this.track).getInfo()
-                : this.track == null ? UNKNOWN_INFO : FAILED_INFO;
+               ? ((AudioTrack) this.track).getInfo()
+               : this.track == null ? UNKNOWN_INFO : FAILED_INFO;
     }
 
     @Override
@@ -87,7 +86,7 @@ public final class LateResolvingTrack implements FutureTrack, AudioLoadResultHan
     }
 
     @Override
-    public  void whenResolved(@NonNull BiConsumer<AudioTrack, Throwable> callback) {
+    public void whenResolved(@NonNull BiConsumer<AudioTrack, Throwable> callback) {
         synchronized (this) {
             if (this.track == null) {
                 if (this.listeners == null) {
@@ -106,7 +105,7 @@ public final class LateResolvingTrack implements FutureTrack, AudioLoadResultHan
 
     @Override
     public synchronized AudioTrack getNow() {
-        if (this.track instanceof AudioTrack)   {
+        if (this.track instanceof AudioTrack) {
             return (AudioTrack) this.track;
         } else if (this.track instanceof Throwable) {
             PUnsafe.throwException((Throwable) this.track);

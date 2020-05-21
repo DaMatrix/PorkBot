@@ -36,14 +36,11 @@ import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.Compression;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.Scanner;
@@ -81,7 +78,7 @@ public class ShardUtils {
     }
 
     public synchronized void shutdown() {
-        if (MANAGER == null)    {
+        if (MANAGER == null) {
             throw new IllegalStateException("Not running!");
         }
 
@@ -90,7 +87,9 @@ public class ShardUtils {
     }
 
     public void forEachGuild(Consumer<Guild> consumer) {
-        if (consumer == null) return;
+        if (consumer == null) {
+            return;
+        }
         MANAGER.getGuilds().forEach(consumer);
     }
 
@@ -110,21 +109,21 @@ public class ShardUtils {
         return MANAGER == null ? -1L : MANAGER.getShardsTotal();
     }
 
-    private String loadToken()   {
+    private String loadToken() {
         try {
             File tokenFile = new File("discordtoken.txt");
-            if (PFiles.checkFileExists(tokenFile) && tokenFile.length() > 0L)   {
-                try (InputStream in = new FileInputStream(tokenFile))   {
+            if (PFiles.checkFileExists(tokenFile) && tokenFile.length() > 0L) {
+                try (InputStream in = new FileInputStream(tokenFile)) {
                     return new String(StreamUtil.toByteArray(in), StandardCharsets.UTF_8).trim();
                 }
             } else {
                 String token;
-                try (Scanner scanner = new Scanner(System.in))  {
+                try (Scanner scanner = new Scanner(System.in)) {
                     System.out.print("Enter your discord bot token: ");
                     System.out.flush();
                     token = scanner.nextLine().trim();
                 }
-                try (PAppendable out = new UTF8FileWriter(PFiles.ensureFileExists(tokenFile)))  {
+                try (PAppendable out = new UTF8FileWriter(PFiles.ensureFileExists(tokenFile))) {
                     out.appendLn(token);
                 }
                 return token;

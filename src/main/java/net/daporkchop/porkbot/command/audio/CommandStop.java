@@ -36,9 +36,9 @@ public class CommandStop extends Command {
     @Override
     public void execute(GuildMessageReceivedEvent evt, String[] args, String rawContent) {
         ServerAudioManager manager = PorkAudio.getAudioManager(evt.getGuild(), false);
-        if (manager == null || manager.player().getPlayingTrack() == null || manager.connectedChannel() == null)    {
+        if (manager == null || manager.player().getPlayingTrack() == null || manager.connectedChannel() == null) {
             evt.getChannel().sendMessage("Not playing!").queue();
-        } else if (manager.connectedChannel() != evt.getMember().getVoiceState().getChannel())  {
+        } else if (manager.connectedChannel() != evt.getMember().getVoiceState().getChannel()) {
             evt.getChannel().sendMessage("Must be in the same voice channel!").queue();
         } else {
             manager.lastAccessedFrom(evt.getChannel()).scheduler().skipAll();

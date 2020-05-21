@@ -21,9 +21,7 @@
 package net.daporkchop.porkbot.audio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
-import io.netty.buffer.ByteBuf;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 
 import java.nio.ByteBuffer;
@@ -32,9 +30,9 @@ import java.nio.ByteBuffer;
  * @author DaPorkchop_
  */
 public final class AudioPlayerSendHandler implements AudioSendHandler {
-    private final AudioPlayer       audioPlayer;
+    private final AudioPlayer audioPlayer;
     private final MutableAudioFrame frame;
-    private final ByteBuffer        buffer;
+    private final ByteBuffer buffer;
 
     public AudioPlayerSendHandler(AudioPlayer audioPlayer) {
         this.audioPlayer = audioPlayer;

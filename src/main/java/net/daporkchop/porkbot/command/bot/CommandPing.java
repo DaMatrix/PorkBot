@@ -25,7 +25,7 @@ import net.daporkchop.porkbot.util.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class CommandPing extends Command {
 

@@ -27,14 +27,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.awt.Color;
-import java.util.Base64;
 
 /**
  * @author DaPorkchop_
  */
 public final class PEPing extends Command {
-    public static final int FLAG_MOTD    = 1 << 0;
-    public static final int FLAG_COUNT   = 1 << 1;
+    public static final int FLAG_MOTD = 1 << 0;
+    public static final int FLAG_COUNT = 1 << 1;
     public static final int FLAG_VERSION = 1 << 2;
     public static final int FLAG_LATENCY = 1 << 3;
 
@@ -65,28 +64,28 @@ public final class PEPing extends Command {
                 //server's online
                 builder.setColor(Color.GREEN);
 
-                if ((this.flags & FLAG_COUNT) != 0)   {
+                if ((this.flags & FLAG_COUNT) != 0) {
                     builder.addField(
                             "Player count:",
                             String.format("%d/%d", pe.onlinePlayers, pe.maxPlayers),
                             true
                     );
                 }
-                if ((this.flags & FLAG_LATENCY) != 0)   {
+                if ((this.flags & FLAG_LATENCY) != 0) {
                     builder.addField(
                             "Latency:",
                             String.format("%d ms", pe.latency),
                             true
                     );
                 }
-                if ((this.flags & FLAG_VERSION) != 0)   {
+                if ((this.flags & FLAG_VERSION) != 0) {
                     builder.addField(
                             "Version:",
                             String.format("%s (Protocol %d)", pe.version, pe.protocol),
                             true
                     );
                 }
-                if ((this.flags & FLAG_MOTD) != 0)   {
+                if ((this.flags & FLAG_MOTD) != 0) {
                     builder.addField(
                             "MOTD:",
                             pe.motd,

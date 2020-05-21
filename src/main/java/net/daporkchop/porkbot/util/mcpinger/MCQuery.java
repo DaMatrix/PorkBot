@@ -20,17 +20,10 @@
 
 package net.daporkchop.porkbot.util.mcpinger;
 
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -91,7 +84,7 @@ public class MCQuery {
     /**
      * The target address and port
      */
-    public InetSocketAddress   address;
+    public InetSocketAddress address;
     /**
      * <code>null</code> if no successful request has been sent, otherwise a Map
      * containing any metadata received except the player list
@@ -101,7 +94,7 @@ public class MCQuery {
      * <code>null</code> if no successful request has been sent, otherwise an
      * array containing all online player usernames
      */
-    public String[]            onlineUsernames;
+    public String[] onlineUsernames;
 
     public MCQuery(InetSocketAddress address) throws IOException {
         this.address = address;
@@ -164,7 +157,7 @@ public class MCQuery {
             }
             challengeInteger = Integer.parseInt(new String(buffer, StandardCharsets.UTF_8).trim());
         }
-        sendPacket(this.address, new byte[] {
+        sendPacket(this.address, new byte[]{
                 (byte) 0xFE,
                 (byte) 0xFD,
                 (byte) 0x00,

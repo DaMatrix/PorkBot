@@ -28,7 +28,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.daporkchop.porkbot.audio.PorkAudio;
 import net.daporkchop.porkbot.audio.ServerAudioManager;
-import net.daporkchop.porkbot.audio.TrackScheduler;
 import net.daporkchop.porkbot.audio.track.ResolvedTrack;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -41,13 +40,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FromURLLoadResultHandler implements AudioLoadResultHandler {
     @NonNull
-    protected final TextChannel        msgChannel;
+    protected final TextChannel msgChannel;
     @NonNull
-    protected final VoiceChannel       dstChannel;
+    protected final VoiceChannel dstChannel;
     @NonNull
     protected final ServerAudioManager manager;
     @NonNull
-    protected final String             input;
+    protected final String input;
 
     @Override
     public void trackLoaded(AudioTrack track) {
@@ -56,7 +55,7 @@ public class FromURLLoadResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
-        if (!this.manager.lastAccessedFrom(this.msgChannel).connect(this.dstChannel, true))   {
+        if (!this.manager.lastAccessedFrom(this.msgChannel).connect(this.dstChannel, true)) {
             return;
         }
 

@@ -41,10 +41,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @UtilityClass
 public class Config {
     public final AtomicLong COMMAND_COUNT_SESSION = new AtomicLong(0L);
-    public final AtomicLong COMMAND_COUNT_TOTAL   = new AtomicLong(0L);
+    public final AtomicLong COMMAND_COUNT_TOTAL = new AtomicLong(0L);
 
     public final AtomicLong TRACKS_PLAYED_TOTAL = new AtomicLong(0L);
-    public final AtomicLong TIME_PLAYED_TOTAL   = new AtomicLong(0L);
+    public final AtomicLong TIME_PLAYED_TOTAL = new AtomicLong(0L);
 
     public void load() {
         File file = new File("command_info.json");
@@ -60,7 +60,7 @@ public class Config {
             throw new RuntimeException(e);
         }
 
-        switch (obj.get("version").getAsInt())  {
+        switch (obj.get("version").getAsInt()) {
             case 3:
                 TRACKS_PLAYED_TOTAL.set(obj.get("tracksPlayed").getAsLong());
                 TIME_PLAYED_TOTAL.set(obj.get("timePlayed").getAsLong());

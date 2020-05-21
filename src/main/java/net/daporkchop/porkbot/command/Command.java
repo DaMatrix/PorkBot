@@ -77,7 +77,7 @@ public abstract class Command {
         //MessageUtils.sendMessage((message == null ? "" : message + "\n") + "Usage: `" + getUsage() + "`\nExample: `" + getUsageExample() + "`", channel);
     }
 
-    public boolean shouldSendTyping()    {
+    public boolean shouldSendTyping() {
         return true;
     }
 }

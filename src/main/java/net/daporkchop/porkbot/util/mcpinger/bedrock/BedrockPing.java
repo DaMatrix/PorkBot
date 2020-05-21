@@ -27,12 +27,10 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import net.daporkchop.lib.network.nettycommon.PorkNettyHelper;
 import net.daporkchop.lib.network.nettycommon.eventloopgroup.pool.EventLoopGroupPool;
-import net.daporkchop.porkbot.util.mcpinger.MCPing;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 /**
  * @author DaPorkchop_
@@ -40,19 +38,19 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class BedrockPing {
     private final EventLoopGroupPool UDP_GROUP_POOL = PorkNettyHelper.getPoolUDP();
-    private final EventLoopGroup     UDP_GROUP      = UDP_GROUP_POOL.get();
-    private final RakNetClient       RAKNET_CLIENT  = new RakNetClient(new InetSocketAddress(0), UDP_GROUP);
+    private final EventLoopGroup UDP_GROUP = UDP_GROUP_POOL.get();
+    private final RakNetClient RAKNET_CLIENT = new RakNetClient(new InetSocketAddress(0), UDP_GROUP);
 
-    public void boot()  {
+    public void boot() {
         RAKNET_CLIENT.bind();
     }
 
-    public void shutdown()  {
+    public void shutdown() {
         RAKNET_CLIENT.close();
         UDP_GROUP_POOL.release(UDP_GROUP);
     }
 
-    public CompletableFuture<RakNetPong> ping(@NonNull InetSocketAddress address)   {
+    public CompletableFuture<RakNetPong> ping(@NonNull InetSocketAddress address) {
         CompletableFuture<RakNetPong> future = new CompletableFuture<>();
 
         RAKNET_CLIENT.ping(address, 5L, TimeUnit.SECONDS).whenComplete((pong, ex) -> {

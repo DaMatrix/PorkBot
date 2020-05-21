@@ -26,19 +26,16 @@ import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.PorkListener;
 import net.daporkchop.porkbot.command.Command;
 import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -46,7 +43,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static net.daporkchop.porkbot.util.Constants.*;
 
@@ -74,7 +70,7 @@ public class CommandNoseTouch extends Command {
 
         Optional<Emote> optionalEmote = evt.getMessage().getEmotes().stream().findAny();
         Optional<String> optionalEmoji = optionalEmote.isPresent() ? Optional.empty()
-                : Arrays.stream(args).filter(s -> EMOJI_PATTERN.matcher(s).find()).findAny();
+                                                                   : Arrays.stream(args).filter(s -> EMOJI_PATTERN.matcher(s).find()).findAny();
 
         Set<Member> members = CommandSelectRandom.getMentionedMembers(evt, rawContent, true);
         if (members.isEmpty()) {
@@ -90,7 +86,7 @@ public class CommandNoseTouch extends Command {
             return;
         }
         Object emote = optionalEmote.isPresent() ? optionalEmote.get() :
-                optionalEmoji.isPresent() ? optionalEmoji.get() : evt.getJDA().getEmoteById(692688500331642900L);
+                       optionalEmoji.isPresent() ? optionalEmoji.get() : evt.getJDA().getEmoteById(692688500331642900L);
 
         MessageBuilder builder = new MessageBuilder().append("React with ");
         if (emote instanceof String) {
@@ -106,9 +102,9 @@ public class CommandNoseTouch extends Command {
         @NonNull
         protected final Set<Member> members;
         @NonNull
-        protected final Object      emote;
+        protected final Object emote;
 
-        protected Message   message;
+        protected Message message;
         protected Future<?> completeFuture;
 
         @Override
@@ -131,8 +127,8 @@ public class CommandNoseTouch extends Command {
                 MessageReaction.ReactionEmote reactionEmote = event.getReactionEmote();
 
                 boolean flag = this.emote instanceof String
-                        ? reactionEmote.isEmoji() && reactionEmote.getEmoji().equals(this.emote)
-                        : reactionEmote.isEmote() && reactionEmote.getEmote() == this.emote;
+                               ? reactionEmote.isEmoji() && reactionEmote.getEmoji().equals(this.emote)
+                               : reactionEmote.isEmote() && reactionEmote.getEmote() == this.emote;
                 if (flag && this.members.remove(event.getMember()) && this.members.size() == 1) {
                     Member last = this.members.iterator().next();
                     this.message.editMessage(new MessageBuilder().append(last).append(" was last!").build()).queue();
@@ -157,7 +153,7 @@ public class CommandNoseTouch extends Command {
                         }
                     }
                     this.message.editMessage(builder.build()).queue();
-                } catch (Exception e)   {
+                } catch (Exception e) {
                     this.message.editMessage("Cancelled due to inactivity.").queue();
                 }
             }

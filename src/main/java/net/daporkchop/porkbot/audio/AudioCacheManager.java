@@ -24,6 +24,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.tools.DataFormatTools;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageInput;
 import com.sedmelluq.discord.lavaplayer.tools.io.MessageOutput;
@@ -39,7 +40,6 @@ import net.daporkchop.lib.common.function.io.IOBiConsumer;
 import net.daporkchop.lib.common.function.io.IOConsumer;
 import net.daporkchop.lib.common.function.io.IORunnable;
 import net.daporkchop.lib.common.misc.file.PFiles;
-import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.porkbot.audio.load.FutureSearchLoadResultHandler;
 import net.daporkchop.porkbot.audio.load.FutureURLLoadResultHandler;
 import org.iq80.leveldb.CompressionType;
@@ -71,6 +71,64 @@ public class AudioCacheManager {
     private final long SEARCH_EXPIRE_TIME = TimeUnit.DAYS.toMillis(14L);
 
     private final long TRACK_EXPIRE_TIME = TimeUnit.DAYS.toMillis(90L);
+    private final LoadingCache<SearchQueryWithPlatform, CompletableFuture<AudioTrack[]>> SEARCH_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(5L, TimeUnit.MINUTES)
+            .softValues()
+            .build(new CacheLoader<SearchQueryWithPlatform, CompletableFuture<AudioTrack[]>>() {
+                @Override
+                public CompletableFuture<AudioTrack[]> load(SearchQueryWithPlatform query) throws Exception {
+                    byte[] encodedKey = query.toString().getBytes(StandardCharsets.UTF_8);
+                    byte[] encodedValue = TRACK_INFO_DB.get(encodedKey);
+
+                    AudioTrack[] results;
+                    if (encodedValue == null || (results = decodeSearches(encodedValue)) == null) {
+                        //value was not found in DB or deserialization failed, execute search
+                        CompletableFuture<AudioTrack[]> future = new CompletableFuture<>();
+                        PorkAudio.PLAYER_MANAGER.loadItem(query.platform.prefixed(query.query), new FutureSearchLoadResultHandler(future));
+
+                        //save new results
+                        future.whenCompleteAsync((IOBiConsumer<AudioTrack[], Throwable>) (result, t) -> {
+                            if (t == null && result != null) {
+                                TRACK_INFO_DB.put(encodedKey, encodeSearches(result));
+                            }
+                            System.out.println("Results fetched from service: " + query);
+                        });
+
+                        return future;
+                    }
+                    System.out.println("Results loaded from disk cache: " + query);
+                    return CompletableFuture.completedFuture(results);
+                }
+            });
+    private final LoadingCache<String, CompletableFuture<AudioItem>> URL_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(5L, TimeUnit.MINUTES)
+            .softValues()
+            .build(new CacheLoader<String, CompletableFuture<AudioItem>>() {
+                @Override
+                public CompletableFuture<AudioItem> load(String key) throws Exception {
+                    byte[] encodedKey = ("url_" + key).getBytes(StandardCharsets.UTF_8);
+                    byte[] encodedValue = TRACK_INFO_DB.get(encodedKey);
+
+                    AudioItem result;
+                    if (encodedValue == null || (result = decodeItem(encodedValue)) == null) {
+                        //value was not found in DB or deserialization failed, resolve now
+                        CompletableFuture<AudioItem> future = new CompletableFuture<>();
+                        PorkAudio.PLAYER_MANAGER.loadItem(key, new FutureURLLoadResultHandler(future));
+
+                        //save new info
+                        future.whenCompleteAsync((IOBiConsumer<AudioItem, Throwable>) (item, t) -> {
+                            if (t == null && item != null) {
+                                TRACK_INFO_DB.put(encodedKey, encodeItem(item));
+                            }
+                            System.out.println("Info fetched from service: " + key);
+                        });
+
+                        return future;
+                    }
+                    System.out.println("Info loaded from disk cache: " + key);
+                    return CompletableFuture.completedFuture(result);
+                }
+            });
 
     static {
         try {
@@ -89,63 +147,6 @@ public class AudioCacheManager {
         }
     }
 
-    private final LoadingCache<SearchQueryWithPlatform, CompletableFuture<AudioTrack[]>> SEARCH_CACHE = CacheBuilder.newBuilder()
-            .expireAfterWrite(5L, TimeUnit.MINUTES)
-            .softValues()
-            .build(new CacheLoader<SearchQueryWithPlatform, CompletableFuture<AudioTrack[]>>() {
-                @Override
-                public CompletableFuture<AudioTrack[]> load(SearchQueryWithPlatform query) throws Exception {
-                    byte[] encodedKey = query.toString().getBytes(StandardCharsets.UTF_8);
-                    byte[] encodedValue = TRACK_INFO_DB.get(encodedKey);
-
-                    AudioTrack[] results;
-                    if (encodedValue == null || (results = decodeSearches(encodedValue)) == null) {
-                        //value was not found in DB or deserialization failed, execute search
-                        CompletableFuture<AudioTrack[]> future = new CompletableFuture<>();
-                        PorkAudio.PLAYER_MANAGER.loadItem(query.platform.prefixed(query.query), new FutureSearchLoadResultHandler(future));
-                        future = future.handle((newResults, t) -> t == null ? newResults : new AudioTrack[0]);
-
-                        //save new results
-                        future.thenAcceptAsync((IOConsumer<AudioTrack[]>) tracks -> TRACK_INFO_DB.put(encodedKey, encodeSearches(tracks)));
-
-                        System.out.println("Results fetched from service: " + query);
-                        return future;
-                    }
-                    System.out.println("Results loaded from disk cache: " + query);
-                    return CompletableFuture.completedFuture(results);
-                }
-            });
-
-    private final LoadingCache<String, CompletableFuture<AudioItem>> URL_CACHE = CacheBuilder.newBuilder()
-            .expireAfterWrite(5L, TimeUnit.MINUTES)
-            .softValues()
-            .build(new CacheLoader<String, CompletableFuture<AudioItem>>() {
-                @Override
-                public CompletableFuture<AudioItem> load(String key) throws Exception {
-                    byte[] encodedKey = ("url_" + key).getBytes(StandardCharsets.UTF_8);
-                    byte[] encodedValue = TRACK_INFO_DB.get(encodedKey);
-
-                    AudioItem result;
-                    if (encodedValue == null || (result = decodeItem(encodedValue)) == null) {
-                        //value was not found in DB or deserialization failed, resolve now
-                        CompletableFuture<AudioItem> future = new CompletableFuture<>();
-                        PorkAudio.PLAYER_MANAGER.loadItem(key, new FutureURLLoadResultHandler(future));
-
-                        //save new results
-                        future.whenCompleteAsync((IOBiConsumer<AudioItem, Throwable>) (item, t) -> {
-                            if (t == null && item != null) {
-                                TRACK_INFO_DB.put(encodedKey, encodeItem(item));
-                            }
-                        });
-
-                        System.out.println("Info fetched from service: " + key);
-                        return future;
-                    }
-                    System.out.println("Info loaded from disk cache: " + key);
-                    return CompletableFuture.completedFuture(result);
-                }
-            });
-
     public void shutdown() {
         try {
             TRACK_INFO_DB.close();
@@ -159,17 +160,15 @@ public class AudioCacheManager {
     }
 
     public void search(@NonNull SearchQueryWithPlatform query, @NonNull AudioLoadResultHandler handler) {
-        search(query).thenAccept(tracks -> {
-            switch (tracks.length) {
-                case 0:
-                    handler.noMatches();
-                    break;
-                case 1:
-                    handler.trackLoaded(tracks[0]);
-                    break;
-                default:
-                    handler.playlistLoaded(new BasicAudioPlaylist(null, Arrays.asList(tracks), null, true));
-                    break;
+        search(query).whenComplete((tracks, t) -> {
+            if (t != null)  {
+                handler.loadFailed((FriendlyException) t);
+            } else if (tracks == null || tracks.length == 0)    {
+                handler.noMatches();
+            } else if (tracks.length == 1)  {
+                handler.trackLoaded(tracks[0]);
+            } else {
+                handler.playlistLoaded(new BasicAudioPlaylist(null, Arrays.asList(tracks), null, true));
             }
         });
     }
@@ -251,7 +250,7 @@ public class AudioCacheManager {
         if (item instanceof AudioPlaylist) {
             AudioPlaylist plist = (AudioPlaylist) item;
             dataOutput = out.startMessage();
-            dataOutput.writeUTF(PorkUtil.fallbackIfNull(plist.getName(), null));
+            DataFormatTools.writeNullableText(dataOutput, plist.getName());
             out.commitMessage();
 
             for (AudioTrack track : plist.getTracks()) {
@@ -280,7 +279,7 @@ public class AudioCacheManager {
 
             if (playlist) {
                 dataInput = in.nextMessage();
-                String name = dataInput.readUTF();
+                String name = DataFormatTools.readNullableText(dataInput);
                 in.skipRemainingBytes();
 
                 List<AudioTrack> tracks = new ArrayList<>();

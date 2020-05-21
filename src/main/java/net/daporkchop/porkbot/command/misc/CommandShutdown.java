@@ -23,7 +23,6 @@ package net.daporkchop.porkbot.command.misc;
 import net.daporkchop.porkbot.PorkBot;
 import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
-import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandShutdown extends Command {

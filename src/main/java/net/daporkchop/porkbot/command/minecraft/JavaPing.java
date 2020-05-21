@@ -24,19 +24,16 @@ import net.daporkchop.porkbot.command.Command;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.mcpinger.MCPing;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.awt.Color;
-import java.util.Base64;
 
 /**
  * @author DaPorkchop_
  */
 public final class JavaPing extends Command {
-    public static final int FLAG_MOTD    = 1 << 0;
-    public static final int FLAG_COUNT   = 1 << 1;
+    public static final int FLAG_MOTD = 1 << 0;
+    public static final int FLAG_COUNT = 1 << 1;
     public static final int FLAG_VERSION = 1 << 2;
     public static final int FLAG_LATENCY = 1 << 3;
     public static final int FLAG_FAVICON = 1 << 4;
