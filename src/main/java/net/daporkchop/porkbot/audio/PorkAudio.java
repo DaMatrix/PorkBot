@@ -109,15 +109,17 @@ public class PorkAudio {
         }
 
         PLAYER_MANAGER.setHttpBuilderConfigurator(builder -> builder
-                .setKeepAliveStrategy((response, context) -> 1L)); //disable keepalive
+                .setUserAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0")); //TODO: randomly switch user agents
 
         PLAYER_MANAGER.setHttpRequestConfigurator(config -> RequestConfig.copy(config)
                 .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
                 .build());
 
+        YOUTUBE_AUDIO_SOURCE_MANAGER.configureBuilder(builder -> builder
+                .setKeepAliveStrategy((response, context) -> 1L)); //disable keepalive
+
         YOUTUBE_AUDIO_SOURCE_MANAGER.configureRequests(config -> RequestConfig.copy(config)
-                .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
-                .setProxy(HttpHost.create("http://localhost:1081"))
+                //.setProxy(HttpHost.create("http://localhost:1081"))
                 .build());
 
         //clean up idle audio managers automatically
