@@ -136,12 +136,6 @@ public class AudioCacheManager {
                     .compressionType(CompressionType.SNAPPY)
                     .verifyChecksums(true)
                     .createIfMissing(true));
-
-            new Thread((IORunnable) () -> {
-                System.out.println("Beginning DB compaction...");
-                TRACK_INFO_DB.compactRange(null, null);
-                System.out.println("Compaction finished.");
-            }, "DB compaction thread").start();
         } catch (IOException e) {
             throw new AssertionError(e);
         }

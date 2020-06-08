@@ -80,6 +80,7 @@ public class FromURLLoadResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void loadFailed(FriendlyException exception) {
+        new RuntimeException(exception).printStackTrace();
         this.msgChannel.sendMessage("Unable to find `" + this.input + "`: " + exception.getMessage()).queue();
     }
 }

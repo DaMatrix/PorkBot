@@ -55,6 +55,7 @@ public class FutureURLLoadResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void loadFailed(FriendlyException exception) {
+        new RuntimeException(exception).printStackTrace();
         this.future.completeExceptionally(exception);
     }
 }
