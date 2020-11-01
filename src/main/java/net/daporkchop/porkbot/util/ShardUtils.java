@@ -58,13 +58,13 @@ public class ShardUtils {
 
         Logging.logger.info("Starting shards...");
         try {
-            MANAGER = new DefaultShardManagerBuilder().setToken(loadToken())
+            MANAGER = DefaultShardManagerBuilder.createLight(loadToken())
                     .setCompression(Compression.NONE)
                     .setShardsTotal(-1)
                     .addEventListeners(new PorkListener())
                     .setStatus(OnlineStatus.IDLE)
                     .setActivity(Activity.of(Activity.ActivityType.DEFAULT, "starting..."))
-                    .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE, CacheFlag.EMOTE))
+                    .enableCache(CacheFlag.VOICE_STATE)
                     .build();
 
             MANAGER.getShards().forEach((EConsumer<JDA>) JDA::awaitReady);

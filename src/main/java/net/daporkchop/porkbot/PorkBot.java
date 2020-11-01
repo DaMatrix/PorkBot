@@ -53,7 +53,6 @@ import net.daporkchop.porkbot.command.minecraft.JavaPing;
 import net.daporkchop.porkbot.command.minecraft.PEPing;
 import net.daporkchop.porkbot.command.minecraft.SkinCommand;
 import net.daporkchop.porkbot.command.misc.CommandDice;
-import net.daporkchop.porkbot.command.misc.CommandNoseTouch;
 import net.daporkchop.porkbot.command.misc.CommandSelectRandom;
 import net.daporkchop.porkbot.command.misc.CommandShutdown;
 import net.daporkchop.porkbot.util.Config;
@@ -115,7 +114,6 @@ public class PorkBot {
 
         //misc
         CommandRegistry.registerCommand(new CommandDice());
-        CommandRegistry.registerCommand(new CommandNoseTouch());
         CommandRegistry.registerCommand(new CommandSelectRandom());
         CommandRegistry.registerCommand(new CommandShutdown());
 

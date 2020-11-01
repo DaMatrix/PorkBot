@@ -41,6 +41,8 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static net.daporkchop.lib.common.util.PValidation.*;
+
 /**
  * @author DaPorkchop_
  */
@@ -86,7 +88,7 @@ public class Constants {
     }
 
     public void appendEscaped(@NonNull StringBuilder builder, @NonNull String src, int start, int length) {
-        PorkUtil.assertInRangeLen(src.length(), start, length);
+        checkRangeLen(src.length(), start, length);
         for (int i = 0; i < length; i++) {
             char c = src.charAt(start + i);
             switch (c) {
