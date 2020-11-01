@@ -69,8 +69,8 @@ public class ShardUtils {
 
             MANAGER.getShards().forEach((EConsumer<JDA>) JDA::awaitReady);
 
-            MANAGER.setStatus(OnlineStatus.ONLINE);
             MANAGER.setActivity(Activity.of(Activity.ActivityType.STREAMING, "Say ..help", "https://www.twitch.tv/daporkchop_"));
+            MANAGER.setStatus(OnlineStatus.ONLINE);
         } catch (Exception e) {
             throw new RuntimeException("Unable to start ShardManager!", e);
         }
@@ -86,23 +86,12 @@ public class ShardUtils {
         MANAGER = null;
     }
 
-    public void forEachGuild(Consumer<Guild> consumer) {
-        if (consumer == null) {
-            return;
-        }
-        MANAGER.getGuilds().forEach(consumer);
-    }
-
     public long getGuildCount() {
         return MANAGER.getGuildCache().size();
     }
 
     public long getUserCount() {
-        return MANAGER.getUserCache().size();
-    }
-
-    public Stream<JDA> getShards() {
-        return MANAGER == null ? Stream.empty() : MANAGER.getShards().stream();
+        return MANAGER.getGuildCache().stream().mapToLong(Guild::getMemberCount).sum();
     }
 
     public long getShardCount() {
