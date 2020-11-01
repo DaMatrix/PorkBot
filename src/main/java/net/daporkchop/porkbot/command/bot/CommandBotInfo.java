@@ -28,6 +28,7 @@ import net.daporkchop.porkbot.util.Config;
 import net.daporkchop.porkbot.util.MessageUtils;
 import net.daporkchop.porkbot.util.ShardUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
@@ -57,7 +58,7 @@ public class CommandBotInfo extends Command {
                         .addField("", "**SHARD INFO**", false)
                         .addField("Shard #:", String.format("%d/%d", evt.getJDA().getShardInfo().getShardId() + 1, ShardUtils.getShardCount()), true)
                         .addField("Shard servers:", String.valueOf(evt.getJDA().getGuildCache().size()), true)
-                        .addField("Shard users:", String.valueOf(evt.getJDA().getUserCache().size()), true)
+                        .addField("Shard users:", String.valueOf(evt.getJDA().getGuildCache().stream().mapToLong(Guild::getMemberCount).sum()), true)
                         .addField("", "**AUDIO INFO**", false)
                         .addField("Playing in:", managers.size() + " servers", true)
                         .addField("Playing to:", managers.stream().map(ServerAudioManager::connectedChannel).map(VoiceChannel::getMembers).mapToLong(l -> l.size() - 1).sum() + " users", true)
